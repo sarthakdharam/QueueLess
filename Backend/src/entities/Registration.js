@@ -5,6 +5,7 @@ export const Registration = new EntitySchema({
   columns: {
     id: { type: "uuid", primary: true, generated: "uuid" },
     reference: { type: "varchar", length: 16, unique: true },
+    idempotencyKey: { name: "idempotency_key", type: "varchar", length: 64, nullable: true, unique: true },
     clinicId: { name: "clinic_id", type: "uuid" },
     doctorId: { name: "doctor_id", type: "uuid", nullable: true },
     patientId: { name: "patient_id", type: "uuid" },

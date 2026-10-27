@@ -103,11 +103,11 @@ The migration creates clinics, clinic administrator accounts, and trial subscrip
 - `POST /api/v1/auth/login` accepts `email` and `password` and returns a 12-hour bearer token.
 - `GET /api/v1/auth/me` returns the authenticated user's clinic profile. Send `Authorization: Bearer <token>`.
 
-The initial React landing page links to clinic registration and login. Patient discovery and online appointments are planned for a later phase.
+The initial React landing page links to clinic registration, login, and public clinic discovery.
 
 ## Phase 2: clinic operations
 
-Apply pending migrations from `Backend/`. This command applies both the Phase 1 foundation and the Phase 2 clinic operations migration on a fresh database:
+Apply pending migrations from `Backend/`. This command applies every pending migration in order on a fresh database:
 
 ```bash
 npm run migration:run
@@ -124,9 +124,31 @@ Authenticated clinic endpoints use the bearer token returned by login or registr
 - `GET /api/v1/clinic/dashboard` returns the day's queue and registration counts.
 - `POST /api/v1/clinic/walk-ins` registers a walk-in. Registration is rejected while walk-ins are disabled or outside configured operating hours.
 - `POST /api/v1/clinic/queue/call-next` calls the next waiting patient through the backend queue service.
-- `POST /api/v1/clinic/queue/:queueId/{call|start|complete|miss|cancel}` applies an allowed status transition and writes an audit record.
+- `POST /api/v1/clinic/queue/:queueId/{check-in|call|start|complete|miss|cancel}` applies an allowed status transition and writes an audit record. Online registrations stay in `registered` until reception confirms physical arrival with `check-in`.
 
 Queue tokens are unique per clinic, doctor and local clinic date. Queue-changing operations are transactional. The first implementation supports a single active consultation per doctor queue and provides staff controls for calling, starting, completing, missing, or cancelling a visit.
+
+## Phase 3: patient portal
+
+Set `APP_BASE_URL` to the address patients use to open the frontend. `OTP_SECRET` should be a random secret of at least 32 characters. For local recovery-code testing only, set `OTP_DEV_ECHO=true` while `NODE_ENV` is not `production`; the API then includes the simulated code in its response. Production recovery codes are intended for WhatsApp delivery when the messaging provider is configured.
+
+Phase 3 adds clinic discovery, public doctor profiles and appointment slots, online appointment or walk-in registration, confirmation pages, private registration links, link rotation/revocation, and mobile-number recovery. Run `npm run migration:run` from `Backend/` to apply the Phase 3 patient-portal migration along with any earlier pending migrations.
+
+Public endpoints:
+
+- `GET /api/v1/public/clinics?q=<name-or-city>` searches active clinics.
+- `GET /api/v1/public/clinics/:clinicId` returns public clinic and doctor details.
+- `GET /api/v1/public/clinics/:clinicId/slots?doctorId=<uuid>&date=YYYY-MM-DD` returns currently available appointment slots.
+- `POST /api/v1/public/registrations` creates an appointment or online walk-in registration. Include a UUID `Idempotency-Key` header and explicit `consentToContact: true`.
+
+Patient endpoints accept the private link secret as a bearer token; the frontend keeps it in the URL fragment, which is not sent to the server:
+
+- `GET /api/v1/patient/registration` opens the registration and current details.
+- `POST /api/v1/patient/access/rotate` creates a replacement private link and revokes previous links.
+- `DELETE /api/v1/patient/access` revokes the current link.
+- `POST /api/v1/patient/recovery/request` starts mobile recovery; `POST /api/v1/patient/recovery/verify` verifies the code and returns private links.
+
+An online registration does not confirm that the patient has arrived. The confirmation page instructs patients to check in with reception. Recovery-code delivery is simulated locally until WhatsApp messaging is configured.
 
 ## Troubleshooting
 

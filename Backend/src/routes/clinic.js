@@ -12,13 +12,14 @@ import { QueueSession } from "../entities/QueueSession.js";
 import { Registration } from "../entities/Registration.js";
 import { QueueEntry } from "../entities/QueueEntry.js";
 import { AuditLog } from "../entities/AuditLog.js";
+import { Appointment } from "../entities/Appointment.js";
 
 export const clinicRouter = Router();
 clinicRouter.use(requireAuth);
 
 const DAYS = ["monday", "tuesday", "wednesday", "thursday", "friday", "saturday", "sunday"];
 const DEFAULT_HOURS = Object.fromEntries(DAYS.map((day, index) => [day, { enabled: index < 6, open: "09:00", close: "17:00" }]));
-const ACTIVE_QUEUE_STATUSES = ["waiting", "called", "in_consultation"];
+const ACTIVE_QUEUE_STATUSES = ["registered", "waiting", "called", "in_consultation"];
 
 function validationError(req, res, next) {
   const errors = validationResult(req);
@@ -265,8 +266,9 @@ clinicRouter.post("/queue/call-next", [body("doctorId").optional({ values: "fals
   } catch (error) { return next(error); }
 });
 
-clinicRouter.post("/queue/:queueId/:action", [param("queueId").isUUID(), param("action").isIn(["call", "start", "complete", "miss", "cancel"]), validationError], async (req, res, next) => {
+clinicRouter.post("/queue/:queueId/:action", [param("queueId").isUUID(), param("action").isIn(["check-in", "call", "start", "complete", "miss", "cancel"]), validationError], async (req, res, next) => {
   const transitions = {
+    "check-in": { from: "registered", to: "waiting", queueTo: "waiting", action: "patient_checked_in" },
     call: { from: "waiting", to: "called", queueTo: "called", action: "patient_called" },
     start: { from: "called", to: "in_consultation", queueTo: "in_consultation", action: "consultation_started" },
     complete: { from: "in_consultation", to: "completed", queueTo: "completed", action: "consultation_completed" },
@@ -283,13 +285,20 @@ clinicRouter.post("/queue/:queueId/:action", [param("queueId").isUUID(), param("
       if (!entry) throw Object.assign(new Error("Queue entry not found."), { status: 404 });
       const allowed = Array.isArray(transition.from) ? transition.from : [transition.from];
       if (!allowed.includes(entry.status)) throw Object.assign(new Error(`Cannot ${req.params.action} a patient whose status is ${entry.status}.`), { status: 409 });
+      if (req.params.action === "check-in") {
+        const clinic = await manager.getRepository(Clinic).findOneBy({ id: req.auth.clinicId });
+        const session = await manager.getRepository(QueueSession).findOneBy({ id: entry.session_id });
+        const sessionDate = session?.sessionDate instanceof Date ? session.sessionDate.toISOString().slice(0, 10) : String(session?.sessionDate || "").slice(0, 10);
+        if (!session || sessionDate !== clinicToday(clinic.timeZone)) throw Object.assign(new Error("Only today's registrations can be checked in."), { status: 409 });
+      }
       if (req.params.action === "start") {
         await manager.query(`SELECT "id" FROM "queue_sessions" WHERE "id" = $1 FOR UPDATE`, [entry.session_id]);
         const anotherConsultation = await manager.getRepository(QueueEntry).findOneBy({ sessionId: entry.session_id, status: "in_consultation" });
         if (anotherConsultation) throw Object.assign(new Error("Complete the current consultation before starting another patient."), { status: 409 });
       }
-      await manager.getRepository(QueueEntry).update({ id: entry.id }, { status: transition.queueTo, ...(req.params.action === "call" ? { calledAt: new Date() } : {}), ...(req.params.action === "start" ? { consultationStartedAt: new Date() } : {}), ...(req.params.action === "complete" ? { completedAt: new Date() } : {}) });
+      await manager.getRepository(QueueEntry).update({ id: entry.id }, { status: transition.queueTo, ...(req.params.action === "check-in" ? { checkedInAt: new Date() } : {}), ...(req.params.action === "call" ? { calledAt: new Date() } : {}), ...(req.params.action === "start" ? { consultationStartedAt: new Date() } : {}), ...(req.params.action === "complete" ? { completedAt: new Date() } : {}) });
       await manager.getRepository(Registration).update({ id: entry.registration_id, clinicId: req.auth.clinicId }, { status: transition.to, ...(req.params.action === "complete" ? { completedAt: new Date() } : {}) });
+      if (req.params.action === "check-in") await manager.getRepository(Appointment).update({ registrationId: entry.registration_id, status: "booked" }, { status: "checked_in" });
       await manager.getRepository(AuditLog).save(manager.getRepository(AuditLog).create({ clinicId: req.auth.clinicId, actorId: req.auth.sub, action: transition.action, entityType: "queue_entry", entityId: entry.id, metadata: { tokenNumber: entry.token_number } }));
       return { id: entry.id, tokenNumber: entry.token_number, status: transition.to };
     });
