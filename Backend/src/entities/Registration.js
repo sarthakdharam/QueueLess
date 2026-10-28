@@ -11,6 +11,7 @@ export const Registration = new EntitySchema({
     patientId: { name: "patient_id", type: "uuid" },
     visitType: { name: "visit_type", type: "varchar", length: 24, default: "walk_in" },
     notes: { type: "varchar", length: 500, nullable: true },
+    consentToContact: { name: "consent_to_contact", type: "boolean", default: false },
     status: { type: "varchar", length: 24, default: "waiting" },
     createdAt: { name: "created_at", type: "timestamptz", createDate: true },
     completedAt: { name: "completed_at", type: "timestamptz", nullable: true },

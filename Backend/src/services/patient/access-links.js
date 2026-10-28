@@ -1,5 +1,6 @@
 import { createHash, randomBytes } from "node:crypto";
 import { PatientAccessToken } from "../../entities/PatientAccessToken.js";
+import { disconnectPatientSockets } from "../../sockets/socket-server.js";
 
 function accessSecret() {
   return randomBytes(32).toString("base64url");
@@ -21,6 +22,7 @@ export async function createAccess(manager, registrationId) {
     .set({ revokedAt: now })
     .where('"registration_id" = :registrationId AND "revoked_at" IS NULL', { registrationId })
     .execute();
+  await disconnectPatientSockets(registrationId);
   await repository.save(repository.create({
     registrationId,
     tokenHash: accessHash(secret),

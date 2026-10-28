@@ -1,9 +1,13 @@
 import { AppDataSource } from "./config/data-source.js";
 import app from "./app.js";
+import { createServer } from "node:http";
+import { initializeSocketServer } from "./sockets/socket-server.js";
+import { retryFailedNotifications } from "./services/notifications/dispatch.js";
 
 const PORT = process.env.PORT || 3000;
 let server;
 let isShuttingDown = false;
+let notificationWorker;
 
 async function startServer() {
   if (!process.env.JWT_SECRET || process.env.JWT_SECRET.length < 32) {
@@ -21,7 +25,10 @@ async function startServer() {
     return;
   }
 
-  server = app.listen(PORT, "127.0.0.1", () => {
+  server = createServer(app);
+  initializeSocketServer(server);
+  notificationWorker = setInterval(() => { void retryFailedNotifications().catch((error) => console.error("Notification retry worker failed:", error.message)); }, 30000);
+  server.listen(PORT, "127.0.0.1", () => {
     console.log(`QueueLess backend running on port ${PORT}`);
   });
 }
@@ -30,6 +37,7 @@ async function shutdown(signal) {
   if (isShuttingDown) return;
   isShuttingDown = true;
   console.log(`${signal} received. Shutting down QueueLess backend...`);
+  if (notificationWorker) clearInterval(notificationWorker);
 
   try {
     if (server) await new Promise((resolve, reject) => server.close((error) => (error ? reject(error) : resolve())));

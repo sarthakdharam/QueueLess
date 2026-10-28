@@ -6,6 +6,7 @@ import { QueueEntry } from "../entities/QueueEntry.js";
 import { PatientAccessToken } from "../entities/PatientAccessToken.js";
 import { Appointment } from "../entities/Appointment.js";
 import { createAccess } from "../services/patient/access-links.js";
+import { disconnectPatientSockets } from "../sockets/socket-server.js";
 
 export async function getPatientRegistration(req, res, next) {
   try {
@@ -14,7 +15,7 @@ export async function getPatientRegistration(req, res, next) {
       .leftJoin("doctors", "d", "d.id = r.doctor_id").leftJoin("appointments", "a", "a.registration_id = r.id")
       .leftJoin("queue_entries", "q", "q.registration_id = r.id").leftJoin("queue_sessions", "s", "s.id = q.session_id")
       .where("r.id = :id", { id: req.patientAccess.registrationId })
-      .select(["r.id AS registration_id", "r.reference AS reference", "r.status AS status", "r.visit_type AS visit_type", "r.created_at AS created_at", "p.name AS patient_name", "c.id AS clinic_id", "c.name AS clinic_name", "c.address AS clinic_address", "c.city AS clinic_city", "c.state AS clinic_state", "c.contact_number AS clinic_contact", "c.time_zone AS time_zone", "d.name AS doctor_name", "d.specialization AS specialization", "a.scheduled_at AS scheduled_at", "a.slot_minutes AS slot_minutes", "a.status AS appointment_status", "q.status AS queue_status", "q.token_number AS token_number", "q.session_id AS session_id"])
+      .select(["r.id AS registration_id", "r.reference AS reference", "r.status AS status", "r.visit_type AS visit_type", "r.consent_to_contact AS consent_to_contact", "r.created_at AS created_at", "p.name AS patient_name", "c.id AS clinic_id", "c.name AS clinic_name", "c.address AS clinic_address", "c.city AS clinic_city", "c.state AS clinic_state", "c.contact_number AS clinic_contact", "c.time_zone AS time_zone", "d.name AS doctor_name", "d.specialization AS specialization", "a.scheduled_at AS scheduled_at", "a.slot_minutes AS slot_minutes", "a.status AS appointment_status", "q.status AS queue_status", "q.token_number AS token_number", "q.session_id AS session_id"])
       .getRawOne();
     if (!raw) return res.status(404).json({ error: "Registration not found." });
     let position = null;
@@ -43,7 +44,7 @@ export async function getPatientRegistration(req, res, next) {
       const minimumMinutes = Math.max(baseMinimum, appointmentDelay);
       estimate = { minimumMinutes, maximumMinutes: minimumMinutes + duration + 10, disclaimer: "This is an estimate based on queue position and configured slot length; delays may change it." };
     }
-    return res.json({ registration: { reference: raw.reference, status: raw.status, visitType: raw.visit_type, tokenNumber: raw.token_number, queueStatus: raw.queue_status, queuePosition: position, createdAt: raw.created_at }, patient: { name: raw.patient_name }, clinic: { id: raw.clinic_id, name: raw.clinic_name, address: raw.clinic_address, city: raw.clinic_city, state: raw.clinic_state, contactNumber: raw.clinic_contact, timeZone: raw.time_zone }, doctor: raw.doctor_name ? { name: raw.doctor_name, specialization: raw.specialization } : null, appointment: timeToAppointment ? { scheduledAt: timeToAppointment, slotMinutes: raw.slot_minutes, status: raw.appointment_status } : null, arrivalInstructions: "Online registration does not confirm physical arrival. Please check in with the receptionist when you reach the clinic.", estimate });
+    return res.json({ registration: { reference: raw.reference, status: raw.status, visitType: raw.visit_type, tokenNumber: raw.token_number, queueStatus: raw.queue_status, queuePosition: position, createdAt: raw.created_at }, notificationsAllowed: raw.consent_to_contact, patient: { name: raw.patient_name }, clinic: { id: raw.clinic_id, name: raw.clinic_name, address: raw.clinic_address, city: raw.clinic_city, state: raw.clinic_state, contactNumber: raw.clinic_contact, timeZone: raw.time_zone }, doctor: raw.doctor_name ? { name: raw.doctor_name, specialization: raw.specialization } : null, appointment: timeToAppointment ? { scheduledAt: timeToAppointment, slotMinutes: raw.slot_minutes, status: raw.appointment_status } : null, arrivalInstructions: "Online registration does not confirm physical arrival. Please check in with the receptionist when you reach the clinic.", estimate });
   } catch (error) { return next(error); }
 
 }
@@ -59,7 +60,15 @@ export async function rotatePatientAccess(req, res, next) {
 export async function revokePatientAccess(req, res, next) {
   try {
     await AppDataSource.getRepository(PatientAccessToken).update({ id: req.patientAccess.tokenId }, { revokedAt: new Date() });
+    await disconnectPatientSockets(req.patientAccess.registrationId);
     return res.status(204).end();
   } catch (error) { return next(error); }
 
+}
+
+export async function updateNotificationPreference(req, res, next) {
+  try {
+    await AppDataSource.getRepository(Registration).update({ id: req.patientAccess.registrationId }, { consentToContact: req.body.enabled });
+    return res.json({ notificationsAllowed: req.body.enabled });
+  } catch (error) { return next(error); }
 }

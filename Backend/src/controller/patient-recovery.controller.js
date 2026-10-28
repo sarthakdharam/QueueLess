@@ -7,6 +7,7 @@ import { Clinic } from "../entities/Clinic.js";
 import { createAccess } from "../services/patient/access-links.js";
 import { normalizeMobile } from "../services/patient/mobile.js";
 import { otpHash } from "../services/patient/otp.js";
+import { sendRecoveryOtp } from "../services/notifications/dispatch.js";
 
 export async function requestRecoveryCode(req, res, next) {
   const mobile = normalizeMobile(req.body.mobile);
@@ -18,6 +19,7 @@ export async function requestRecoveryCode(req, res, next) {
       const id = randomUUID();
       const challenge = AppDataSource.getRepository(OtpChallenge).create({ id, mobile, challengeHash: otpHash(id, code), expiresAt: new Date(Date.now() + 10 * 60 * 1000) });
       await AppDataSource.getRepository(OtpChallenge).save(challenge);
+      void sendRecoveryOtp({ mobile, challengeId: id, code }).catch((error) => console.error("Recovery OTP delivery failed:", error.message));
       if (process.env.NODE_ENV !== "production" && process.env.OTP_DEV_ECHO === "true") developmentCode = code;
     }
     return res.status(202).json({ message: "If registrations exist for that mobile number, a verification code has been sent.", ...(developmentCode ? { developmentCode } : {}) });

@@ -12,10 +12,13 @@ import ClinicFinder from './pages/clinic-finder.jsx'
 import ClinicBooking from './pages/clinic-booking.jsx'
 import PatientRegistration from './pages/patient-registration.jsx'
 import PatientRecovery from './pages/patient-recovery.jsx'
+import ClinicBilling from './pages/clinic-billing.jsx'
+import ClinicNotifications from './pages/clinic-notifications.jsx'
+import ClinicPatients from './pages/clinic-patients.jsx'
 
 export default function App() {
-  return 
-  <LanguageProvider>
+  return (
+    <LanguageProvider>
     <LanguageSwitcher/>
     <Routes>
       <Route path="/" element={<Landing/>}/>
@@ -28,7 +31,12 @@ export default function App() {
       <Route path="/clinic" element={<ClinicHome/>}/>
       <Route path="/clinic/setup" element={<ClinicSetup/>}/>
       <Route path="/clinic/queue" element={<ClinicDashboard/>}/>
+      <Route path="/clinic/patients/today" element={<ClinicPatients mode="today"/>}/>
+      <Route path="/clinic/patients/history" element={<ClinicPatients mode="history"/>}/>
+      <Route path="/clinic/billing" element={<ClinicBilling/>}/>
+      <Route path="/clinic/notifications" element={<ClinicNotifications/>}/>
       <Route path="*" element={<Navigate to="/" replace/>}/>
       </Routes>
-  </LanguageProvider>
+    </LanguageProvider>
+  )
 }

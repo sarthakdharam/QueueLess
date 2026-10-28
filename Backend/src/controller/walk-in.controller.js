@@ -9,6 +9,8 @@ import { QueueEntry } from "../entities/QueueEntry.js";
 import { AuditLog } from "../entities/AuditLog.js";
 import { getSettings } from "../services/clinic/settings.js";
 import { clinicIsOpen, clinicToday } from "../services/clinic/time.js";
+import { emitQueueChange } from "../sockets/socket-server.js";
+import { notifyApproachingPatients } from "../services/notifications/dispatch.js";
 
 export async function registerWalkIn(req, res, next) {
   const clinicId = req.auth.clinicId;
@@ -38,8 +40,10 @@ export async function registerWalkIn(req, res, next) {
       const registration = await manager.getRepository(Registration).save(manager.getRepository(Registration).create({ reference, clinicId, doctorId, patientId: patientRows[0].id, visitType: "walk_in", notes: req.body.notes?.trim() || null, status: "waiting" }));
       const queueEntry = await manager.getRepository(QueueEntry).save(manager.getRepository(QueueEntry).create({ registrationId: registration.id, sessionId: session.id, tokenNumber, queueOrder: Number(maxOrder.max || 0) + 1000, status: "waiting", checkedInAt: new Date() }));
       await manager.getRepository(AuditLog).save(manager.getRepository(AuditLog).create({ clinicId, actorId: req.auth.sub, action: "walk_in_registered", entityType: "registration", entityId: registration.id, metadata: { tokenNumber } }));
-      return { registration, queueEntry, tokenNumber };
+      return { registration, queueEntry, tokenNumber, sessionId: session.id };
     });
+    emitQueueChange({ clinicId, registrationId: result.registration.id, status: "waiting" });
+    void notifyApproachingPatients(clinicId, result.sessionId).catch((error) => console.error("Turn reminder failed:", error.message));
     return res.status(201).json({ registration: { id: result.registration.id, reference: result.registration.reference, status: result.registration.status, tokenNumber: result.tokenNumber, visitType: result.registration.visitType, createdAt: result.registration.createdAt }, message: "Walk-in registered and added to today's queue." });
   } catch (error) {
     if (error.status) return res.status(error.status).json({ error: error.message });

@@ -101,6 +101,8 @@ Backend/src/
 ├── middleware/          Authentication, validation, and patient access checks
 ├── migrations/          Ordered database schema changes
 ├── repositories/        Database queries grouped by data area
+├── seed/                Explicit local demo data command
+├── sockets/             Authenticated Socket.IO rooms and event contract
 ├── routes/              URL definitions and request validation
 │   ├── auth.js           Clinic registration and login routes
 │   ├── clinic/           Clinic workspace route groups
@@ -108,7 +110,9 @@ Backend/src/
 │   └── patient/          Private visit and recovery routes
 ├── services/             Business rules grouped by feature
 │   ├── clinic/           Clinic time-zone and settings rules
-│   └── patient/          Availability, access links, mobile numbers, and OTP hashing
+│   ├── notifications/    WhatsApp adapter, simulator, and persisted retries
+│   ├── patient/           Availability, access links, mobile numbers, and OTP hashing
+│   └── queue/             Return-ordering policy
 └── utils/                Shared small-purpose helpers
 
 Frontend/src/
@@ -187,6 +191,38 @@ An online registration does not confirm that the patient has arrived. The confir
 ## Phase 4: queue engine
 
 Run `npm run migration:run` from `Backend/` to add the queue ordering column and index. Appointment arrivals and walk-ins share the daily doctor queue: due appointments are called in scheduled-time order, walk-ins follow in queue order, and future appointments remain behind patients who are ready now. Reception must check in online registrations before they become callable. Missed appointments release their booked slot; if they return to the queue, the configured missed-turn policy places them after the chosen number of waiting patients or at the end. Patient visit links show a queue position and estimated wait based on queue order, configured slot length, active consultation, and appointment time.
+
+## Phase 5: real-time updates
+
+The backend attaches Socket.IO to the API server. Clinic sockets authenticate with the clinic JWT and are only allowed into their own clinic room. Patient sockets authenticate with their private access secret and are only allowed into that registration's room. Queue updates are emitted after successful database commits; clients refresh the authoritative REST snapshot after connection and each update.
+
+Event contract:
+
+- Client: `clinic:joinQueue`, `patient:joinQueue`, `queue:requestSnapshot`
+- Server: `queue:snapshot` (instructs the client to refresh REST state), `queue:updated`, `registration:confirmed`, `patient:statusChanged`, and `patient:called`
+- Clinic room payloads contain clinic ID, status, and timestamp only; patient room payloads are scoped to the one registration.
+
+The dashboard keeps a 20-second REST refresh as a fallback. Browser reconnection always fetches current state instead of trusting missed socket events.
+
+## Phase 6: WhatsApp and notification simulator
+
+Notifications are persisted with an idempotency key and delivery status. Patient confirmation and turn-approaching reminders require recorded contact consent. `NOTIFICATION_PROVIDER=simulator` is the default; the clinic Notifications screen can record simulated success or failure without contacting patients. Failed messages are retried from the database by the backend worker up to three times.
+
+To enable the WhatsApp Cloud API adapter, configure `NOTIFICATION_PROVIDER=whatsapp`, the phone-number ID, access token, Graph API version, app secret, webhook verify token, and approved confirmation, turn-approaching, and OTP template names in the backend environment. Recovery OTP codes are redacted from the notification history and excluded from automatic retries; request another code if delivery fails. The adapter sends approved templates only. Never put those credentials in Vite variables or frontend code. Verify template names, opt-in rules, provider requirements, and message pricing with the WhatsApp account before enabling production delivery. Configure the provider callback as `/api/v1/webhooks/whatsapp` for delivery receipts.
+
+## Phase 7: subscription and payment flow
+
+Clinic registration starts a one-month trial. The clinic Subscription screen shows trial/renewal dates and payment history; the base plan is ₹500/month. New walk-in and online patient registrations are disabled after trial or paid access expires, while existing queue management, account settings, billing, and patient records remain available. No records are deleted on expiry.
+
+The local payment provider is a simulator; use its success/failure controls to exercise subscription state without a charge. For Razorpay, configure `PAYMENT_PROVIDER=razorpay`, the server-only key ID/secret, and a webhook secret. Checkout creates an INR order, but the subscription activates only after a valid signed `payment.captured` webhook. Register `/api/v1/webhooks/razorpay` as the provider webhook URL and subscribe to `payment.captured` and `payment.failed`. Do not use browser callback data as proof of payment.
+
+## Phase 8: automated checks and pilot preparation
+
+Run backend rule tests with `npm test` from `Backend/`; these cover return ordering, short queues, staff overrides, date/slot rules, time-zone conversion, and mobile normalization. Run `npm run lint` and `npm run build` from `Frontend/`. Apply every pending database migration before exercising Phase 5–7 endpoints.
+
+For a local demo clinic, set a private `DEMO_SEED_PASSWORD` (at least 12 characters) in `.env`, then run `npm run seed:demo` from `Backend/`. The seeded login is `demo-admin@queueless.local`; the seed command refuses to run in production and creates no patient records.
+
+Before a clinic pilot, use a clinic-approved test environment and consented test numbers. Walk through registration, arrival, queue movement, missed and returned turns, notification opt-out, reconnecting after network loss, trial expiry, simulated payment failure/success, and data isolation between two clinics. Record staff feedback and compare estimated waits with actual consultation times before enabling paid messaging or payments for patients. A real pilot and its feedback require participating clinic staff; they cannot be simulated by this repository.
 
 ## Troubleshooting
 

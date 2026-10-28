@@ -8,6 +8,10 @@ import { Appointment } from "../entities/Appointment.js";
 import { createAccess } from "../services/patient/access-links.js";
 import { normalizeMobile } from "../services/patient/mobile.js";
 import { addDays, clinicHoursForDate, dateInZone, hoursCloseToMinutes, isSlotOpen, loadPublicClinic, validDate, zonedTimeToUtc, OPEN_STATUSES } from "../services/patient/clinic-availability.js";
+import { emitQueueChange } from "../sockets/socket-server.js";
+import { notifyRegistrationConfirmation } from "../services/notifications/dispatch.js";
+import { Subscription } from "../entities/Subscription.js";
+import { hasSubscriptionAccess } from "../services/subscriptions/access-policy.js";
 
 export async function createPatientRegistration(req, res, next) {
   const { clinicId, visitType } = req.body;
@@ -19,6 +23,8 @@ export async function createPatientRegistration(req, res, next) {
     const clinicData = await loadPublicClinic(clinicId);
     if (!clinicData) return res.status(404).json({ error: "Clinic not found." });
     const { clinic, settings, doctors } = clinicData;
+    const subscription = await AppDataSource.getRepository(Subscription).findOneBy({ clinicId });
+    if (!hasSubscriptionAccess(subscription)) return res.status(402).json({ error: "Online registration is temporarily unavailable while this clinic renews its subscription. Please contact the clinic directly." });
     const doctor = req.body.doctorId ? doctors.find((item) => item.id === req.body.doctorId) : doctors.length === 1 ? doctors[0] : null;
     if (req.body.doctorId && !doctor) return res.status(400).json({ error: "Choose an available doctor." });
     if (visitType === "appointment" && !doctor) return res.status(400).json({ error: "Choose a doctor for your appointment." });
@@ -54,7 +60,7 @@ export async function createPatientRegistration(req, res, next) {
       const reference = `QL${randomBytes(7).toString("hex").toUpperCase()}`;
       const registration = await manager.getRepository(Registration).save(manager.getRepository(Registration).create({
         reference, idempotencyKey, clinicId, doctorId, patientId,
-        visitType, status: "registered",
+        visitType, status: "registered", consentToContact: req.body.consentToContact === true || req.body.consentToContact === "true",
       }));
       const queueEntry = await manager.getRepository(QueueEntry).save(manager.getRepository(QueueEntry).create({
         registrationId: registration.id, sessionId: session.id, tokenNumber: Number(tokenResult.max || 0) + 1,
@@ -66,6 +72,8 @@ export async function createPatientRegistration(req, res, next) {
       const access = await createAccess(manager, registration.id);
       return { registration, queueEntry, access };
     });
+    emitQueueChange({ clinicId, registrationId: created.registration.id, status: "registered", type: "registration:confirmed" });
+    void notifyRegistrationConfirmation(created.registration.id).catch((error) => console.error("Registration notification failed:", error.message));
     return res.status(201).json({
       registration: { id: created.registration.id, reference: created.registration.reference, status: created.registration.status, visitType, tokenNumber: created.queueEntry.tokenNumber },
       clinic: { id: clinic.id, name: clinic.name, address: clinic.address, city: clinic.city, state: clinic.state, timeZone: clinic.timeZone },

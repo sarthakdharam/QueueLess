@@ -1,0 +1,41 @@
+.brand {
+  gap: 8px;
+  color: #062f71;
+  font-size: 19px;
+  letter-spacing: -0.75px;
+}
+
+.brand .brand-mark {
+  display: block;
+  flex: 0 0 auto;
+  width: 30px;
+  height: 30px;
+  border-radius: 0;
+  background: none;
+  object-fit: contain;
+}
+
+.brand-name {
+  white-space: nowrap;
+}
+
+.brand .brand-accent {
+  color: #10ae91;
+}
+
+.portal-sidebar .brand {
+  color: #f0f8ff;
+}
+
+.portal-sidebar .brand-name {
+  color: #f0f8ff;
+}
+
+.portal-sidebar .brand .brand-accent {
+  color: #55d9f1;
+}
+
+footer .brand .brand-mark {
+  width: 26px;
+  height: 26px;
+}
