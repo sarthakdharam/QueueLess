@@ -1,0 +1,18 @@
+import { Link } from 'react-router-dom'
+import { Localized } from '../i18n.jsx'
+import Brand from '../components/Brand.jsx'
+
+export default function Landing() {
+  return <Localized><main className="landing">
+    <header className="topbar"><Brand /><nav><a href="#how-it-works">How it works</a><a href="#for-clinics">For clinics</a><Link to="/clinics">Find a clinic</Link><Link className="nav-login" to="/login">Clinic login</Link><Link className="button button-dark button-small" to="/register">Register clinic <span>↗</span></Link></nav></header>
+    <section className="hero-section">
+      <div className="hero-copy"><div className="eyebrow"><span className="live-dot"/> A calmer way to care</div><h1>Less waiting.<br/><em>More caring.</em></h1><p className="hero-description">A clearer queue for your clinic. Patients know where they stand, and your team stays in control.</p><div className="hero-actions"><Link className="button button-dark" to="/clinics">Find a clinic <span>↗</span></Link><Link className="text-link" to="/register">For clinics <span>↗</span></Link></div><div className="hero-proof"><div className="proof-avatars"><span>R</span><span>A</span><span>M</span></div><p>Made for independent clinics<br/><strong>Across India</strong></p></div></div>
+      <div className="queue-card" aria-label="Example live clinic queue"><div className="card-top"><div><span className="clinic-label">TODAY AT</span><h2>Greenleaf Clinic</h2></div><span className="open-pill"><i/> Open</span></div><div className="queue-status"><div><span className="clinic-label">NOW SERVING</span><strong className="serving-token">A<span>08</span></strong><span className="serving-name">Dr. Mehta · Room 1</span></div><div className="queue-count"><strong>06</strong><span>waiting</span></div></div><div className="queue-divider"/><div className="queue-next"><span className="next-icon">↗</span><div><span className="clinic-label">UP NEXT</span><strong>A09 <span>· Priya S.</span></strong></div><span className="wait-time">~12 min</span></div><div className="card-foot"><span className="live-dot"/> Queue updates live <span>Updated just now</span></div></div>
+      <span className="hero-orbit orbit-one"/><span className="hero-orbit orbit-two"/><span className="hero-star">✳</span>
+    </section>
+    <section className="trust-strip"><span>BUILT FOR THE PEOPLE WHO KEEP CLINICS MOVING</span><div><span>Independent clinics</span><b>·</b><span>Reception teams</span><b>·</b><span>Patients on the go</span></div></section>
+    <section className="steps-section" id="how-it-works"><div><div className="eyebrow">A BETTER VISIT, STEP BY STEP</div><h2>Good care starts<br/>before the consult.</h2></div><div className="step-list"><article><span>01</span><div><h3>Know where you stand</h3><p>Patients get a token and a live view of their place in line.</p></div></article><article><span>02</span><div><h3>Wait on your terms</h3><p>Come back when your turn is getting close, with clear guidance.</p></div></article><article><span>03</span><div><h3>Keep the day flowing</h3><p>Your team manages walk-ins and appointments from one simple queue.</p></div></article></div></section>
+    <section className="cta-section" id="for-clinics"><div><div className="eyebrow">YOUR CLINIC, IN BETTER FLOW</div><h2>Make room for<br/>what matters.</h2><p>Set up your clinic and start a one-month free trial. No payment details needed to begin.</p></div><Link className="button button-light" to="/register">Create your clinic <span>↗</span></Link></section>
+    <footer><Brand/><span>© 2026 QueueLess · Thoughtful queues, better visits.</span><div><a href="mailto:hello@queueless.in">Contact</a><a href="#">Privacy</a><a href="#">Terms</a></div></footer>
+  </main></Localized>
+}

@@ -89,6 +89,40 @@ npm run lint
 npm run build
 ```
 
+## Backend code map
+
+```text
+Backend/src/
+├── app.js               Express app setup and API route mounting
+├── server.js            Database startup and graceful shutdown
+├── config/              Database connection and TypeORM setup
+├── controller/          Request handlers grouped by feature
+├── entities/            PostgreSQL table definitions
+├── middleware/          Authentication, validation, and patient access checks
+├── migrations/          Ordered database schema changes
+├── repositories/        Database queries grouped by data area
+├── routes/              URL definitions and request validation
+│   ├── auth.js           Clinic registration and login routes
+│   ├── clinic/           Clinic workspace route groups
+│   ├── public/           Clinic discovery and patient registration routes
+│   └── patient/          Private visit and recovery routes
+├── services/             Business rules grouped by feature
+│   ├── clinic/           Clinic time-zone and settings rules
+│   └── patient/          Availability, access links, mobile numbers, and OTP hashing
+└── utils/                Shared small-purpose helpers
+
+Frontend/src/
+├── api/                  Shared API client
+├── assets/               Images and other static assets
+├── components/           Shared interface components
+├── pages/                One screen per feature or user journey
+├── App.jsx               Page routes and top-level providers
+├── i18n.jsx              Language selection and translations
+└── *.css                 Shared and feature-specific styles
+```
+
+Each route group delegates to a controller with a matching feature name; shared business logic lives in services, and reusable database queries live in repositories.
+
 ## Phase 1: clinic accounts
 
 Before starting the backend, set `JWT_SECRET` in the root `.env` to a random secret of at least 32 characters. Apply the initial database migration from `Backend/`:
@@ -124,7 +158,7 @@ Authenticated clinic endpoints use the bearer token returned by login or registr
 - `GET /api/v1/clinic/dashboard` returns the day's queue and registration counts.
 - `POST /api/v1/clinic/walk-ins` registers a walk-in. Registration is rejected while walk-ins are disabled or outside configured operating hours.
 - `POST /api/v1/clinic/queue/call-next` calls the next waiting patient through the backend queue service.
-- `POST /api/v1/clinic/queue/:queueId/{check-in|call|start|complete|miss|cancel}` applies an allowed status transition and writes an audit record. Online registrations stay in `registered` until reception confirms physical arrival with `check-in`.
+- `POST /api/v1/clinic/queue/:queueId/{check-in|call|start|complete|miss|return|cancel}` applies an allowed status transition and writes an audit record. Online registrations stay in `registered` until reception confirms physical arrival with `check-in`.
 
 Queue tokens are unique per clinic, doctor and local clinic date. Queue-changing operations are transactional. The first implementation supports a single active consultation per doctor queue and provides staff controls for calling, starting, completing, missing, or cancelling a visit.
 
@@ -132,7 +166,7 @@ Queue tokens are unique per clinic, doctor and local clinic date. Queue-changing
 
 Set `APP_BASE_URL` to the address patients use to open the frontend. `OTP_SECRET` should be a random secret of at least 32 characters. For local recovery-code testing only, set `OTP_DEV_ECHO=true` while `NODE_ENV` is not `production`; the API then includes the simulated code in its response. Production recovery codes are intended for WhatsApp delivery when the messaging provider is configured.
 
-Phase 3 adds clinic discovery, public doctor profiles and appointment slots, online appointment or walk-in registration, confirmation pages, private registration links, link rotation/revocation, and mobile-number recovery. Run `npm run migration:run` from `Backend/` to apply the Phase 3 patient-portal migration along with any earlier pending migrations.
+Phase 3 adds clinic discovery, public doctor profiles and appointment slots, online appointment or walk-in registration, confirmation pages, private registration links, link rotation/revocation, and mobile-number recovery. The patient and clinic interfaces include a persistent language selector for English, Hindi, Bengali, Tamil, Telugu, and Marathi. Run `npm run migration:run` from `Backend/` to apply the Phase 3 patient-portal migration along with any earlier pending migrations.
 
 Public endpoints:
 
@@ -149,6 +183,10 @@ Patient endpoints accept the private link secret as a bearer token; the frontend
 - `POST /api/v1/patient/recovery/request` starts mobile recovery; `POST /api/v1/patient/recovery/verify` verifies the code and returns private links.
 
 An online registration does not confirm that the patient has arrived. The confirmation page instructs patients to check in with reception. Recovery-code delivery is simulated locally until WhatsApp messaging is configured.
+
+## Phase 4: queue engine
+
+Run `npm run migration:run` from `Backend/` to add the queue ordering column and index. Appointment arrivals and walk-ins share the daily doctor queue: due appointments are called in scheduled-time order, walk-ins follow in queue order, and future appointments remain behind patients who are ready now. Reception must check in online registrations before they become callable. Missed appointments release their booked slot; if they return to the queue, the configured missed-turn policy places them after the chosen number of waiting patients or at the end. Patient visit links show a queue position and estimated wait based on queue order, configured slot length, active consultation, and appointment time.
 
 ## Troubleshooting
 

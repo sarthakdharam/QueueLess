@@ -1,188 +1,34 @@
-import { useCallback, useEffect, useState } from 'react'
-import { Link, Navigate, Route, Routes, useNavigate, useParams } from 'react-router-dom'
-import axios from 'axios'
+import { Navigate, Route, Routes } from 'react-router-dom'
 import './App.css'
 import './patient.css'
-
-const api = axios.create({ baseURL: '/api/v1' })
-api.interceptors.request.use((config) => {
-  const token = localStorage.getItem('queueless.session')
-  if (token && !config.headers.Authorization) config.headers.Authorization = `Bearer ${token}`
-  return config
-})
-
-function Brand() {
-  return <Link className="brand" to="/" aria-label="QueueLess home"><span className="brand-mark">Q</span><span>queue<span className="brand-accent">less</span></span></Link>
-}
-
-function Landing() {
-  return <main className="landing">
-    <header className="topbar"><Brand /><nav><a href="#how-it-works">How it works</a><a href="#for-clinics">For clinics</a><Link to="/clinics">Find a clinic</Link><Link className="nav-login" to="/login">Clinic login</Link><Link className="button button-dark button-small" to="/register">Register clinic <span>↗</span></Link></nav></header>
-    <section className="hero-section">
-      <div className="hero-copy"><div className="eyebrow"><span className="live-dot"/> A calmer way to care</div><h1>Less waiting.<br/><em>More caring.</em></h1><p className="hero-description">A clearer queue for your clinic. Patients know where they stand, and your team stays in control.</p><div className="hero-actions"><Link className="button button-dark" to="/clinics">Find a clinic <span>↗</span></Link><Link className="text-link" to="/register">For clinics <span>↗</span></Link></div><div className="hero-proof"><div className="proof-avatars"><span>R</span><span>A</span><span>M</span></div><p>Made for independent clinics<br/><strong>Across India</strong></p></div></div>
-      <div className="queue-card" aria-label="Example live clinic queue"><div className="card-top"><div><span className="clinic-label">TODAY AT</span><h2>Greenleaf Clinic</h2></div><span className="open-pill"><i/> Open</span></div><div className="queue-status"><div><span className="clinic-label">NOW SERVING</span><strong className="serving-token">A<span>08</span></strong><span className="serving-name">Dr. Mehta · Room 1</span></div><div className="queue-count"><strong>06</strong><span>waiting</span></div></div><div className="queue-divider"/><div className="queue-next"><span className="next-icon">↗</span><div><span className="clinic-label">UP NEXT</span><strong>A09 <span>· Priya S.</span></strong></div><span className="wait-time">~12 min</span></div><div className="card-foot"><span className="live-dot"/> Queue updates live <span>Updated just now</span></div></div>
-      <span className="hero-orbit orbit-one"/><span className="hero-orbit orbit-two"/><span className="hero-star">✳</span>
-    </section>
-    <section className="trust-strip"><span>BUILT FOR THE PEOPLE WHO KEEP CLINICS MOVING</span><div><span>Independent clinics</span><b>·</b><span>Reception teams</span><b>·</b><span>Patients on the go</span></div></section>
-    <section className="steps-section" id="how-it-works"><div><div className="eyebrow">A BETTER VISIT, STEP BY STEP</div><h2>Good care starts<br/>before the consult.</h2></div><div className="step-list"><article><span>01</span><div><h3>Know where you stand</h3><p>Patients get a token and a live view of their place in line.</p></div></article><article><span>02</span><div><h3>Wait on your terms</h3><p>Come back when your turn is getting close, with clear guidance.</p></div></article><article><span>03</span><div><h3>Keep the day flowing</h3><p>Your team manages walk-ins and appointments from one simple queue.</p></div></article></div></section>
-    <section className="cta-section" id="for-clinics"><div><div className="eyebrow">YOUR CLINIC, IN BETTER FLOW</div><h2>Make room for<br/>what matters.</h2><p>Set up your clinic and start a one-month free trial. No payment details needed to begin.</p></div><Link className="button button-light" to="/register">Create your clinic <span>↗</span></Link></section>
-    <footer><Brand/><span>© 2026 QueueLess · Thoughtful queues, better visits.</span><div><a href="mailto:hello@queueless.in">Contact</a><a href="#">Privacy</a><a href="#">Terms</a></div></footer>
-  </main>
-}
-
-function AuthPage({ mode }) {
-  const isRegister = mode === 'register'
-  const navigate = useNavigate()
-  const [form, setForm] = useState({ clinicName: '', address: '', city: '', state: '', contactNumber: '', email: '', adminName: '', password: '', acceptedTerms: false })
-  const [error, setError] = useState('')
-  const [busy, setBusy] = useState(false)
-  const update = (event) => setForm({ ...form, [event.target.name]: event.target.type === 'checkbox' ? event.target.checked : event.target.value })
-  const submit = async (event) => {
-    event.preventDefault(); setError(''); setBusy(true)
-    try {
-      const response = await api.post(`/auth/${isRegister ? 'register' : 'login'}`, isRegister ? form : { email: form.email, password: form.password })
-      localStorage.setItem('queueless.session', response.data.token)
-      navigate('/clinic')
-    } catch (requestError) { setError(requestError.response?.data?.error || 'Unable to connect. Please try again.') }
-    finally { setBusy(false) }
-  }
-  return <main className="auth-shell"><div className="auth-side"><Brand/><div className="auth-side-copy"><div className="eyebrow"><span className="live-dot"/> Better flow starts here</div><h1>More time for<br/><em>good care.</em></h1><p>QueueLess brings a little more calm to the everyday clinic visit.</p></div><span className="auth-note">Thoughtful queues, better visits.</span></div><section className="auth-main"><Link className="back-link" to="/">← Back to home</Link><div className="auth-card"><div className="eyebrow">{isRegister ? 'GET STARTED' : 'WELCOME BACK'}</div><h2>{isRegister ? 'Set up your clinic' : 'Sign in to QueueLess'}</h2><p className="auth-intro">{isRegister ? 'Create your clinic workspace. Your first month is on us.' : 'Manage your clinic queue and appointments.'}</p><form onSubmit={submit}>
-    {isRegister && <><label>Clinic name<input name="clinicName" autoComplete="organization" required minLength="2" maxLength="160" value={form.clinicName} onChange={update} placeholder="e.g. Greenleaf Clinic"/></label><label>Clinic address<input name="address" autoComplete="street-address" required value={form.address} onChange={update} placeholder="Street address"/></label><div className="form-row"><label>City<input name="city" autoComplete="address-level2" required value={form.city} onChange={update}/></label><label>State<input name="state" autoComplete="address-level1" required value={form.state} onChange={update}/></label></div><label>Clinic phone<input name="contactNumber" type="tel" autoComplete="tel" required value={form.contactNumber} onChange={update} placeholder="+91 98765 43210"/></label><label>Your name<input name="adminName" autoComplete="name" required minLength="2" value={form.adminName} onChange={update} placeholder="Clinic administrator"/></label></>}
-    <label>Email address<input name="email" type="email" autoComplete="email" required value={form.email} onChange={update} placeholder="you@clinic.com"/></label><label>Password<input name="password" type="password" autoComplete={isRegister ? 'new-password' : 'current-password'} required minLength={isRegister ? 10 : undefined} value={form.password} onChange={update} placeholder={isRegister ? 'At least 10 characters' : 'Your password'}/></label>
-    {isRegister && <label className="terms-check"><input type="checkbox" name="acceptedTerms" checked={form.acceptedTerms} onChange={update} required/><span>I agree to the <a href="#">Terms</a> and <a href="#">Privacy Policy</a>.</span></label>}
-    {error && <p className="form-error" role="alert">{error}</p>}<button className="button button-dark form-submit" disabled={busy}>{busy ? 'Please wait…' : isRegister ? 'Create clinic account' : 'Sign in'} <span>↗</span></button>
-  </form><p className="auth-switch">{isRegister ? 'Already set up?' : 'New to QueueLess?'} <Link to={isRegister ? '/login' : '/register'}>{isRegister ? 'Sign in' : 'Register your clinic'}</Link></p></div></section></main>
-}
-
-function ClinicHome() {
-  const [session] = useState(() => localStorage.getItem('queueless.session'))
-  const [setup, setSetup] = useState(null)
-  const [error, setError] = useState('')
-  const [loading, setLoading] = useState(true)
-  useEffect(() => {
-    if (!session) return
-    api.get('/clinic/setup').then(({ data }) => setSetup(data)).catch(() => { localStorage.removeItem('queueless.session'); setError('Your session expired. Please sign in again.') }).finally(() => setLoading(false))
-  }, [session])
-  if (!session) return <Navigate to="/login" replace />
-  if (!loading && setup && !setup.setupComplete) return <Navigate to="/clinic/setup" replace />
-  if (!loading && setup?.setupComplete) return <Navigate to="/clinic/queue" replace />
-  return <main className="clinic-welcome"><Brand/>{loading ? <p>Loading your clinic…</p> : <><p>{error}</p><Link className="button button-dark" to="/login">Sign in again</Link></>}</main>
-}
-
-function ClinicSetup() {
-  const [data, setData] = useState(null)
-  const [profile, setProfile] = useState({})
-  const [settings, setSettings] = useState(null)
-  const [doctors, setDoctors] = useState([])
-  const [doctor, setDoctor] = useState({ name: '', specialization: '', details: '' })
-  const [breakEnabled, setBreakEnabled] = useState(false)
-  const [breakTime, setBreakTime] = useState({ start: '13:00', end: '14:00' })
-  const [error, setError] = useState('')
-  const [busy, setBusy] = useState(false)
-  useEffect(() => { api.get('/clinic/setup').then(({ data: initial }) => { setData(initial); setProfile({ name: initial.clinic.name, address: initial.clinic.address, city: initial.clinic.city, state: initial.clinic.state, contactNumber: initial.clinic.contactNumber, timeZone: initial.clinic.timeZone || 'Asia/Kolkata' }); setSettings(initial.settings); setDoctors(initial.doctors); if (initial.settings.breaks?.length) { setBreakEnabled(true); setBreakTime(initial.settings.breaks[0]) } if (initial.doctors[0]) setDoctor({ name: '', specialization: '', details: '' }) }).catch(() => setError('Could not load clinic setup. Please sign in again.')) }, [])
-  const setHour = (day, field, value) => setSettings({ ...settings, workingHours: { ...settings.workingHours, [day]: { ...settings.workingHours[day], [field]: value } } })
-  const save = async (event) => {
-    event.preventDefault(); setBusy(true); setError('')
-    try {
-      await api.put('/clinic/profile', profile)
-      await api.put('/clinic/settings', { ...settings, breaks: breakEnabled ? [breakTime] : [] })
-      if (doctor.name.trim() && !doctors.some((item) => item.name.toLowerCase() === doctor.name.trim().toLowerCase())) {
-        const { data: created } = await api.post('/clinic/doctors', { ...doctor, availability: { workingHours: settings.workingHours } })
-        setDoctors([...doctors, created.doctor])
-      }
-      const { data: refreshed } = await api.get('/clinic/setup'); setData(refreshed)
-      if (refreshed.setupComplete) window.location.href = '/clinic/queue'
-      else if (!doctor.name.trim() && doctors.length === 0) setError('Add at least one doctor to finish setup.')
-    } catch (requestError) { setError(requestError.response?.data?.error || 'Unable to save setup. Please try again.') }
-    finally { setBusy(false) }
-  }
-  if (!localStorage.getItem('queueless.session')) return <Navigate to="/login" replace />
-  if (!data) return <main className="clinic-welcome"><Brand/><p>{error || 'Loading setup…'}</p></main>
-  return <main className="setup-shell"><header className="portal-header"><Brand/><div className="portal-header-right"><span>{data.clinic.name}</span><button onClick={() => { localStorage.removeItem('queueless.session'); window.location.href = '/' }}>Sign out</button></div></header><section className="setup-content"><div className="setup-heading"><div className="eyebrow">PHASE 2 · CLINIC SETUP</div><h1>Set up your clinic</h1><p>Configure your team and opening hours. You can adjust these any time.</p></div><form onSubmit={save} className="setup-form"><section className="setup-panel"><div className="panel-heading"><span>01</span><div><h2>Clinic profile</h2><p>Confirm the details patients will use to find you.</p></div></div><div className="setup-grid"><label>Clinic name<input required value={profile.name || ''} onChange={(e) => setProfile({ ...profile, name: e.target.value })}/></label><label>Contact number<input required value={profile.contactNumber || ''} onChange={(e) => setProfile({ ...profile, contactNumber: e.target.value })}/></label><label className="wide-field">Address<input required value={profile.address || ''} onChange={(e) => setProfile({ ...profile, address: e.target.value })}/></label><label>City<input required value={profile.city || ''} onChange={(e) => setProfile({ ...profile, city: e.target.value })}/></label><label>State<input required value={profile.state || ''} onChange={(e) => setProfile({ ...profile, state: e.target.value })}/></label><label>Time zone<select value={profile.timeZone || 'Asia/Kolkata'} onChange={(e) => setProfile({ ...profile, timeZone: e.target.value })}><option value="Asia/Kolkata">India Standard Time · Asia/Kolkata</option><option value="Asia/Dubai">Gulf Standard Time · Asia/Dubai</option><option value="UTC">UTC</option></select></label></div></section>
-    <section className="setup-panel"><div className="panel-heading"><span>02</span><div><h2>Doctors and availability</h2><p>Add a doctor and set the clinic's regular hours.</p></div></div><div className="doctor-fields"><label>Doctor name<input required={doctors.length === 0} value={doctor.name} onChange={(e) => setDoctor({ ...doctor, name: e.target.value })} placeholder="e.g. Dr. Ananya Mehta"/></label><label>Specialization <small>Optional</small><input value={doctor.specialization} onChange={(e) => setDoctor({ ...doctor, specialization: e.target.value })} placeholder="e.g. General physician"/></label></div><button type="button" className="add-doctor-button" onClick={async () => { if (!doctor.name.trim()) return; try { const { data: created } = await api.post('/clinic/doctors', { ...doctor, availability: { workingHours: settings.workingHours } }); setDoctors([...doctors, created.doctor]); setDoctor({ name: '', specialization: '', details: '' }) } catch (requestError) { setError(requestError.response?.data?.error || 'Could not add this doctor.') } }}>＋ Add doctor</button>{doctors.length > 0 && <div className="doctor-list">{doctors.map((item) => <span key={item.id}><b>{item.name}</b>{item.specialization && ` · ${item.specialization}`}</span>)}</div>}<div className="hours-table"><div className="hours-header"><span>DAY</span><span>OPEN</span><span>CLOSE</span></div>{Object.entries(settings.workingHours).map(([day, hours]) => <div className={`hours-row ${hours.enabled ? '' : 'day-off'}`} key={day}><label className="day-toggle"><input type="checkbox" checked={hours.enabled} onChange={(e) => setHour(day, 'enabled', e.target.checked)}/><span>{day}</span></label><input type="time" disabled={!hours.enabled} value={hours.open} onChange={(e) => setHour(day, 'open', e.target.value)}/><input type="time" disabled={!hours.enabled} value={hours.close} onChange={(e) => setHour(day, 'close', e.target.value)}/></div>)}</div><div className="break-config"><label className="check-setting"><input type="checkbox" checked={breakEnabled} onChange={(e) => setBreakEnabled(e.target.checked)}/> Add a daily consultation break</label>{breakEnabled && <div className="break-times"><label>From<input type="time" value={breakTime.start} onChange={(e) => setBreakTime({ ...breakTime, start: e.target.value })}/></label><label>To<input type="time" value={breakTime.end} onChange={(e) => setBreakTime({ ...breakTime, end: e.target.value })}/></label></div>}</div></section>
-    <section className="setup-panel"><div className="panel-heading"><span>03</span><div><h2>Queue preferences</h2><p>Choose a few defaults for the reception team.</p></div></div><div className="setup-grid"><label>Appointment slot length<select value={settings.slotDurationMinutes} onChange={(e) => setSettings({ ...settings, slotDurationMinutes: Number(e.target.value) })}><option value="10">10 minutes</option><option value="15">15 minutes</option><option value="20">20 minutes</option><option value="30">30 minutes</option></select></label><label>Appointments per slot<input type="number" min="1" max="100" value={settings.appointmentCapacity} onChange={(e) => setSettings({ ...settings, appointmentCapacity: Number(e.target.value) })}/></label><label>Turn approaching reminder<input type="number" min="1" max="30" value={settings.notifyAtPatientsAhead} onChange={(e) => setSettings({ ...settings, notifyAtPatientsAhead: Number(e.target.value) })} aria-label="Notify when this many patients are ahead"/></label><label>Walk-in registrations<select value={String(settings.walkInsEnabled)} onChange={(e) => setSettings({ ...settings, walkInsEnabled: e.target.value === 'true' })}><option value="true">Enabled</option><option value="false">Disabled</option></select></label><label>Returned patient queue rule<input type="number" min="0" max="30" value={settings.returnPatientsAhead} onChange={(e) => setSettings({ ...settings, returnPatientsAhead: Number(e.target.value) })}/><small>Patients placed ahead on return; the default is five.</small></label><label>Missed turn policy<select value={settings.missedTurnPolicy || 'after_waiting'} onChange={(e) => setSettings({ ...settings, missedTurnPolicy: e.target.value })}><option value="after_waiting">Rejoin after eligible waiting patients</option><option value="at_end">Rejoin at the end of the queue</option></select></label></div></section>
-    {error && <p className="form-error" role="alert">{error}</p>}<div className="setup-submit"><span>Changes are saved to your clinic workspace.</span><button className="button button-dark" disabled={busy}>{busy ? 'Saving…' : 'Save and continue'} <span>↗</span></button></div></form></section></main>
-}
-
-function ClinicDashboard() {
-  const [dashboard, setDashboard] = useState(null)
-  const [setup, setSetup] = useState(null)
-  const [doctors, setDoctors] = useState([])
-  const [form, setForm] = useState({ name: '', mobile: '', doctorId: '', notes: '' })
-  const [error, setError] = useState('')
-  const [busy, setBusy] = useState(false)
-  const [toast, setToast] = useState('')
-  const load = useCallback(async () => { try { const [{ data: board }, { data: config }, { data: team }] = await Promise.all([api.get('/clinic/dashboard'), api.get('/clinic/setup'), api.get('/clinic/doctors')]); setDashboard(board); setSetup(config); setDoctors(team.doctors) } catch (requestError) { setError(requestError.response?.data?.error || 'Could not load the queue.') } }, [])
-  useEffect(() => { const initialLoad = window.setTimeout(load, 0); const interval = window.setInterval(load, 20000); return () => { window.clearTimeout(initialLoad); window.clearInterval(interval) } }, [load])
-  const addWalkIn = async (event) => { event.preventDefault(); setBusy(true); setError(''); try { const { data } = await api.post('/clinic/walk-ins', form); setForm({ name: '', mobile: '', doctorId: '', notes: '' }); setToast(`Token ${data.registration.tokenNumber} added · ${data.registration.reference}`); await load() } catch (requestError) { setError(requestError.response?.data?.error || 'Could not register this patient.') } finally { setBusy(false) } }
-  const performAction = async (queueId, action) => { if (['cancel', 'miss'].includes(action) && !window.confirm(action === 'cancel' ? 'Cancel this patient’s queue registration?' : 'Mark this patient as having missed their turn?')) return; setError(''); try { await api.post(`/clinic/queue/${queueId}/${action}`); await load() } catch (requestError) { setError(requestError.response?.data?.error || 'Could not update this queue entry.') } }
-  const callNext = async () => { setError(''); try { const { data } = await api.post('/clinic/queue/call-next', {}); setToast(`Now calling token ${data.queueEntry.tokenNumber}`); await load() } catch (requestError) { setError(requestError.response?.data?.error || 'Could not call the next patient.') } }
-  if (!localStorage.getItem('queueless.session')) return <Navigate to="/login" replace />
-  if (!dashboard || !setup) return <main className="clinic-welcome"><Brand/><p>{error || 'Loading today’s queue…'}</p></main>
-  if (!setup.setupComplete) return <Navigate to="/clinic/setup" replace />
-  const cards = [['Registered today', dashboard.summary.registrations, 'people checked in'], ['Waiting now', dashboard.summary.waiting, 'in the queue'], ['In consultation', dashboard.summary.consulting, 'with a doctor'], ['Completed', dashboard.summary.completed, 'visits today']]
-  return <main className="portal-shell"><aside className="portal-sidebar"><Brand/><div className="side-clinic"><span className="clinic-avatar">{setup.clinic.name.slice(0, 1)}</span><div><b>{setup.clinic.name}</b><small>Clinic workspace</small></div><span>⌄</span></div><div className="side-label">WORKSPACE</div><a className="side-link selected" href="/clinic/queue"><span>▦</span> Queue dashboard</a><Link className="side-link" to="/clinic/setup"><span>⚙</span> Clinic settings</Link><div className="sidebar-bottom"><span className="clinic-avatar staff-avatar">{setup.clinic.name.slice(0, 1)}</span><div><b>Clinic administrator</b><small>Administrator</small></div><button aria-label="Sign out" title="Sign out" onClick={() => { localStorage.removeItem('queueless.session'); window.location.href = '/' }}>↗</button></div></aside><section className="portal-main"><header className="dashboard-header"><div><div className="eyebrow">CLINIC OVERVIEW</div><h1>Good morning</h1><p>Here’s what’s happening at your clinic today.</p></div><div className="header-actions"><span className="date-chip">{new Date(`${dashboard.date}T12:00:00`).toLocaleDateString('en-IN', { weekday: 'short', day: 'numeric', month: 'short' })}</span><Link className="button button-dark" to="/clinic/setup">Clinic settings <span>↗</span></Link></div></header>
-  {error && <p className="portal-alert" role="alert">{error}</p>}{toast && <p className="portal-toast" role="status">{toast}<button onClick={() => setToast('')}>×</button></p>}
-  <section className="metric-grid">{cards.map(([title, value, note]) => <article className="metric-card" key={title}><span>{title}</span><strong>{value}</strong><small>{note}</small></article>)}</section>
-  <section className="dashboard-columns"><div className="queue-panel"><div className="panel-title"><div><h2>Live queue</h2><p><span className="live-dot"/> Updates every 20 seconds</p></div><button className="button button-dark call-next" onClick={callNext}>Call next patient <span>↗</span></button></div>{dashboard.queue.length === 0 ? <div className="queue-empty"><span>☼</span><h3>Your queue is clear</h3><p>Registered patients will show here. Add a walk-in to get started.</p></div> : <div className="table-scroll"><table><thead><tr><th>TOKEN</th><th>PATIENT</th><th>DOCTOR</th><th>STATUS</th><th>POSITION</th><th>ACTION</th></tr></thead><tbody>{dashboard.queue.map((row) => <tr key={row.queue_id}><td><strong className="table-token">A{String(row.token_number).padStart(2, '0')}</strong><small>{row.reference}</small></td><td><b>{row.patient_name}</b><small>{row.patient_mobile}</small></td><td>{row.doctor_name || 'Any doctor'}</td><td><span className={`status-pill status-${row.queue_status}`}>{row.queue_status.replace('_', ' ')}</span></td><td>{row.position ? `#${row.position}` : '—'}</td><td><div className="row-actions">{row.queue_status === 'registered' && <button onClick={() => performAction(row.queue_id, 'check-in')}>Check in</button>}{row.queue_status === 'waiting' && <button onClick={() => performAction(row.queue_id, 'call')}>Call</button>}{row.queue_status === 'called' && <><button onClick={() => performAction(row.queue_id, 'start')}>Start</button><button className="quiet-action" onClick={() => performAction(row.queue_id, 'miss')}>Missed</button></>}{row.queue_status === 'in_consultation' && <button onClick={() => performAction(row.queue_id, 'complete')}>Complete</button>}{['waiting', 'called'].includes(row.queue_status) && <button className="quiet-action" onClick={() => performAction(row.queue_id, 'cancel')}>Cancel</button>}</div></td></tr>)}</tbody></table></div>}</div>
-  <aside className="walkin-panel"><div className="panel-title"><div><h2>Register a walk-in</h2><p>New patient or returning visitor</p></div><span className="plus-mark">＋</span></div><form onSubmit={addWalkIn}><label>Patient name<input required minLength="2" maxLength="160" value={form.name} onChange={(e) => setForm({ ...form, name: e.target.value })} placeholder="Full name"/></label><label>Mobile number<input required type="tel" value={form.mobile} onChange={(e) => setForm({ ...form, mobile: e.target.value })} placeholder="+91 98765 43210"/></label><label>Doctor<select value={form.doctorId} onChange={(e) => setForm({ ...form, doctorId: e.target.value })}><option value="">Any available doctor</option>{doctors.map((item) => <option key={item.id} value={item.id}>{item.name}</option>)}</select></label><label>Reception note <small>Optional</small><textarea maxLength="500" value={form.notes} onChange={(e) => setForm({ ...form, notes: e.target.value })} placeholder="Brief note for the clinic team" rows="3"/></label><button className="button button-dark form-submit" disabled={busy}>{busy ? 'Adding patient…' : 'Add to today’s queue'} <span>↗</span></button><p className="walkin-note">Walk-ins can be registered during configured clinic hours. A permanent reference and token are assigned.</p></form></aside></section>
-  <div className="dashboard-foot"><span>{dashboard.summary.missed} missed turns</span><span>{dashboard.summary.cancelled} cancelled</span><span>Reception actions are recorded in the activity log.</span></div></section></main>
-}
-
-function PatientShell({ children }) {
-  return <main className="patient-page"><header className="patient-header"><Brand/><Link to="/clinics">Find a clinic</Link></header>{children}<footer className="patient-footer">QueueLess · Your visit, with a little more clarity.</footer></main>
-}
-
-function ClinicFinder() {
-  const [q, setQ] = useState('')
-  const [clinics, setClinics] = useState([])
-  const [busy, setBusy] = useState(true)
-  const [error, setError] = useState('')
-  useEffect(() => { api.get('/public/clinics').then(({ data }) => setClinics(data.clinics)).catch(() => setError('Clinics could not be loaded. Please try again.')).finally(() => setBusy(false)) }, [])
-  const search = async (event) => { event.preventDefault(); setBusy(true); try { const { data } = await api.get('/public/clinics', { params: { q } }); setClinics(data.clinics); setError('') } catch { setError('Search is temporarily unavailable.') } finally { setBusy(false) } }
-  return <PatientShell><section className="patient-content"><div className="eyebrow">PATIENT PORTAL</div><h1>Find a clinic</h1><p className="patient-intro">Search for a clinic to view its details and book an appointment.</p><form className="patient-search" onSubmit={search}><input value={q} onChange={(e) => setQ(e.target.value)} placeholder="Clinic name, city, or address" aria-label="Search clinics"/><button className="button button-dark">Search</button></form>{error && <p className="form-error" role="alert">{error}</p>}{busy ? <p className="muted">Loading clinics…</p> : clinics.length ? <div className="clinic-results">{clinics.map((clinic) => <article className="clinic-result" key={clinic.id}><div><h2>{clinic.name}</h2><p>{clinic.address}{clinic.city ? `, ${clinic.city}` : ''}{clinic.state ? `, ${clinic.state}` : ''}</p>{clinic.contact_number && <small>{clinic.contact_number}</small>}</div><Link className="button button-dark" to={`/clinic/${clinic.id}/book`}>View clinic <span>↗</span></Link></article>)}</div> : <div className="patient-empty"><h2>No clinics found yet</h2><p>Try a different search or check back later.</p></div>}</section></PatientShell>
-}
-
-function ClinicBooking() {
-  const { clinicId } = useParams()
-  const [clinic, setClinic] = useState(null)
-  const [availability, setAvailability] = useState({ appointmentBookingEnabled: false, walkInsEnabled: false })
-  const [doctors, setDoctors] = useState([])
-  const [form, setForm] = useState({ doctorId: '', name: '', mobile: '', visitType: 'appointment', appointmentDate: '', slotTime: '', consentToContact: false })
-  const [slots, setSlots] = useState([])
-  const [busy, setBusy] = useState(false)
-  const [loading, setLoading] = useState(true)
-  const [error, setError] = useState('')
-  const [result, setResult] = useState(null)
-  useEffect(() => { api.get(`/public/clinics/${clinicId}`).then(({ data }) => { setClinic(data.clinic); setDoctors(data.doctors); setAvailability(data); setForm((old) => ({ ...old, visitType: data.appointmentBookingEnabled || !data.walkInsEnabled ? 'appointment' : 'walk_in', ...(data.doctors.length === 1 ? { doctorId: data.doctors[0].id } : {}) })) }).catch(() => setError('Clinic not found or unavailable.')).finally(() => setLoading(false)) }, [clinicId])
-  useEffect(() => { if (form.visitType !== 'appointment' || !form.doctorId || !form.appointmentDate) return; let active = true; api.get(`/public/clinics/${clinicId}/slots`, { params: { doctorId: form.doctorId, date: form.appointmentDate } }).then(({ data }) => { if (active) setSlots(data.slots) }).catch(() => { if (active) setSlots([]) }); return () => { active = false } }, [clinicId, form.doctorId, form.appointmentDate, form.visitType])
-  const submit = async (event) => { event.preventDefault(); setBusy(true); setError(''); try { const { data } = await api.post('/public/registrations', form, { headers: { 'Idempotency-Key': crypto.randomUUID() } }); sessionStorage.setItem('queueless.patient-link', data.accessUrl.split('#')[1]); setResult(data); window.history.replaceState(null, '', data.accessUrl) } catch (requestError) { setError(requestError.response?.data?.error || 'Unable to register. Please try again.') } finally { setBusy(false) } }
-  if (loading) return <PatientShell><section className="patient-content"><p>Loading clinic…</p></section></PatientShell>
-  if (result) return <PatientShell><section className="patient-content patient-confirmation"><div className="eyebrow">REGISTRATION CONFIRMED</div><h1>You’re on the list.</h1><p className="patient-intro">{result.clinic.name} · {result.clinic.address}, {result.clinic.city}</p><p className="muted">Your private visit link is ready. Bookmark this page to reopen the registration.</p><div className="confirmation-card"><span>REFERENCE</span><strong>{result.registration.reference}</strong><span>REGISTRATION STATUS</span><strong>{result.registration.status}</strong><span>TOKEN</span><strong>A{String(result.registration.tokenNumber).padStart(2, '0')}</strong>{result.doctor && <p>Doctor: {result.doctor.name}{result.doctor.specialization ? ` · ${result.doctor.specialization}` : ''}</p>}{result.appointment && <p>Appointment time: {new Date(result.appointment.scheduledAt).toLocaleString('en-IN', { dateStyle: 'medium', timeStyle: 'short', timeZone: result.appointment.timeZone })} ({result.appointment.timeZone}). This is your scheduled appointment time, not a live queue position.</p>}<p>{result.arrivalInstructions}</p><Link className="button button-dark" to="/patient/registration">View registration <span>↗</span></Link></div></section></PatientShell>
-  return <PatientShell><section className="patient-content"><Link className="back-link inline-back" to="/clinics">← All clinics</Link><div className="eyebrow">BOOK A VISIT</div><h1>{clinic?.name || 'Clinic'}</h1><p className="patient-intro">{clinic?.address}{clinic?.city ? `, ${clinic.city}` : ''}{clinic?.state ? `, ${clinic.state}` : ''}</p>{clinic?.contactNumber && <p className="muted">Clinic phone: {clinic.contactNumber}</p>}{!availability.appointmentBookingEnabled && !availability.walkInsEnabled ? <div className="patient-empty"><h2>Online registration unavailable</h2><p>Call the clinic to arrange your visit.</p></div> : <form className="patient-form" onSubmit={submit}><label>Visit type<select value={form.visitType} onChange={(e) => setForm({ ...form, visitType: e.target.value, slotTime: '' })}><option value="appointment" disabled={!availability.appointmentBookingEnabled}>Book an appointment</option><option value="walk_in" disabled={!availability.walkInsEnabled}>Join today’s walk-in queue</option></select></label>{form.visitType === 'walk_in' && doctors.length > 1 && <label>Doctor<select value={form.doctorId} onChange={(e) => setForm({ ...form, doctorId: e.target.value })}><option value="">Any available doctor</option>{doctors.map((d) => <option key={d.id} value={d.id}>{d.name}{d.specialization ? ` · ${d.specialization}` : ''}</option>)}</select></label>}{form.visitType === 'appointment' && <><label>Doctor<select required value={form.doctorId} onChange={(e) => setForm({ ...form, doctorId: e.target.value, slotTime: '' })}><option value="">Choose a doctor</option>{doctors.map((d) => <option key={d.id} value={d.id}>{d.name}{d.specialization ? ` · ${d.specialization}` : ''}</option>)}</select></label><label>Appointment date<input required type="date" min={new Date().toISOString().slice(0, 10)} value={form.appointmentDate} onChange={(e) => setForm({ ...form, appointmentDate: e.target.value, slotTime: '' })}/></label>{form.doctorId && form.appointmentDate && <fieldset className="slot-picker"><legend>Available times</legend>{slots.length ? slots.map((slot) => <label key={slot.time} className={form.slotTime === slot.time ? 'slot selected' : 'slot'}><input type="radio" required name="slotTime" value={slot.time} checked={form.slotTime === slot.time} onChange={(e) => setForm({ ...form, slotTime: e.target.value })}/><span>{slot.time}</span><small>{slot.remaining} left</small></label>) : <p className="muted">No times available. Choose another date.</p>}</fieldset>}</>}<label>Your name<input required minLength="2" maxLength="160" autoComplete="name" value={form.name} onChange={(e) => setForm({ ...form, name: e.target.value })}/></label><label>Mobile number<input required type="tel" autoComplete="tel" value={form.mobile} onChange={(e) => setForm({ ...form, mobile: e.target.value })} placeholder="+91 98765 43210"/></label><label className="terms-check"><input type="checkbox" required checked={form.consentToContact} onChange={(e) => setForm({ ...form, consentToContact: e.target.checked })}/><span>I agree to receive registration updates from the clinic.</span></label>{error && <p className="form-error" role="alert">{error}</p>}<button className="button button-dark form-submit" disabled={busy}>{busy ? 'Registering…' : 'Confirm registration'} <span>↗</span></button></form>}</section></PatientShell>
-}
-
-function PatientRegistration() {
-  const [secret] = useState(() => window.location.hash.slice(1) || sessionStorage.getItem('queueless.patient-link') || '')
-  const [data, setData] = useState(null)
-  const [error, setError] = useState('')
-  useEffect(() => { if (!secret) return; sessionStorage.setItem('queueless.patient-link', secret); api.get('/patient/registration', { headers: { Authorization: `Bearer ${secret}` } }).then(({ data: response }) => setData(response)).catch((e) => setError(e.response?.data?.error || 'This private link could not be opened.')) }, [secret])
-  if (!secret) return <Navigate to="/patient/recover" replace />
-  return <PatientShell><section className="patient-content">{error ? <><div className="eyebrow">PRIVATE VISIT LINK</div><h1>Link unavailable</h1><p className="patient-intro">{error}</p><Link className="button button-dark" to="/patient/recover">Recover access</Link></> : !data ? <p>Loading your registration…</p> : <><div className="eyebrow">YOUR REGISTRATION</div><h1>{data.clinic.name}</h1><p className="patient-intro">Reference {data.registration.reference} · Token A{String(data.registration.tokenNumber).padStart(2, '0')}</p><div className="confirmation-card"><span>STATUS</span><strong>{data.registration.queueStatus || data.registration.status}</strong>{data.registration.queuePosition && <p>Queue position: {data.registration.queuePosition}</p>}{data.appointment && <p>Appointment: {new Date(data.appointment.scheduledAt).toLocaleString('en-IN', { dateStyle: 'medium', timeStyle: 'short', timeZone: data.clinic.timeZone })}</p>}<p>{data.arrivalInstructions}</p>{data.estimate && <small>Estimated wait: {data.estimate.minimumMinutes}–{data.estimate.maximumMinutes} minutes. {data.estimate.disclaimer}</small>}</div><p className="patient-intro">{data.clinic.address}, {data.clinic.city} · {data.clinic.contactNumber}</p><button className="text-button" onClick={async () => { try { const { data: rotated } = await api.post('/patient/access/rotate', {}, { headers: { Authorization: `Bearer ${secret}` } }); sessionStorage.setItem('queueless.patient-link', rotated.accessUrl.split('#')[1]); window.location.assign(rotated.accessUrl) } catch { setError('Could not create a replacement private link.') } }}>Create a new private link</button><button className="text-button danger-text" onClick={async () => { try { await api.delete('/patient/access', { headers: { Authorization: `Bearer ${secret}` } }); sessionStorage.removeItem('queueless.patient-link'); setError('This private link has been revoked.') } catch { setError('Could not revoke this link.') } }}>Revoke this link</button></>}</section></PatientShell>
-}
-
-function PatientRecovery() {
-  const [mobile, setMobile] = useState('')
-  const [code, setCode] = useState('')
-  const [developmentCode, setDevelopmentCode] = useState('')
-  const [registrations, setRegistrations] = useState([])
-  const [step, setStep] = useState('request')
-  const [error, setError] = useState('')
-  const requestCode = async (event) => { event.preventDefault(); setError(''); try { const { data } = await api.post('/patient/recovery/request', { mobile }); setDevelopmentCode(data.developmentCode || ''); setStep('verify') } catch (e) { setError(e.response?.data?.error || 'Could not request a code.') } }
-  const verify = async (event) => { event.preventDefault(); setError(''); try { const { data } = await api.post('/patient/recovery/verify', { mobile, code }); setRegistrations(data.registrations); setStep('links') } catch (e) { setError(e.response?.data?.error || 'The code could not be verified.') } }
-  return <PatientShell><section className="patient-content"><div className="eyebrow">PATIENT PORTAL</div><h1>Recover your visit</h1><p className="patient-intro">Use the mobile number you gave the clinic. We’ll send a verification code if registrations are found.</p>{step === 'request' && <form className="patient-form" onSubmit={requestCode}><label>Mobile number<input required type="tel" value={mobile} onChange={(e) => setMobile(e.target.value)} placeholder="+91 98765 43210"/></label>{error && <p className="form-error">{error}</p>}<button className="button button-dark">Send verification code</button></form>}{step === 'verify' && <form className="patient-form" onSubmit={verify}><label>Six-digit code<input required inputMode="numeric" pattern="[0-9]{6}" maxLength="6" value={code} onChange={(e) => setCode(e.target.value)}/></label>{developmentCode && <p className="dev-code">Local development code: <strong>{developmentCode}</strong></p>}{error && <p className="form-error">{error}</p>}<button className="button button-dark">Verify and find visits</button></form>}{step === 'links' && (registrations.length ? <div className="clinic-results">{registrations.map((item) => <article className="clinic-result" key={item.reference}><div><h2>{item.clinicName}</h2><p>Reference {item.reference}</p></div><a className="button button-dark" href={item.accessUrl}>Open visit <span>↗</span></a></article>)}</div> : <div className="patient-empty"><h2>No active registrations found</h2><p>Check the mobile number or contact your clinic.</p></div>)}</section></PatientShell>
-}
+import './experience.css'
+import { LanguageProvider, LanguageSwitcher } from './i18n.jsx'
+import Landing from './pages/landing.jsx'
+import AuthPage from './pages/auth-page.jsx'
+import ClinicHome from './pages/clinic-home.jsx'
+import ClinicSetup from './pages/clinic-setup.jsx'
+import ClinicDashboard from './pages/clinic-dashboard.jsx'
+import ClinicFinder from './pages/clinic-finder.jsx'
+import ClinicBooking from './pages/clinic-booking.jsx'
+import PatientRegistration from './pages/patient-registration.jsx'
+import PatientRecovery from './pages/patient-recovery.jsx'
 
 export default function App() {
-  return <Routes><Route path="/" element={<Landing/>}/><Route path="/register" element={<AuthPage mode="register"/>}/><Route path="/login" element={<AuthPage mode="login"/>}/><Route path="/clinics" element={<ClinicFinder/>}/><Route path="/clinic/:clinicId/book" element={<ClinicBooking/>}/><Route path="/patient/registration" element={<PatientRegistration/>}/><Route path="/patient/recover" element={<PatientRecovery/>}/><Route path="/clinic" element={<ClinicHome/>}/><Route path="/clinic/setup" element={<ClinicSetup/>}/><Route path="/clinic/queue" element={<ClinicDashboard/>}/><Route path="*" element={<Navigate to="/" replace/>}/></Routes>
+  return 
+  <LanguageProvider>
+    <LanguageSwitcher/>
+    <Routes>
+      <Route path="/" element={<Landing/>}/>
+      <Route path="/register" element={<AuthPage mode="register"/>}/>
+      <Route path="/login" element={<AuthPage mode="login"/>}/>
+      <Route path="/clinics" element={<ClinicFinder/>}/>
+      <Route path="/clinic/:clinicId/book" element={<ClinicBooking/>}/>
+      <Route path="/patient/registration" element={<PatientRegistration/>}/>
+      <Route path="/patient/recover" element={<PatientRecovery/>}/>
+      <Route path="/clinic" element={<ClinicHome/>}/>
+      <Route path="/clinic/setup" element={<ClinicSetup/>}/>
+      <Route path="/clinic/queue" element={<ClinicDashboard/>}/>
+      <Route path="*" element={<Navigate to="/" replace/>}/>
+      </Routes>
+  </LanguageProvider>
 }

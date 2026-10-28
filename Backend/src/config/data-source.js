@@ -20,6 +20,7 @@ import { Appointment } from "../entities/Appointment.js";
 import { PatientAccessToken } from "../entities/PatientAccessToken.js";
 import { OtpChallenge } from "../entities/OtpChallenge.js";
 import { PatientPortal1760000002000 } from "../migrations/1760000002000-PatientPortal.js";
+import { QueueEngine1760000003000 } from "../migrations/1760000003000-QueueEngine.js";
 
 const currentFile = fileURLToPath(import.meta.url);
 const currentDirectory = path.dirname(currentFile);
@@ -39,7 +40,7 @@ export const AppDataSource = new DataSource({
   password: process.env.POSTGRES_PASSWORD,
   database: process.env.POSTGRES_DB,
   entities: [Clinic, ClinicUser, Subscription, ClinicSettings, Doctor, Patient, QueueSession, Registration, QueueEntry, AuditLog, Appointment, PatientAccessToken, OtpChallenge],
-  migrations: [InitialFoundation1760000000000, ClinicOperations1760000001000, PatientPortal1760000002000],
+  migrations: [InitialFoundation1760000000000, ClinicOperations1760000001000, PatientPortal1760000002000, QueueEngine1760000003000],
   synchronize: false,
   logging: false,
 });

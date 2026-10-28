@@ -7,6 +7,7 @@ export const QueueEntry = new EntitySchema({
     registrationId: { name: "registration_id", type: "uuid", unique: true },
     sessionId: { name: "session_id", type: "uuid" },
     tokenNumber: { name: "token_number", type: "int" },
+    queueOrder: { name: "queue_order", type: "bigint" },
     status: { type: "varchar", length: 24, default: "waiting" },
     checkedInAt: { name: "checked_in_at", type: "timestamptz", nullable: true },
     calledAt: { name: "called_at", type: "timestamptz", nullable: true },
