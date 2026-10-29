@@ -7,6 +7,7 @@ export async function sendWhatsAppTemplate({ recipient, templateName, variables 
     method: "POST",
     headers: { Authorization: `Bearer ${accessToken}`, "Content-Type": "application/json" },
     body: JSON.stringify({ messaging_product: "whatsapp", recipient_type: "individual", to: recipient, type: "template", template: { name: templateName, language: { code: process.env.WHATSAPP_TEMPLATE_LANGUAGE || "en" }, components: [{ type: "body", parameters: variables.map((text) => ({ type: "text", text: String(text) })) }] } }),
+    signal: AbortSignal.timeout(10000),
   });
   const result = await response.json().catch(() => ({}));
   if (!response.ok) throw new Error(result.error?.message || `WhatsApp request failed (${response.status}).`);

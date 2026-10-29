@@ -39,7 +39,7 @@ export async function callNextPatient(req, res, next) {
     });
     if (!called) return res.status(409).json({ error: "There are no waiting patients in this queue." });
     emitQueueChange({ clinicId, registrationId: called.registrationId, status: "called" });
-    void notifyApproachingPatients(clinicId, called.sessionId).catch((error) => console.error("Turn reminder failed:", error.message));
+  void notifyApproachingPatients(clinicId, called.sessionId).catch((error) => console.error("Turn reminder failed:", process.env.NODE_ENV === "production" ? error.name : error.message));
     return res.json({ queueEntry: called });
   } catch (error) { return next(error); }
 
@@ -100,7 +100,7 @@ export async function transitionQueueEntry(req, res, next) {
       return { id: entry.id, registrationId: entry.registration_id, sessionId: entry.session_id, tokenNumber: entry.token_number, status: transition.to };
     });
     emitQueueChange({ clinicId: req.auth.clinicId, registrationId: changed.registrationId, status: changed.status });
-    void notifyApproachingPatients(req.auth.clinicId, changed.sessionId).catch((error) => console.error("Turn reminder failed:", error.message));
+    void notifyApproachingPatients(req.auth.clinicId, changed.sessionId).catch((error) => console.error("Turn reminder failed:", process.env.NODE_ENV === "production" ? error.name : error.message));
     return res.json({ queueEntry: changed });
   } catch (error) {
     if (error.status) return res.status(error.status).json({ error: error.message });

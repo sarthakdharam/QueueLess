@@ -11,11 +11,12 @@ import { getSettings } from "../services/clinic/settings.js";
 import { clinicIsOpen, clinicToday } from "../services/clinic/time.js";
 import { emitQueueChange } from "../sockets/socket-server.js";
 import { notifyApproachingPatients } from "../services/notifications/dispatch.js";
+import { normalizeMobile } from "../services/patient/mobile.js";
 
 export async function registerWalkIn(req, res, next) {
   const clinicId = req.auth.clinicId;
   const doctorId = req.body.doctorId || null;
-  const mobile = req.body.mobile.replace(/[\s()-]/g, "");
+  const mobile = normalizeMobile(req.body.mobile);
   const day = await AppDataSource.getRepository(Clinic).findOneBy({ id: clinicId }).then((clinic) => clinicToday(clinic.timeZone));
   const lockKey = `queue:${clinicId}:${doctorId || "all"}:${day}`;
   try {
@@ -43,7 +44,7 @@ export async function registerWalkIn(req, res, next) {
       return { registration, queueEntry, tokenNumber, sessionId: session.id };
     });
     emitQueueChange({ clinicId, registrationId: result.registration.id, status: "waiting" });
-    void notifyApproachingPatients(clinicId, result.sessionId).catch((error) => console.error("Turn reminder failed:", error.message));
+  void notifyApproachingPatients(clinicId, result.sessionId).catch((error) => console.error("Turn reminder failed:", process.env.NODE_ENV === "production" ? error.name : error.message));
     return res.status(201).json({ registration: { id: result.registration.id, reference: result.registration.reference, status: result.registration.status, tokenNumber: result.tokenNumber, visitType: result.registration.visitType, createdAt: result.registration.createdAt }, message: "Walk-in registered and added to today's queue." });
   } catch (error) {
     if (error.status) return res.status(error.status).json({ error: error.message });

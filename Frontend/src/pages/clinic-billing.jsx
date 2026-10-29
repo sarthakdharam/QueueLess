@@ -2,6 +2,7 @@ import { useCallback, useEffect, useState } from 'react'
 import { Link, Navigate } from 'react-router-dom'
 import { api } from '../api/client.js'
 import Brand from '../components/Brand.jsx'
+import ClinicLoading from '../components/ClinicLoading.jsx'
 
 function loadCheckoutScript() {
   if (window.Razorpay) return Promise.resolve()
@@ -113,6 +114,6 @@ export default function ClinicBilling() {
           {billing.payments.map((payment) => <tr key={payment.id}><td>{new Date(payment.createdAt).toLocaleString('en-IN')}</td><td>₹{(payment.amount / 100).toFixed(2)}</td><td>{payment.status}</td><td>{payment.provider}</td></tr>)}
         </tbody></table></div> : <p>No payments recorded.</p>}
       </section>
-    </> : <p>{error || 'Loading subscription…'}</p>}
+    </> : error ? <p className="portal-alert" role="alert">{error}</p> : <ClinicLoading>Loading subscription…</ClinicLoading>}
   </main>
 }

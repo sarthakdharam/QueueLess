@@ -38,7 +38,7 @@ app.get("/api/health", (req, res) => {
 });
 
 app.use((error, req, res, next) => {
-  console.error("Request failed:", error.message);
+  console.error("Request failed:", process.env.NODE_ENV === "production" ? error.name : error.message);
   if (res.headersSent) return next(error);
   return res.status(500).json({ error: "An unexpected server error occurred." });
 });

@@ -20,14 +20,14 @@ async function startServer() {
     await AppDataSource.initialize();
     console.log("PostgreSQL connected successfully.");
   } catch (error) {
-    console.error("Failed to initialize database connection:", error.message);
+    console.error("Failed to initialize database connection:", process.env.NODE_ENV === "production" ? error.name : error.message);
     process.exitCode = 1;
     return;
   }
 
   server = createServer(app);
   initializeSocketServer(server);
-  notificationWorker = setInterval(() => { void retryFailedNotifications().catch((error) => console.error("Notification retry worker failed:", error.message)); }, 30000);
+  notificationWorker = setInterval(() => { void retryFailedNotifications().catch((error) => console.error("Notification retry worker failed:", process.env.NODE_ENV === "production" ? error.name : error.message)); }, 30000);
   server.listen(PORT, "127.0.0.1", () => {
     console.log(`QueueLess backend running on port ${PORT}`);
   });

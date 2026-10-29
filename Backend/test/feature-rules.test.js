@@ -13,6 +13,9 @@ import { accessHash } from "../src/services/patient/access-links.js";
 import { clinicToday } from "../src/services/clinic/time.js";
 import { isHistoricalVisit } from "../src/services/clinic/patient-history.js";
 import { isValidAppointmentCapacity } from "../src/utils/queue-preferences.js";
+import { createLookupSecret, lookupSecretHash, LOOKUP_SESSION_TTL_MS } from "../src/services/patient/lookup-sessions.js";
+import { isCredentialActive, isOtpChallengeUsable } from "../src/services/patient/credential-policy.js";
+import { mobileLookupCandidates } from "../src/services/patient/mobile-lookup.js";
 
 test("return policy places a returning patient after the configured number", () => {
   const queue = [1000, 2000, 3000, 4000, 5000, 6000].map((queue_order, index) => ({ id: String(index), queue_order }));
@@ -103,8 +106,32 @@ test("webhook signatures verify raw bytes and reject tampering", () => {
 
 test("OTP and patient access values are one-way protected", () => {
   assert.notEqual(otpHash("challenge", "123456"), otpHash("challenge", "123457"));
+  assert.notEqual(otpHash("challenge-a", "123456"), otpHash("challenge-b", "123456"));
   assert.equal(accessHash("high-entropy-secret").length, 64);
   assert.notEqual(accessHash("first-secret"), accessHash("second-secret"));
+  const lookupSecret = createLookupSecret();
+  assert.ok(lookupSecret.length >= 40);
+  assert.equal(lookupSecretHash(lookupSecret).length, 64);
+  assert.notEqual(lookupSecretHash(lookupSecret), lookupSecret);
+  assert.equal(LOOKUP_SESSION_TTL_MS, 15 * 60 * 1000);
+});
+
+test("private credentials reject expiry and revocation, while OTPs reject reuse and excess attempts", () => {
+  const now = Date.parse("2026-10-29T12:00:00.000Z");
+  assert.equal(isCredentialActive({ expiresAt: new Date(now + 1000), revokedAt: null }, now), true);
+  assert.equal(isCredentialActive({ expiresAt: new Date(now - 1), revokedAt: null }, now), false);
+  assert.equal(isCredentialActive({ expiresAt: new Date(now + 1000), revokedAt: new Date(now) }, now), false);
+  assert.equal(isOtpChallengeUsable({ expiresAt: new Date(now + 1000), consumedAt: null, attemptCount: 4 }, now), true);
+  assert.equal(isOtpChallengeUsable({ expiresAt: new Date(now - 1), consumedAt: null, attemptCount: 0 }, now), false);
+  assert.equal(isOtpChallengeUsable({ expiresAt: new Date(now + 1000), consumedAt: new Date(now), attemptCount: 0 }, now), false);
+  assert.equal(isOtpChallengeUsable({ expiresAt: new Date(now + 1000), consumedAt: null, attemptCount: 5 }, now), false);
+});
+
+test("Indian mobile numbers normalize to one country-code form and match legacy local records", () => {
+  assert.equal(normalizeMobile("98765 43210"), "+919876543210");
+  assert.equal(normalizeMobile("09876543210"), "+919876543210");
+  assert.equal(normalizeMobile("+91 (98765) 43210"), "+919876543210");
+  assert.deepEqual(mobileLookupCandidates("+919876543210"), ["+919876543210", "9876543210"]);
 });
 
 test("clinic-local date follows the configured timezone rather than UTC midnight", () => {

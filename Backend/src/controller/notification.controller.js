@@ -11,7 +11,7 @@ export async function createNotificationSimulation(req, res, next) {
     const notification = await simulateNotification({ clinicId: req.auth.clinicId, actorId: req.auth.sub, outcome: req.body.outcome });
     return res.status(201).json({ notification });
   } catch (error) {
-    if (error.status) return res.status(error.status).json({ error: error.message });
+    if (error.status) return res.status(error.status).json({ error: error.message, ...(error.notification ? { notification: error.notification } : {}) });
     return next(error);
   }
 }

@@ -25,6 +25,9 @@ import { Notification } from "../entities/Notification.js";
 import { Payment } from "../entities/Payment.js";
 import { ReturnEvent } from "../entities/ReturnEvent.js";
 import { RealtimeBilling1760000004000 } from "../migrations/1760000004000-RealtimeBilling.js";
+import { PatientLookupSession } from "../entities/PatientLookupSession.js";
+import { PatientLookupSessions1760000005000 } from "../migrations/1760000005000-PatientLookupSessions.js";
+import { TruthfulSimulatorDeliveryStatus1760000006000 } from "../migrations/1760000006000-TruthfulSimulatorDeliveryStatus.js";
 
 const currentFile = fileURLToPath(import.meta.url);
 const currentDirectory = path.dirname(currentFile);
@@ -43,8 +46,8 @@ export const AppDataSource = new DataSource({
   username: process.env.POSTGRES_USER,
   password: process.env.POSTGRES_PASSWORD,
   database: process.env.POSTGRES_DB,
-  entities: [Clinic, ClinicUser, Subscription, ClinicSettings, Doctor, Patient, QueueSession, Registration, QueueEntry, AuditLog, Appointment, PatientAccessToken, OtpChallenge, Notification, Payment, ReturnEvent],
-  migrations: [InitialFoundation1760000000000, ClinicOperations1760000001000, PatientPortal1760000002000, QueueEngine1760000003000, RealtimeBilling1760000004000],
+  entities: [Clinic, ClinicUser, Subscription, ClinicSettings, Doctor, Patient, QueueSession, Registration, QueueEntry, AuditLog, Appointment, PatientAccessToken, OtpChallenge, PatientLookupSession, Notification, Payment, ReturnEvent],
+  migrations: [InitialFoundation1760000000000, ClinicOperations1760000001000, PatientPortal1760000002000, QueueEngine1760000003000, RealtimeBilling1760000004000, PatientLookupSessions1760000005000, TruthfulSimulatorDeliveryStatus1760000006000],
   synchronize: false,
   logging: false,
 });

@@ -1,6 +1,6 @@
 .brand {
   gap: 8px;
-  color: #062f71;
+  color: #30245f;
   font-size: 19px;
   letter-spacing: -0.75px;
 }
@@ -20,7 +20,7 @@
 }
 
 .brand .brand-accent {
-  color: #10ae91;
+  color: #6b57dc;
 }
 
 .portal-sidebar .brand {
@@ -32,7 +32,7 @@
 }
 
 .portal-sidebar .brand .brand-accent {
-  color: #55d9f1;
+  color: #f2a090;
 }
 
 footer .brand .brand-mark {

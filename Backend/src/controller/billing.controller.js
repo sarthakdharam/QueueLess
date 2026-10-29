@@ -76,7 +76,7 @@ export async function razorpayWebhook(req, res) {
     await recordPaymentOutcome({ where: "p.provider_reference = :orderId AND p.provider = 'razorpay'", parameters: { orderId }, requirePending: false }, captured ? "captured" : "failed");
     return res.json({ received: true });
   } catch (error) {
-    console.error("Payment webhook processing failed:", error.message);
+    console.error("Payment webhook processing failed:", process.env.NODE_ENV === "production" ? error.name : error.message);
     return res.status(500).json({ error: "Payment webhook processing failed." });
   }
 }
@@ -107,7 +107,7 @@ export async function receiveWhatsAppWebhook(req, res) {
     }
     return res.json({ received: true });
   } catch (error) {
-    console.error("WhatsApp webhook processing failed:", error.message);
+    console.error("WhatsApp webhook processing failed:", process.env.NODE_ENV === "production" ? error.name : error.message);
     return res.status(500).json({ error: "WhatsApp webhook processing failed." });
   }
 }

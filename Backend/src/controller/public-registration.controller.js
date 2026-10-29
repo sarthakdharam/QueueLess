@@ -73,7 +73,7 @@ export async function createPatientRegistration(req, res, next) {
       return { registration, queueEntry, access };
     });
     emitQueueChange({ clinicId, registrationId: created.registration.id, status: "registered", type: "registration:confirmed" });
-    void notifyRegistrationConfirmation(created.registration.id).catch((error) => console.error("Registration notification failed:", error.message));
+    void notifyRegistrationConfirmation(created.registration.id, created.access.url).catch(() => console.error("Registration notification failed."));
     return res.status(201).json({
       registration: { id: created.registration.id, reference: created.registration.reference, status: created.registration.status, visitType, tokenNumber: created.queueEntry.tokenNumber },
       clinic: { id: clinic.id, name: clinic.name, address: clinic.address, city: clinic.city, state: clinic.state, timeZone: clinic.timeZone },

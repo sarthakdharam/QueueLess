@@ -1,35 +1,35 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 96 96" fill="none">
   <defs>
     <linearGradient id="ring" x1="17" y1="8" x2="63" y2="70" gradientUnits="userSpaceOnUse">
-      <stop stop-color="#F3FFF9"/><stop offset=".44" stop-color="#BDF8E7"/><stop offset="1" stop-color="#4BD9B4"/>
+      <stop stop-color="#FFFFFF"/><stop offset=".44" stop-color="#D9D0FF"/><stop offset="1" stop-color="#8974F2"/>
     </linearGradient>
     <linearGradient id="mint" x1="25" y1="38" x2="62" y2="72" gradientUnits="userSpaceOnUse">
-      <stop stop-color="#72F1D0"/><stop offset=".55" stop-color="#28D5AE"/><stop offset="1" stop-color="#0B9C80"/>
+      <stop stop-color="#B5A8FF"/><stop offset=".55" stop-color="#8974F2"/><stop offset="1" stop-color="#5746BD"/>
     </linearGradient>
     <linearGradient id="glass" x1="65" y1="66" x2="81" y2="84" gradientUnits="userSpaceOnUse">
-      <stop stop-color="#B9FFE9"/><stop offset=".48" stop-color="#42E1BA"/><stop offset="1" stop-color="#12B890"/>
+      <stop stop-color="#FFD1C4"/><stop offset=".48" stop-color="#F29B8C"/><stop offset="1" stop-color="#D9657E"/>
     </linearGradient>
     <linearGradient id="shine" x1="20" y1="10" x2="58" y2="43" gradientUnits="userSpaceOnUse">
       <stop stop-color="#fff" stop-opacity=".72"/><stop offset="1" stop-color="#fff" stop-opacity="0"/>
     </linearGradient>
     <filter id="depth" x="3" y="3" width="91" height="92" color-interpolation-filters="sRGB" filterUnits="userSpaceOnUse">
-      <feDropShadow dx="0" dy="2.5" stdDeviation="2" flood-color="#041C17" flood-opacity=".3"/>
+      <feDropShadow dx="0" dy="2.5" stdDeviation="2" flood-color="#201843" flood-opacity=".3"/>
     </filter>
   </defs>
   <g filter="url(#depth)">
-    <circle cx="40" cy="39" r="29" fill="#10342E" stroke="url(#ring)" stroke-width="7.5"/>
+    <circle cx="40" cy="39" r="29" fill="#30245F" stroke="url(#ring)" stroke-width="7.5"/>
     <path d="M20 25a24 24 0 0 1 38-8" stroke="url(#shine)" stroke-width="2.5" stroke-linecap="round"/>
-    <circle cx="25" cy="40" r="5.2" fill="#EFFBF6"/>
-    <circle cx="55" cy="40" r="5.2" fill="#EFFBF6"/>
+    <circle cx="25" cy="40" r="5.2" fill="#F8F6FF"/>
+    <circle cx="55" cy="40" r="5.2" fill="#F8F6FF"/>
     <circle cx="40" cy="43" r="6.2" fill="url(#mint)"/>
-    <path d="M16.5 61c0-6.5 3.3-10 8.5-10s8.5 3.5 8.5 10v4h-17v-4Z" fill="#EAF8F2"/>
-    <path d="M46.5 61c0-6.5 3.3-10 8.5-10s8.5 3.5 8.5 10v4h-17v-4Z" fill="#EAF8F2"/>
+    <path d="M16.5 61c0-6.5 3.3-10 8.5-10s8.5 3.5 8.5 10v4h-17v-4Z" fill="#F4F0FF"/>
+    <path d="M46.5 61c0-6.5 3.3-10 8.5-10s8.5 3.5 8.5 10v4h-17v-4Z" fill="#F4F0FF"/>
     <path d="M31 65v-7c0-6.5 3.8-10.5 9-10.5s9 4 9 10.5v7H31Z" fill="url(#mint)"/>
     <rect x="36.8" y="13" width="6.4" height="18" rx="2" fill="url(#mint)"/>
     <rect x="31" y="18.8" width="18" height="6.4" rx="2" fill="url(#mint)"/>
-    <path d="M38.5 15.5v2.2M33.3 20.8h2.2" stroke="#E4FFF5" stroke-width="1.3" stroke-linecap="round"/>
-    <path d="m61 62 17 17" stroke="#073F37" stroke-width="13" stroke-linecap="round"/>
+    <path d="M38.5 15.5v2.2M33.3 20.8h2.2" stroke="#F8F6FF" stroke-width="1.3" stroke-linecap="round"/>
+    <path d="m61 62 17 17" stroke="#382B83" stroke-width="13" stroke-linecap="round"/>
     <path d="m61 62 17 17" stroke="url(#glass)" stroke-width="10" stroke-linecap="round"/>
-    <path d="m63.2 63.5 4.2 4.2" stroke="#E2FFF4" stroke-opacity=".82" stroke-width="1.8" stroke-linecap="round"/>
+    <path d="m63.2 63.5 4.2 4.2" stroke="#FFF2EF" stroke-opacity=".9" stroke-width="1.8" stroke-linecap="round"/>
   </g>
 </svg>
