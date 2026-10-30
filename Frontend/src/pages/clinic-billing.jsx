@@ -1,8 +1,10 @@
 import { useCallback, useEffect, useState } from 'react'
-import { Link, Navigate } from 'react-router-dom'
+import { Navigate } from 'react-router-dom'
+import { Localized } from '../i18n.jsx'
 import { api } from '../api/client.js'
-import Brand from '../components/Brand.jsx'
+import ClinicPageHeader from '../components/ClinicPageHeader.jsx'
 import ClinicLoading from '../components/ClinicLoading.jsx'
+import TablePagination, { TABLE_PAGE_SIZE } from '../components/TablePagination.jsx'
 
 function loadCheckoutScript() {
   if (window.Razorpay) return Promise.resolve()
@@ -21,6 +23,7 @@ export default function ClinicBilling() {
   const [error, setError] = useState('')
   const [message, setMessage] = useState('')
   const [busy, setBusy] = useState(false)
+  const [paymentPage, setPaymentPage] = useState(1)
 
   const load = useCallback(async () => {
     try {
@@ -88,11 +91,13 @@ export default function ClinicBilling() {
   const subscription = billing?.subscription
   const statusLabel = subscription?.accessStatus === 'expired' ? 'Expired' : subscription?.status
   const expiryDate = subscription?.status === 'active' ? subscription.renewalDate : subscription?.trialEnd
+  const paymentPageCount = Math.max(1, Math.ceil((billing?.payments.length || 0) / TABLE_PAGE_SIZE))
+  const activePaymentPage = Math.min(paymentPage, paymentPageCount)
+  const visiblePayments = billing?.payments.slice((activePaymentPage - 1) * TABLE_PAGE_SIZE, activePaymentPage * TABLE_PAGE_SIZE) || []
 
-  return <main className="clinic-welcome billing-page">
+  return <Localized><><ClinicPageHeader showBackToQueue/><main className="clinic-welcome billing-page subscription-page">
     <header className="dashboard-header">
-      <div><Brand/><div className="eyebrow">CLINIC SUBSCRIPTION</div><h1>Plans and billing</h1><p>Manage your QueueLess trial and renewal.</p></div>
-      <Link className="button button-dark" to="/clinic/queue">Back to queue</Link>
+      <div><div className="eyebrow">CLINIC SUBSCRIPTION</div><h1>Plans and billing</h1><p>Manage your QueueLess trial and renewal.</p></div>
     </header>
     {error && <p className="portal-alert" role="alert">{error}</p>}
     {message && <p className="portal-toast" role="status">{message}</p>}
@@ -111,9 +116,10 @@ export default function ClinicBilling() {
       <section className="queue-panel billing-panel">
         <h2>Payment history</h2>
         {billing.payments.length ? <div className="table-scroll"><table><thead><tr><th>DATE</th><th>AMOUNT</th><th>STATUS</th><th>PROVIDER</th></tr></thead><tbody>
-          {billing.payments.map((payment) => <tr key={payment.id}><td>{new Date(payment.createdAt).toLocaleString('en-IN')}</td><td>₹{(payment.amount / 100).toFixed(2)}</td><td>{payment.status}</td><td>{payment.provider}</td></tr>)}
+          {visiblePayments.map((payment) => <tr key={payment.id}><td>{new Date(payment.createdAt).toLocaleString('en-IN')}</td><td>₹{(payment.amount / 100).toFixed(2)}</td><td>{payment.status}</td><td>{payment.provider}</td></tr>)}
         </tbody></table></div> : <p>No payments recorded.</p>}
+        <TablePagination total={billing.payments.length} page={activePaymentPage} onPageChange={setPaymentPage} label="payments"/>
       </section>
     </> : error ? <p className="portal-alert" role="alert">{error}</p> : <ClinicLoading>Loading subscription…</ClinicLoading>}
-  </main>
+  </main></></Localized>
 }

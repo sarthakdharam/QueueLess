@@ -4,6 +4,7 @@ import { validateRequest } from "../../middleware/validate-request.js";
 import { getSetup, updateClinicProfile, updateClinicSettings } from "../../controller/clinic-settings.controller.js";
 import { INDIAN_REGIONS } from "../../utils/indian-regions.js";
 import { isValidAppointmentCapacity } from "../../utils/queue-preferences.js";
+import { DAYS } from "../../services/clinic/settings.js";
 
 const router = Router();
 
@@ -20,10 +21,12 @@ router.put("/profile", [
 ], updateClinicProfile);
 
 router.put("/settings", [
-  body("workingHours").isObject().withMessage("Working hours are required."),
-  body("workingHours.*.enabled").isBoolean(),
-  body("workingHours.*.open").matches(/^([01]\d|2[0-3]):[0-5]\d$/),
-  body("workingHours.*.close").matches(/^([01]\d|2[0-3]):[0-5]\d$/),
+  body("workingHours").isObject().withMessage("Working hours are required.").bail().custom((hours) => DAYS.every((day) => {
+    const schedule = hours[day];
+    if (!schedule || typeof schedule.enabled !== "boolean") return false;
+    if (!schedule.enabled) return true;
+    return /^([01]\d|2[0-3]):[0-5]\d$/.test(schedule.open) && /^([01]\d|2[0-3]):[0-5]\d$/.test(schedule.close) && schedule.open < schedule.close;
+  })).withMessage("Provide valid opening and closing times for every open day."),
   body("breaks").optional().isArray({ max: 6 }),
   body("breaks.*.start").optional().matches(/^([01]\d|2[0-3]):[0-5]\d$/),
   body("breaks.*.end").optional().matches(/^([01]\d|2[0-3]):[0-5]\d$/),

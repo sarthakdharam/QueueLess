@@ -1,4 +1,5 @@
 import { AppDataSource } from "../../config/data-source.js";
+import { IsNull } from "typeorm";
 import { Notification } from "../../entities/Notification.js";
 import { sendSimulatedMessage } from "./providers/simulator.js";
 import { sendWhatsAppTemplate } from "./providers/whatsapp-cloud.js";
@@ -84,8 +85,8 @@ export async function simulateNotification({ clinicId, actorId, outcome }) {
   return { ...notification, simulationMode: true, realMessageSent: false };
 }
 
-export async function listClinicNotifications(clinicId) {
-  return AppDataSource.getRepository(Notification).find({ where: { clinicId }, order: { createdAt: "DESC" }, take: 100 });
+export async function listClinicNotifications(clinicId, { unreadOnly = false } = {}) {
+  return AppDataSource.getRepository(Notification).find({ where: unreadOnly ? { clinicId, readAt: IsNull() } : { clinicId }, order: { createdAt: "DESC" }, take: 100 });
 }
 
 export async function retryFailedNotifications() {

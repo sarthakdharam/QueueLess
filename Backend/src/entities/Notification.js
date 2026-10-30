@@ -16,6 +16,7 @@ export const Notification = new EntitySchema({
     payload: { type: "jsonb", default: () => "'{}'::jsonb" },
     createdAt: { name: "created_at", type: "timestamptz", createDate: true },
     deliveredAt: { name: "delivered_at", type: "timestamptz", nullable: true },
+    readAt: { name: "read_at", type: "timestamptz", nullable: true },
   },
   indices: [{ name: "IDX_notifications_clinic_created", columns: ["clinicId", "createdAt"] }],
 });

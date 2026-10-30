@@ -29,7 +29,7 @@ export async function updateClinicProfile(req, res, next) {
 export async function updateClinicSettings(req, res, next) {
   try {
     const hours = req.body.workingHours;
-    if (DAYS.some((day) => !hours[day] || hours[day].open >= hours[day].close)) return res.status(400).json({ error: "Provide valid opening and closing times for every day." });
+    if (!hours || typeof hours !== "object" || DAYS.some((day) => !hours[day] || typeof hours[day].enabled !== "boolean" || (hours[day].enabled && (!/^([01]\d|2[0-3]):[0-5]\d$/.test(hours[day].open) || !/^([01]\d|2[0-3]):[0-5]\d$/.test(hours[day].close) || hours[day].open >= hours[day].close)))) return res.status(400).json({ error: "Provide valid opening and closing times for every open day." });
     if ((req.body.breaks || []).some((item) => !item.start || !item.end || item.start >= item.end)) return res.status(400).json({ error: "Break end time must be later than its start time." });
     const repository = AppDataSource.getRepository(ClinicSettings);
     const existing = await getSettings(AppDataSource.manager, req.auth.clinicId);

@@ -1,7 +1,6 @@
 import { AppDataSource } from "../config/data-source.js";
 import { Clinic } from "../entities/Clinic.js";
 import { QueueEntry } from "../entities/QueueEntry.js";
-import { Registration } from "../entities/Registration.js";
 import { clinicToday } from "../services/clinic/time.js";
 
 const ACTIVE_QUEUE_STATUSES = ["registered", "waiting", "called", "in_consultation", "missed"];
@@ -20,11 +19,6 @@ export async function getDashboard(req, res, next) {
       .select(["q.id AS queue_id", "q.token_number AS token_number", "q.queue_order AS queue_order", "q.status AS queue_status", "q.created_at AS registered_at", "r.id AS registration_id", "r.reference AS reference", "r.status AS status", "r.visit_type AS visit_type", "p.name AS patient_name", "p.mobile AS patient_mobile", "d.name AS doctor_name", "a.scheduled_at AS scheduled_at"])
       .orderBy("CASE WHEN a.status IN ('booked', 'checked_in') AND a.scheduled_at <= now() THEN 0 WHEN a.scheduled_at IS NULL OR a.status = 'returned' THEN 1 ELSE 2 END", "ASC")
       .addOrderBy("a.scheduled_at", "ASC", "NULLS LAST").addOrderBy("q.queue_order", "ASC").getRawMany();
-    const all = await AppDataSource.getRepository(Registration).createQueryBuilder("r")
-      .where("r.clinic_id = :clinicId", { clinicId: req.auth.clinicId })
-      .andWhere("(r.created_at AT TIME ZONE :timeZone)::date = :day", { timeZone: clinic.timeZone, day })
-      .select("r.status", "status").addSelect("COUNT(*)", "count").groupBy("r.status").getRawMany();
-    const totals = Object.fromEntries(all.map((row) => [row.status, Number(row.count)]));
     const visibleQueue = queue.filter((entry) => ACTIVE_QUEUE_STATUSES.includes(entry.queue_status));
     let position = 0;
     const positionedQueue = visibleQueue.map((entry) => {
@@ -32,8 +26,8 @@ export async function getDashboard(req, res, next) {
       return { ...entry, position: entry.queue_status === "waiting" ? position : null };
     });
     const waiting = queue.filter((entry) => entry.queue_status === "waiting").length;
-    const registrationCount = Object.values(totals).reduce((total, count) => total + count, 0);
-    return res.json({ date: day, summary: { registrations: registrationCount, waiting, consulting: totals.in_consultation || 0, completed: totals.completed || 0, missed: totals.missed || 0, cancelled: totals.cancelled || 0 }, queue: positionedQueue });
+    const countByQueueStatus = (status) => queue.filter((entry) => entry.queue_status === status).length;
+    return res.json({ date: day, summary: { registrations: queue.length, waiting, consulting: countByQueueStatus("in_consultation"), completed: countByQueueStatus("completed"), missed: countByQueueStatus("missed"), cancelled: countByQueueStatus("cancelled") }, queue: positionedQueue });
   } catch (error) { return next(error); }
 
 }

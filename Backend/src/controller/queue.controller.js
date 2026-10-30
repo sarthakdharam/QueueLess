@@ -25,7 +25,7 @@ export async function callNextPatient(req, res, next) {
         .innerJoin("registrations", "r", "r.id = q.registration_id")
         .innerJoin("queue_sessions", "s", "s.id = q.session_id")
         .leftJoin("appointments", "a", "a.registration_id = r.id")
-        .where("r.clinic_id = :clinicId AND s.session_date = :day AND q.status = 'waiting' AND (a.scheduled_at IS NULL OR a.scheduled_at <= now())", { clinicId, day })
+        .where("r.clinic_id = :clinicId AND s.session_date = :day AND q.status = 'waiting'", { clinicId, day })
       .select(["q.id AS id", "q.registration_id AS registration_id", "q.session_id AS session_id", "q.token_number AS token_number"])
         .orderBy("CASE WHEN a.status IN ('booked', 'checked_in') AND a.scheduled_at <= now() THEN 0 WHEN a.scheduled_at IS NULL OR a.status = 'returned' THEN 1 ELSE 2 END", "ASC")
         .addOrderBy("a.scheduled_at", "ASC", "NULLS LAST").addOrderBy("q.queue_order", "ASC").limit(1).setLock("pessimistic_write", undefined, ["q"]);
