@@ -1,5 +1,6 @@
 import { findPublicClinicDetails } from "../../repositories/clinic.repository.js";
 import { countOpenAppointmentsByTime } from "../../repositories/appointment.repository.js";
+import { activeEmergencyForSlot } from "../clinic/doctor-emergencies.js";
 
 const DAY_NAMES = ["sunday", "monday", "tuesday", "wednesday", "thursday", "friday", "saturday"];
 export const OPEN_STATUSES = ["booked", "confirmed", "checked_in"];
@@ -39,7 +40,10 @@ export function zonedTimeToUtc(date, time, timeZone) {
 
 export function clinicHoursForDate(clinic, settings, doctor, date) {
   const day = weekdayForDate(date);
-  return doctor?.availability?.workingHours?.[day] || settings.workingHours?.[day] || null;
+  // The clinic setup screen manages the published booking hours. Doctors are
+  // created with a snapshot of those hours, so prefer the current settings to
+  // avoid offering stale availability after the clinic updates its schedule.
+  return settings.workingHours?.[day] || doctor?.availability?.workingHours?.[day] || null;
 }
 
 export function isSlotOpen(time, duration, hours, breaks) {
@@ -82,11 +86,12 @@ export async function availableSlots({ clinic, settings, doctor, date }) {
     if (!isSlotOpen(hhmm, duration, dayHours, settings.breaks)) continue;
     const startsAt = zonedTimeToUtc(date, hhmm, clinic.timeZone || "Asia/Kolkata");
     if (date === clinicToday && startsAt.getTime() <= now) continue;
+    const endsAt = new Date(startsAt.getTime() + duration * 60000);
+    if (await activeEmergencyForSlot({ doctorId: doctor.id, startsAt, endsAt })) continue;
     const bookedCount = counts.get(startsAt.toISOString()) || 0;
     if (bookedCount >= settings.appointmentCapacity) continue;
     slots.push({ time: hhmm, startsAt: startsAt.toISOString(), remaining: settings.appointmentCapacity - bookedCount });
   }
   return slots;
 }
-
 

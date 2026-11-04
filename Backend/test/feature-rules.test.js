@@ -16,6 +16,7 @@ import { isValidAppointmentCapacity } from "../src/utils/queue-preferences.js";
 import { createLookupSecret, lookupSecretHash, LOOKUP_SESSION_TTL_MS } from "../src/services/patient/lookup-sessions.js";
 import { isCredentialActive, isOtpChallengeUsable } from "../src/services/patient/credential-policy.js";
 import { mobileLookupCandidates } from "../src/services/patient/mobile-lookup.js";
+import { emergencyAffectsSlot } from "../src/services/clinic/doctor-emergencies.js";
 
 test("return policy places a returning patient after the configured number", () => {
   const queue = [1000, 2000, 3000, 4000, 5000, 6000].map((queue_order, index) => ({ id: String(index), queue_order }));
@@ -50,6 +51,14 @@ test("zoned appointments and breaks are calculated consistently", () => {
   assert.equal(zonedTimeToUtc("2026-10-28", "09:00", "Asia/Kolkata").toISOString(), "2026-10-28T03:30:00.000Z");
   assert.equal(isSlotOpen("10:00", 30, { close: "12:00" }, [{ start: "10:15", end: "10:45" }]), false);
   assert.equal(isSlotOpen("11:00", 30, { close: "12:00" }, []), true);
+});
+
+test("emergency availability overlaps only the affected booking window", () => {
+  const temporary = { status: "active", startsAt: "2026-11-04T05:30:00.000Z", endsAt: "2026-11-04T06:30:00.000Z" };
+  assert.equal(emergencyAffectsSlot(temporary, "2026-11-04T05:45:00.000Z", "2026-11-04T06:00:00.000Z"), true);
+  assert.equal(emergencyAffectsSlot(temporary, "2026-11-04T06:30:00.000Z", "2026-11-04T06:45:00.000Z"), false);
+  assert.equal(emergencyAffectsSlot({ ...temporary, endsAt: null }, "2026-11-05T05:30:00.000Z", "2026-11-05T05:45:00.000Z"), true);
+  assert.equal(emergencyAffectsSlot({ ...temporary, status: "resumed" }, "2026-11-04T05:45:00.000Z", "2026-11-04T06:00:00.000Z"), false);
 });
 
 test("mobile normalization removes presentation characters only", () => {

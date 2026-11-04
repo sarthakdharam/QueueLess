@@ -42,7 +42,7 @@ export default function DropdownSelect({ value = '', options = [], onChange, lab
         if (event.key === 'Enter' && filtered[active]) { event.preventDefault(); choose(filtered[active]) }
         if (event.key === 'Escape') setOpen(false)
       }}/>} 
-      <ul className="state-options dropdown-options" role="listbox" aria-label={t(label)}>{filtered.length ? filtered.map((option, index) => <li key={String(option.value)} role="option" aria-selected={String(value) === String(option.value)} aria-disabled={option.disabled || undefined} className={`${index === active ? 'active' : ''} ${option.disabled ? 'option-disabled' : ''}`} onMouseDown={(event) => event.preventDefault()} onMouseEnter={() => setActive(index)} onClick={() => choose(option)}>{option.label}</li>) : <li className="state-no-results" role="status">{t(`No ${label.toLowerCase()} found for “`)}{query}”.</li>}</ul>
+      <ul className="state-options dropdown-options" role="listbox" aria-label={t(label)}>{filtered.length ? filtered.map((option, index) => <li key={String(option.value)} role="option" aria-selected={String(value) === String(option.value)} aria-disabled={option.disabled || undefined} className={`${index === active ? 'active' : ''} ${option.disabled ? 'option-disabled' : ''}`} onMouseDown={(event) => { event.preventDefault(); choose(option) }} onMouseEnter={() => setActive(index)}>{option.label}</li>) : <li className="state-no-results" role="status">{t(`No ${label.toLowerCase()} found for “`)}{query}”.</li>}</ul>
     </div>}
   </div>
 }

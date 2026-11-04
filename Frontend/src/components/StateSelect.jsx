@@ -59,7 +59,7 @@ export default function StateSelect({ value, onChange, id = 'clinic-state', inva
       if (event.key === 'Escape') setOpen(false)
       if (event.key === 'Tab') setOpen(false)
     }} />
-    {open && <ul className="state-options" id={`${id}-options`} role="listbox" aria-label={t('Indian states and union territories')}>{matches.length ? matches.map((region) => <li id={`${id}-option-${INDIAN_REGIONS.indexOf(region)}`} role="option" aria-selected={value === region} key={region} className={matches[active] === region ? 'active' : ''} onMouseDown={(event) => event.preventDefault()} onMouseEnter={() => setActive(matches.indexOf(region))} onClick={() => choose(region)}>{region}</li>) : <li className="state-no-results" role="status">{t('No state or Union Territory matches “')}{displayedQuery.trim()}”.</li>}</ul>}
+    {open && <ul className="state-options" id={`${id}-options`} role="listbox" aria-label={t('Indian states and union territories')}>{matches.length ? matches.map((region) => <li id={`${id}-option-${INDIAN_REGIONS.indexOf(region)}`} role="option" aria-selected={value === region} key={region} className={matches[active] === region ? 'active' : ''} onMouseDown={(event) => { event.preventDefault(); choose(region) }} onMouseEnter={() => setActive(matches.indexOf(region))}>{region}</li>) : <li className="state-no-results" role="status">{t('No state or Union Territory matches “')}{displayedQuery.trim()}”.</li>}</ul>}
     <span className="sr-only" aria-live="polite">{value ? `${t('Selected')} ${value}` : ''}</span>
   </div>
 }

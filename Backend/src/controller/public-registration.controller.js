@@ -12,6 +12,7 @@ import { emitQueueChange } from "../sockets/socket-server.js";
 import { notifyRegistrationConfirmation } from "../services/notifications/dispatch.js";
 import { Subscription } from "../entities/Subscription.js";
 import { hasSubscriptionAccess } from "../services/subscriptions/access-policy.js";
+import { activeEmergencyForSlot } from "../services/clinic/doctor-emergencies.js";
 
 export async function createPatientRegistration(req, res, next) {
   const { clinicId, visitType } = req.body;
@@ -44,6 +45,7 @@ export async function createPatientRegistration(req, res, next) {
         const refreshed = await manager.getRepository(Appointment).createQueryBuilder("a").where("a.clinic_id = :clinicId AND a.doctor_id = :doctorId AND a.scheduled_at = :scheduledAt AND a.status IN (:...statuses)", { clinicId, doctorId: doctor.id, scheduledAt, statuses: OPEN_STATUSES }).getCount();
         if (refreshed >= settings.appointmentCapacity) throw Object.assign(new Error("That appointment slot has just filled. Choose another time."), { status: 409 });
         if (scheduledAt <= new Date() || dateInZone(scheduledAt, clinic.timeZone || "Asia/Kolkata") !== date) throw Object.assign(new Error("That appointment time is invalid. Choose another slot."), { status: 400 });
+        if (await activeEmergencyForSlot({ doctorId: doctor.id, startsAt: scheduledAt, endsAt: new Date(scheduledAt.getTime() + settings.slotDurationMinutes * 60000) })) throw Object.assign(new Error("This doctor is unavailable at that time. Choose another slot."), { status: 409 });
         const dayHours = clinicHoursForDate(clinic, settings, doctor, date);
         const [slotHour, slotMinute] = req.body.slotTime.split(":").map(Number);
         const slotStart = slotHour * 60 + slotMinute;

@@ -118,6 +118,103 @@ const clinicUiWords = {
   },
 }
 
+
+const landingWords = {
+  hi: {
+    'ONE SIMPLE VIEW, ALL DAY': 'एक सरल दृश्य, पूरे दिन',
+    'Everything you need for a calmer clinic visit.': 'शांत क्लिनिक यात्रा के लिए आपको जो चाहिए।',
+    'QueueLess keeps patients informed and gives clinic teams one clear place to manage the day.': 'QueueLess मरीज़ों को जानकारी देता है और क्लिनिक टीम को दिन संभालने के लिए एक स्पष्ट जगह देता है।',
+    'Live queue updates': 'लाइव कतार अपडेट',
+    'Patients can check their place in line without calling the reception desk.': 'मरीज़ रिसेप्शन पर कॉल किए बिना कतार में अपनी जगह देख सकते हैं।',
+    'Appointments and walk-ins': 'अपॉइंटमेंट और वॉक-इन',
+    'Bring scheduled visits and same-day registrations together in one working queue.': 'तय मुलाक़ातों और उसी दिन के पंजीकरण को एक कतार में रखें।',
+    'Clear next steps': 'अगले स्पष्ट कदम',
+    'Give every patient a private link, a token, and simple guidance for their visit.': 'हर मरीज़ को निजी लिंक, टोकन और मुलाक़ात के लिए सरल निर्देश दें।',
+    'FOR PATIENTS': 'मरीज़ों के लिए',
+    'Spend less time waiting at the clinic.': 'क्लिनिक में कम समय प्रतीक्षा करें।',
+    'Book a visit, save your private appointment link, and return when your place in the queue is getting close.': 'मुलाक़ात बुक करें, अपना निजी लिंक सहेजें और बारी पास आने पर वापस आएँ।',
+    'FOR CLINICS': 'क्लिनिकों के लिए',
+    'Give your reception team a clearer day.': 'अपनी रिसेप्शन टीम को बेहतर दिन दें।',
+    'Register walk-ins, call the next patient, track consultations, and keep your queue moving from one dashboard.': 'वॉक-इन पंजीकृत करें, अगले मरीज़ को बुलाएँ और एक डैशबोर्ड से कतार संभालें।',
+  },
+  bn: {
+    'ONE SIMPLE VIEW, ALL DAY': 'একটি সহজ দৃশ্য, সারাদিন',
+    'Everything you need for a calmer clinic visit.': 'শান্ত ক্লিনিক ভিজিটের জন্য যা দরকার।',
+    'QueueLess keeps patients informed and gives clinic teams one clear place to manage the day.': 'QueueLess রোগীদের তথ্য জানায় এবং ক্লিনিক টিমকে দিন পরিচালনার জন্য একটি স্পষ্ট জায়গা দেয়।',
+    'Live queue updates': 'সারির সরাসরি আপডেট',
+    'Patients can check their place in line without calling the reception desk.': 'রোগীরা রিসেপশনে ফোন না করেই সারিতে তাদের স্থান দেখতে পারেন।',
+    'Appointments and walk-ins': 'অ্যাপয়েন্টমেন্ট ও ওয়াক-ইন',
+    'Bring scheduled visits and same-day registrations together in one working queue.': 'নির্ধারিত ভিজিট এবং একই দিনের নিবন্ধন এক সারিতে রাখুন।',
+    'Clear next steps': 'পরের ধাপ পরিষ্কার',
+    'Give every patient a private link, a token, and simple guidance for their visit.': 'প্রতিটি রোগীকে ব্যক্তিগত লিঙ্ক, টোকেন ও সহজ নির্দেশনা দিন।',
+    'FOR PATIENTS': 'রোগীদের জন্য', 'Spend less time waiting at the clinic.': 'ক্লিনিকে কম সময় অপেক্ষা করুন।',
+    'Book a visit, save your private appointment link, and return when your place in the queue is getting close.': 'ভিজিট বুক করুন, ব্যক্তিগত লিঙ্ক সংরক্ষণ করুন এবং আপনার পালা কাছে এলে ফিরে আসুন।',
+    'FOR CLINICS': 'ক্লিনিকের জন্য', 'Give your reception team a clearer day.': 'রিসেপশন টিমকে আরও পরিষ্কার দিন দিন।',
+    'Register walk-ins, call the next patient, track consultations, and keep your queue moving from one dashboard.': 'ওয়াক-ইন নিবন্ধন করুন, পরের রোগীকে ডাকুন এবং এক ড্যাশবোর্ড থেকে সারি চালান।',
+  },
+  ta: {
+    'ONE SIMPLE VIEW, ALL DAY': 'ஒரே எளிய காட்சி, நாள் முழுவதும்',
+    'Everything you need for a calmer clinic visit.': 'அமைதியான கிளினிக் வருகைக்கு தேவையான அனைத்தும்.',
+    'QueueLess keeps patients informed and gives clinic teams one clear place to manage the day.': 'QueueLess நோயாளிகளுக்கு தகவல் அளித்து, கிளினிக் குழுவுக்கு நாளை நிர்வகிக்க ஒரே தெளிவான இடம் தருகிறது.',
+    'Live queue updates': 'நேரடி வரிசை புதுப்பிப்புகள்',
+    'Patients can check their place in line without calling the reception desk.': 'நோயாளிகள் ரிசெப்ஷனுக்கு அழைக்காமல் வரிசையில் தங்கள் இடத்தைப் பார்க்கலாம்.',
+    'Appointments and walk-ins': 'முன்பதிவுகள் மற்றும் நேரடி வருகைகள்',
+    'Bring scheduled visits and same-day registrations together in one working queue.': 'திட்டமிட்ட வருகைகளையும் அதே நாள் பதிவுகளையும் ஒரே வரிசையில் வைக்கவும்.',
+    'Clear next steps': 'தெளிவான அடுத்த படிகள்',
+    'Give every patient a private link, a token, and simple guidance for their visit.': 'ஒவ்வொரு நோயாளிக்கும் தனிப்பட்ட இணைப்பு, டோக்கன் மற்றும் எளிய வழிகாட்டுதல் வழங்கவும்.',
+    'FOR PATIENTS': 'நோயாளிகளுக்காக', 'Spend less time waiting at the clinic.': 'கிளினிக்கில் குறைவாக காத்திருங்கள்.',
+    'Book a visit, save your private appointment link, and return when your place in the queue is getting close.': 'வருகையைப் பதிவு செய்து, தனிப்பட்ட இணைப்பை சேமித்து, உங்கள் முறை நெருங்கும்போது திரும்பவும்.',
+    'FOR CLINICS': 'கிளினிக்குகளுக்காக', 'Give your reception team a clearer day.': 'ரிசெப்ஷன் குழுவுக்கு தெளிவான நாளை அளியுங்கள்.',
+    'Register walk-ins, call the next patient, track consultations, and keep your queue moving from one dashboard.': 'நேரடி வருகைகளைப் பதிவு செய்து, அடுத்த நோயாளியை அழைத்து, ஒரே டாஷ்போர்டில் வரிசையை நிர்வகிக்கவும்.',
+  },
+  te: {
+    'ONE SIMPLE VIEW, ALL DAY': 'రోజంతా ఒక సులభమైన దృశ్యం',
+    'Everything you need for a calmer clinic visit.': 'ప్రశాంతమైన క్లినిక్ సందర్శనకు కావాల్సిన ప్రతిదీ.',
+    'QueueLess keeps patients informed and gives clinic teams one clear place to manage the day.': 'QueueLess రోగులకు సమాచారం అందించి, క్లినిక్ బృందానికి రోజును నిర్వహించడానికి ఒక స్పష్టమైన స్థలాన్ని ఇస్తుంది.',
+    'Live queue updates': 'ప్రత్యక్ష క్యూ నవీకరణలు',
+    'Patients can check their place in line without calling the reception desk.': 'రోగులు రిసెప్షన్‌కు ఫోన్ చేయకుండా క్యూలో తమ స్థానాన్ని చూడవచ్చు.',
+    'Appointments and walk-ins': 'అపాయింట్‌మెంట్లు మరియు వాక్-ఇన్‌లు',
+    'Bring scheduled visits and same-day registrations together in one working queue.': 'షెడ్యూల్ చేసిన సందర్శనలు, అదే రోజు నమోదులను ఒకే క్యూలో ఉంచండి.',
+    'Clear next steps': 'స్పష్టమైన తదుపరి దశలు',
+    'Give every patient a private link, a token, and simple guidance for their visit.': 'ప్రతి రోగికి ప్రైవేట్ లింక్, టోకెన్, సులభమైన మార్గదర్శకత్వం ఇవ్వండి.',
+    'FOR PATIENTS': 'రోగుల కోసం', 'Spend less time waiting at the clinic.': 'క్లినిక్‌లో తక్కువ సమయం వేచి ఉండండి.',
+    'Book a visit, save your private appointment link, and return when your place in the queue is getting close.': 'సందర్శన బుక్ చేసి, ప్రైవేట్ లింక్‌ను సేవ్ చేసి, మీ వంతు దగ్గరైనప్పుడు తిరిగి రండి.',
+    'FOR CLINICS': 'క్లినిక్‌ల కోసం', 'Give your reception team a clearer day.': 'రిసెప్షన్ బృందానికి స్పష్టమైన రోజును ఇవ్వండి.',
+    'Register walk-ins, call the next patient, track consultations, and keep your queue moving from one dashboard.': 'వాక్-ఇన్‌లను నమోదు చేసి, తదుపరి రోగిని పిలిచి, ఒక డ్యాష్‌బోర్డ్ నుండి క్యూను నిర్వహించండి.',
+  },
+  mr: {
+    'ONE SIMPLE VIEW, ALL DAY': 'सोपे दृश्य, दिवसभर',
+    'Everything you need for a calmer clinic visit.': 'सोप्या क्लिनिक भेटीसाठी आवश्यक सर्वकाही.',
+    'QueueLess keeps patients informed and gives clinic teams one clear place to manage the day.': 'QueueLess रुग्णांना माहिती देतो आणि क्लिनिक टीमला दिवस हाताळण्यासाठी एक स्पष्ट जागा देतो.',
+    'Live queue updates': 'थेट रांग अद्यतने',
+    'Patients can check their place in line without calling the reception desk.': 'रुग्ण रिसेप्शनला फोन न करता रांगेतील आपली जागा पाहू शकतात.',
+    'Appointments and walk-ins': 'अपॉइंटमेंट आणि थेट भेटी',
+    'Bring scheduled visits and same-day registrations together in one working queue.': 'नियोजित भेटी आणि त्याच दिवसाच्या नोंदी एका रांगेत ठेवा.',
+    'Clear next steps': 'पुढील स्पष्ट पावले',
+    'Give every patient a private link, a token, and simple guidance for their visit.': 'प्रत्येक रुग्णाला खासगी लिंक, टोकन आणि सोपे मार्गदर्शन द्या.',
+    'FOR PATIENTS': 'रुग्णांसाठी', 'Spend less time waiting at the clinic.': 'क्लिनिकमध्ये कमी वेळ थांबा.',
+    'Book a visit, save your private appointment link, and return when your place in the queue is getting close.': 'भेट बुक करा, खासगी लिंक जतन करा आणि तुमची पाळी जवळ आल्यावर परत या.',
+    'FOR CLINICS': 'क्लिनिकसाठी', 'Give your reception team a clearer day.': 'रिसेप्शन टीमला अधिक स्पष्ट दिवस द्या.',
+    'Register walk-ins, call the next patient, track consultations, and keep your queue moving from one dashboard.': 'थेट भेटी नोंदवा, पुढील रुग्णाला बोलवा आणि एका डॅशबोर्डवरून रांग चालवा.',
+  },
+}
+
+const landingCoreWords = {'hi': {'A BETTER VISIT, STEP BY STEP': 'बेहतर मुलाक़ात, हर कदम पर', 'Good care starts': 'अच्छी देखभाल शुरू होती है', 'before the consult.': 'मुलाक़ात से पहले।', 'Know where you stand': 'अपनी स्थिति जानें', 'Patients get a token and a live view of their place in line.': 'मरीज़ को टोकन और कतार में अपनी जगह की ताज़ा जानकारी मिलती है।', 'Wait on your terms': 'अपनी सुविधा से इंतज़ार करें', 'Come back when your turn is getting close, with clear guidance.': 'बारी पास आने पर साफ़ सूचना के साथ वापस आएँ।', 'Keep the day flowing': 'दिन को सुचारू रखें', 'Your team manages walk-ins and appointments from one simple queue.': 'आपकी टीम वॉक-इन और अपॉइंटमेंट एक ही कतार से संभाले।', 'YOUR CLINIC, IN BETTER FLOW': 'आपका क्लिनिक, बेहतर व्यवस्था में', 'Make room for': 'जगह बनाएँ', 'what matters.': 'ज़रूरी बातों के लिए।', 'Set up your clinic and start a one-month free trial. No payment details needed to begin.': 'क्लिनिक सेट करें और एक महीने का मुफ़्त ट्रायल शुरू करें। शुरुआत में भुगतान की जानकारी ज़रूरी नहीं।', 'Create your clinic': 'अपना क्लिनिक बनाएँ', 'Contact': 'संपर्क', 'Privacy': 'गोपनीयता', 'Terms': 'नियम'}, 'bn': {'A BETTER VISIT, STEP BY STEP': 'আরও ভালো ভিজিট, ধাপে ধাপে', 'Good care starts': 'ভালো যত্ন শুরু হয়', 'before the consult.': 'পরামর্শের আগে।', 'Know where you stand': 'নিজের অবস্থান জানুন', 'Patients get a token and a live view of their place in line.': 'রোগীরা টোকেন ও সারিতে নিজেদের অবস্থানের সরাসরি তথ্য পান।', 'Wait on your terms': 'নিজের সুবিধামতো অপেক্ষা করুন', 'Come back when your turn is getting close, with clear guidance.': 'আপনার পালা কাছে এলে স্পষ্ট নির্দেশনা নিয়ে ফিরে আসুন।', 'Keep the day flowing': 'দিনটি সচল রাখুন', 'Your team manages walk-ins and appointments from one simple queue.': 'আপনার টিম এক সারি থেকে ওয়াক-ইন ও অ্যাপয়েন্টমেন্ট পরিচালনা করে।', 'YOUR CLINIC, IN BETTER FLOW': 'আপনার ক্লিনিক, আরও ভালো প্রবাহে', 'Make room for': 'জায়গা রাখুন', 'what matters.': 'যা গুরুত্বপূর্ণ তার জন্য।', 'Set up your clinic and start a one-month free trial. No payment details needed to begin.': 'আপনার ক্লিনিক সেট আপ করুন এবং এক মাসের বিনামূল্যে ট্রায়াল শুরু করুন।', 'Create your clinic': 'আপনার ক্লিনিক তৈরি করুন', 'Contact': 'যোগাযোগ', 'Privacy': 'গোপনীয়তা', 'Terms': 'শর্তাবলি'}, 'ta': {'A BETTER VISIT, STEP BY STEP': 'சிறந்த வருகை, படிப்படியாக', 'Good care starts': 'நல்ல பராமரிப்பு தொடங்குவது', 'before the consult.': 'ஆலோசனைக்கு முன்.', 'Know where you stand': 'உங்கள் நிலையை அறியுங்கள்', 'Patients get a token and a live view of their place in line.': 'நோயாளிகள் டோக்கனையும் வரிசையில் தங்கள் இடத்தையும் நேரடியாகப் பார்க்கலாம்.', 'Wait on your terms': 'உங்கள் விருப்பப்படி காத்திருங்கள்', 'Come back when your turn is getting close, with clear guidance.': 'உங்கள் முறை நெருங்கும்போது தெளிவான வழிகாட்டுதலுடன் திரும்பவும்.', 'Keep the day flowing': 'நாளை சீராக நடத்துங்கள்', 'Your team manages walk-ins and appointments from one simple queue.': 'உங்கள் குழு ஒரே வரிசையில் நேரடி வருகைகளையும் முன்பதிவுகளையும் நிர்வகிக்கிறது.', 'YOUR CLINIC, IN BETTER FLOW': 'உங்கள் கிளினிக், சிறந்த ஓட்டத்தில்', 'Make room for': 'இடம் ஒதுக்குங்கள்', 'what matters.': 'முக்கியமானவற்றுக்கு.', 'Set up your clinic and start a one-month free trial. No payment details needed to begin.': 'உங்கள் கிளினிக்கை அமைத்து ஒரு மாத இலவச சோதனையைத் தொடங்குங்கள்.', 'Create your clinic': 'உங்கள் கிளினிக்கை உருவாக்குங்கள்', 'Contact': 'தொடர்பு', 'Privacy': 'தனியுரிமை', 'Terms': 'விதிமுறைகள்'}, 'te': {'A BETTER VISIT, STEP BY STEP': 'మెరుగైన సందర్శన, దశలవారీగా', 'Good care starts': 'మంచి సంరక్షణ ప్రారంభమవుతుంది', 'before the consult.': 'సంప్రదింపుకు ముందు.', 'Know where you stand': 'మీ స్థానం తెలుసుకోండి', 'Patients get a token and a live view of their place in line.': 'రోగులు టోకెన్, క్యూలో తమ స్థానాన్ని ప్రత్యక్షంగా చూడగలరు.', 'Wait on your terms': 'మీ సౌకర్యానికి వేచి ఉండండి', 'Come back when your turn is getting close, with clear guidance.': 'మీ వంతు దగ్గరైనప్పుడు స్పష్టమైన మార్గదర్శకంతో తిరిగి రండి.', 'Keep the day flowing': 'రోజును సజావుగా నడపండి', 'Your team manages walk-ins and appointments from one simple queue.': 'మీ బృందం ఒకే క్యూ నుండి వాక్-ఇన్\u200cలు, అపాయింట్\u200cమెంట్లను నిర్వహిస్తుంది.', 'YOUR CLINIC, IN BETTER FLOW': 'మీ క్లినిక్, మెరుగైన ప్రవాహంలో', 'Make room for': 'స్థలం ఇవ్వండి', 'what matters.': 'ముఖ్యమైన వాటికి.', 'Set up your clinic and start a one-month free trial. No payment details needed to begin.': 'మీ క్లినిక్\u200cను ఏర్పాటు చేసి ఒక నెల ఉచిత ట్రయల్ ప్రారంభించండి.', 'Create your clinic': 'మీ క్లినిక్\u200cను సృష్టించండి', 'Contact': 'సంప్రదించండి', 'Privacy': 'గోప్యత', 'Terms': 'నిబంధనలు'}, 'mr': {'A BETTER VISIT, STEP BY STEP': 'उत्तम भेट, टप्प्याटप्प्याने', 'Good care starts': 'चांगली काळजी सुरू होते', 'before the consult.': 'तपासणीपूर्वी.', 'Know where you stand': 'तुमची जागा जाणून घ्या', 'Patients get a token and a live view of their place in line.': 'रुग्णांना टोकन आणि रांगेतील त्यांच्या जागेची थेट माहिती मिळते.', 'Wait on your terms': 'तुमच्या सोयीनुसार थांबा', 'Come back when your turn is getting close, with clear guidance.': 'तुमची पाळी जवळ आल्यावर स्पष्ट मार्गदर्शनासह परत या.', 'Keep the day flowing': 'दिवस सुरळीत चालू ठेवा', 'Your team manages walk-ins and appointments from one simple queue.': 'तुमची टीम एका रांगेतून थेट भेटी आणि अपॉइंटमेंट हाताळते.', 'YOUR CLINIC, IN BETTER FLOW': 'तुमचे क्लिनिक, अधिक सुरळीत', 'Make room for': 'जागा ठेवा', 'what matters.': 'महत्त्वाच्या गोष्टींसाठी.', 'Set up your clinic and start a one-month free trial. No payment details needed to begin.': 'तुमचे क्लिनिक सेट करा आणि एक महिन्याची मोफत चाचणी सुरू करा. सुरुवातीला पेमेंट तपशीलाची गरज नाही.', 'Create your clinic': 'तुमचे क्लिनिक तयार करा', 'Contact': 'संपर्क', 'Privacy': 'गोपनीयता', 'Terms': 'अटी'}}
+
+
+Object.assign(landingCoreWords.bn, {
+  'BUILT FOR THE PEOPLE WHO KEEP CLINICS MOVING': 'যারা ক্লিনিককে সচল রাখেন তাদের জন্য', 'Independent clinics': 'স্বতন্ত্র ক্লিনিক', 'Reception teams': 'রিসেপশন টিম', 'Patients on the go': 'চলতি পথে রোগীরা',
+})
+Object.assign(landingCoreWords.ta, {
+  'BUILT FOR THE PEOPLE WHO KEEP CLINICS MOVING': 'கிளினிக்குகளை இயக்குபவர்களுக்காக', 'Independent clinics': 'சுயாதீன கிளினிக்குகள்', 'Reception teams': 'ரிசெப்ஷன் குழுக்கள்', 'Patients on the go': 'பயணத்தில் உள்ள நோயாளிகள்',
+})
+Object.assign(landingCoreWords.te, {
+  'BUILT FOR THE PEOPLE WHO KEEP CLINICS MOVING': 'క్లినిక్‌లను సజావుగా నడిపేవారి కోసం', 'Independent clinics': 'స్వతంత్ర క్లినిక్‌లు', 'Reception teams': 'రిసెప్షన్ బృందాలు', 'Patients on the go': 'ప్రయాణంలో ఉన్న రోగులు',
+})
+Object.assign(landingCoreWords.mr, {
+  'BUILT FOR THE PEOPLE WHO KEEP CLINICS MOVING': 'क्लिनिक सुरळीत चालवणाऱ्यांसाठी', 'Independent clinics': 'स्वतंत्र क्लिनिक', 'Reception teams': 'रिसेप्शन टीम', 'Patients on the go': 'प्रवासातील रुग्ण',
+})
+
 const languageContext = createContext(null)
 
 export function LanguageProvider({ children }) {
@@ -139,7 +236,7 @@ export function LanguageProvider({ children }) {
 function translated(value, language) {
   if (typeof value !== 'string' || language === 'en') return value
   const trimmed = value.trim().replace(/\s+/g, ' ')
-  const replacement = words[language]?.[trimmed] || clinicWords[language]?.[trimmed] || statusWords[language]?.[trimmed] || screenWords[language]?.[trimmed] || clinicUiWords[language]?.[trimmed]
+  const replacement = words[language]?.[trimmed] || clinicWords[language]?.[trimmed] || statusWords[language]?.[trimmed] || screenWords[language]?.[trimmed] || clinicUiWords[language]?.[trimmed] || landingWords[language]?.[trimmed] || landingCoreWords[language]?.[trimmed]
   if (!replacement) return value
   const start = value.match(/^\s*/)?.[0] || ''
   const end = value.match(/\s*$/)?.[0] || ''

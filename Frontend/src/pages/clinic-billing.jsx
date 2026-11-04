@@ -48,7 +48,7 @@ export default function ClinicBilling() {
     setError('')
     setMessage('')
     try {
-      const { data: order } = await api.post('/clinic/billing/checkout')
+      const { data: order } = await api.post('/clinic/billing/checkout', {}, { successToast: false })
       if (order.provider === 'simulator') {
         setPendingPayment(order)
         setMessage('Development mode: choose a simulated result below. No payment was made.')
@@ -77,7 +77,7 @@ export default function ClinicBilling() {
     setBusy(true)
     setError('')
     try {
-      const { data } = await api.post('/clinic/billing/simulate', { paymentId: pendingPayment.paymentId, outcome })
+      const { data } = await api.post('/clinic/billing/simulate', { paymentId: pendingPayment.paymentId, outcome }, { successToast: false })
       setMessage(data.message)
       setPendingPayment(null)
       await load()

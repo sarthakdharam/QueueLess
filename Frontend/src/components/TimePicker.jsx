@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useEffect, useId, useRef, useState } from 'react'
 import DropdownSelect from './DropdownSelect.jsx'
 import { useTranslate } from '../i18n.jsx'
 
@@ -18,22 +18,41 @@ const formatTime = (value) => {
   return `${parts.hour}:${parts.minute} ${parts.period}`
 }
 
+const TIME_PICKER_OPEN_EVENT = 'queueless:time-picker-open'
+
 export default function TimePicker({ value, onChange, label, invalid = false, disabled = false }) {
   const t = useTranslate()
+  const pickerId = useId()
+  const root = useRef(null)
   const [open, setOpen] = useState(false)
   const [draft, setDraft] = useState(() => toParts(value))
 
   const showPicker = () => {
     setDraft(toParts(value))
+    document.dispatchEvent(new CustomEvent(TIME_PICKER_OPEN_EVENT, { detail: pickerId }))
     setOpen(true)
   }
 
-  return <div className="time-picker">
-    <input type="text" readOnly value={formatTime(value)} aria-label={t(label)} aria-invalid={invalid || undefined} disabled={disabled} onClick={showPicker} onKeyDown={(event) => { if (event.key === 'Enter' || event.key === ' ') { event.preventDefault(); showPicker() } }}/>
-    <button type="button" className="time-picker-trigger" aria-label={`${t('Choose ')}${t(label).toLowerCase()}`} aria-expanded={open} disabled={disabled} onClick={open ? () => setOpen(false) : showPicker}>
+  useEffect(() => {
+    const closeOtherPickers = (event) => { if (event.detail !== pickerId) setOpen(false) }
+    const closeWhenOutside = (event) => { if (!root.current?.contains(event.target)) setOpen(false) }
+    const closeOnEscape = (event) => { if (event.key === 'Escape') setOpen(false) }
+    document.addEventListener(TIME_PICKER_OPEN_EVENT, closeOtherPickers)
+    document.addEventListener('pointerdown', closeWhenOutside)
+    document.addEventListener('keydown', closeOnEscape)
+    return () => {
+      document.removeEventListener(TIME_PICKER_OPEN_EVENT, closeOtherPickers)
+      document.removeEventListener('pointerdown', closeWhenOutside)
+      document.removeEventListener('keydown', closeOnEscape)
+    }
+  }, [pickerId])
+
+  return <div className="time-picker" ref={root}>
+    <input type="text" readOnly value={formatTime(value)} aria-label={t(label)} aria-invalid={invalid || undefined} disabled={disabled} onClick={(event) => { event.stopPropagation(); showPicker() }} onKeyDown={(event) => { if (event.key === 'Enter' || event.key === ' ') { event.preventDefault(); showPicker() } }}/>
+    <button type="button" className="time-picker-trigger" aria-label={`${t('Choose ')}${t(label).toLowerCase()}`} aria-expanded={open} disabled={disabled} onClick={(event) => { event.stopPropagation(); if (open) setOpen(false); else showPicker() }}>
       <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="8.5"/><path d="M12 7v5l3.2 2"/></svg>
     </button>
-    {open && <div className="time-picker-popover" role="dialog" aria-label={`${t('Choose ')}${t(label).toLowerCase()}`}>
+    {open && <div className="time-picker-popover" role="dialog" aria-label={`${t('Choose ')}${t(label).toLowerCase()}`} onClick={(event) => event.stopPropagation()}>
       <div className="time-picker-title">{t(label)}</div>
       <div className="time-picker-controls">
         <div className="time-picker-control"><span>{t('Hour')}</span><DropdownSelect label="Hour" value={draft.hour} options={Array.from({ length: 12 }, (_, index) => String(index + 1)).map((hour) => ({ value: hour, label: hour.padStart(2, '0') }))} onChange={(hour) => setDraft({ ...draft, hour })}/></div>

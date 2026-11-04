@@ -16,11 +16,14 @@ import PatientRecovery from './pages/patient-recovery.jsx'
 import ClinicBilling from './pages/clinic-billing.jsx'
 import ClinicNotifications from './pages/clinic-notifications.jsx'
 import ClinicPatients from './pages/clinic-patients.jsx'
+import ClinicDoctorAvailability from './pages/clinic-doctor-availability.jsx'
+import ToastViewport from './components/ToastViewport.jsx'
 
 export default function App() {
   return (
     <LanguageProvider>
     <LanguageSwitcher/>
+    <ToastViewport/>
     <Routes>
       <Route path="/" element={<Landing/>}/>
       <Route path="/register" element={<AuthPage mode="register"/>}/>
@@ -34,6 +37,7 @@ export default function App() {
       <Route path="/clinic/queue" element={<ClinicDashboard/>}/>
       <Route path="/clinic/patients/today" element={<ClinicPatients mode="today"/>}/>
       <Route path="/clinic/patients/history" element={<ClinicPatients mode="history"/>}/>
+      <Route path="/clinic/doctor-availability" element={<ClinicDoctorAvailability/>}/>
       <Route path="/clinic/billing" element={<ClinicBilling/>}/>
       <Route path="/clinic/notifications" element={<ClinicNotifications/>}/>
       <Route path="*" element={<Navigate to="/" replace/>}/>
