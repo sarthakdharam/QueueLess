@@ -12,6 +12,7 @@ import { clinicIsOpen, clinicToday } from "../services/clinic/time.js";
 import { emitQueueChange } from "../sockets/socket-server.js";
 import { notifyApproachingPatients } from "../services/notifications/dispatch.js";
 import { normalizeMobile } from "../services/patient/mobile.js";
+import { activeEmergencyForSlot } from "../services/clinic/doctor-emergencies.js";
 
 export async function registerWalkIn(req, res, next) {
   const clinicId = req.auth.clinicId;
@@ -30,6 +31,7 @@ export async function registerWalkIn(req, res, next) {
       if (doctorId) {
         const doctor = await manager.getRepository(Doctor).findOneBy({ id: doctorId, clinicId, status: "active" });
         if (!doctor) throw Object.assign(new Error("Selected doctor is unavailable."), { status: 400 });
+        if (await activeEmergencyForSlot({ doctorId, startsAt: new Date(), endsAt: new Date(Date.now() + 60000) })) throw Object.assign(new Error("Selected doctor is temporarily unavailable. Choose another doctor or wait until availability resumes."), { status: 409 });
       }
       let session = await manager.getRepository(QueueSession).findOneBy({ clinicId, doctorId: doctorId || IsNull(), sessionDate: day });
       if (!session) session = await manager.getRepository(QueueSession).save(manager.getRepository(QueueSession).create({ clinicId, doctorId, sessionDate: day }));

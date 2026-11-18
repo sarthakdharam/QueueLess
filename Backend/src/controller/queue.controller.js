@@ -26,6 +26,8 @@ export async function callNextPatient(req, res, next) {
         .innerJoin("queue_sessions", "s", "s.id = q.session_id")
         .leftJoin("appointments", "a", "a.registration_id = r.id")
         .where("r.clinic_id = :clinicId AND s.session_date = :day AND q.status = 'waiting'", { clinicId, day })
+        .andWhere("(a.id IS NULL OR a.status NOT IN ('needs_attention', 'needs_rescheduling'))")
+        .andWhere("NOT EXISTS (SELECT 1 FROM doctor_availability_events e WHERE e.doctor_id = r.doctor_id AND e.status = 'active' AND e.starts_at <= now() AND (e.ends_at IS NULL OR e.ends_at > now()))")
       .select(["q.id AS id", "q.registration_id AS registration_id", "q.session_id AS session_id", "q.token_number AS token_number"])
         .orderBy("CASE WHEN a.status IN ('booked', 'checked_in') AND a.scheduled_at <= now() THEN 0 WHEN a.scheduled_at IS NULL OR a.status = 'returned' THEN 1 ELSE 2 END", "ASC")
         .addOrderBy("a.scheduled_at", "ASC", "NULLS LAST").addOrderBy("q.queue_order", "ASC").limit(1).setLock("pessimistic_write", undefined, ["q"]);
@@ -53,11 +55,16 @@ export async function transitionQueueEntry(req, res, next) {
   }
   try {
     const changed = await AppDataSource.transaction(async (manager) => {
-      const entry = await manager.getRepository(QueueEntry).createQueryBuilder("q").innerJoin("registrations", "r", "r.id = q.registration_id")
+      const entry = await manager.getRepository(QueueEntry).createQueryBuilder("q").innerJoin("registrations", "r", "r.id = q.registration_id").leftJoin("appointments", "a", "a.registration_id = r.id")
         .where("q.id = :id AND r.clinic_id = :clinicId", { id: req.params.queueId, clinicId: req.auth.clinicId })
-        .select(["q.id AS id", "q.registration_id AS registration_id", "q.session_id AS session_id", "q.token_number AS token_number", "q.status AS status"])
+        .select(["q.id AS id", "q.registration_id AS registration_id", "q.session_id AS session_id", "q.token_number AS token_number", "q.status AS status", "a.status AS appointment_status", "r.doctor_id AS doctor_id"])
         .setLock("pessimistic_write", undefined, ["q"]).getRawOne();
       if (!entry) throw Object.assign(new Error("Queue entry not found."), { status: 404 });
+      if (["call", "start"].includes(req.params.action) && ["needs_attention", "needs_rescheduling"].includes(entry.appointment_status)) throw Object.assign(new Error("This appointment is paused because the doctor is unavailable. Resume doctor availability before calling this patient."), { status: 409 });
+      if (["call", "start"].includes(req.params.action) && entry.doctor_id) {
+        const emergency = await manager.query("SELECT 1 FROM doctor_availability_events WHERE doctor_id = $1 AND status = 'active' AND starts_at <= now() AND (ends_at IS NULL OR ends_at > now()) LIMIT 1", [entry.doctor_id]);
+        if (emergency.length) throw Object.assign(new Error("This doctor is currently unavailable. Resume doctor availability before calling this patient."), { status: 409 });
+      }
       const transition = transitionFor(req.params.action, entry.status);
       if (!transition) throw Object.assign(new Error(`Cannot ${req.params.action} a patient whose status is ${entry.status}.`), { status: 409 });
       if (req.params.action === "check-in") {

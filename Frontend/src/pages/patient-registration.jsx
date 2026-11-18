@@ -20,6 +20,7 @@ export default function PatientRegistration() {
   const [selectedDate, setSelectedDate] = useState('')
   const [selectedSlot, setSelectedSlot] = useState('')
   const formatClinicTime = (value) => new Date(value).toLocaleString(locale, { dateStyle: 'medium', timeStyle: 'short', timeZone: data?.clinic?.timeZone })
+  const appointmentStatusLabel = (status) => ({ needs_attention: 'Needs attention', needs_rescheduling: 'Needs rescheduling', checked_in: 'Checked in' }[status] || status)
 
   useEffect(() => {
     if (!secret) return
@@ -135,7 +136,7 @@ export default function PatientRegistration() {
       <p className="patient-intro">Reference {data.registration.reference} · Token A{String(data.registration.tokenNumber).padStart(2, '0')}</p>
       <div className="confirmation-card"><span>REGISTRATION STATUS</span><strong>{data.registration.queueStatus || data.registration.status}</strong>
         {data.doctor && <p>Doctor: {data.doctor.name}{data.doctor.specialization ? ` · ${data.doctor.specialization}` : ''}</p>}
-        {data.appointment && <><span>APPOINTMENT STATUS</span><strong>{data.appointment.status}</strong><div className="patient-time-estimate"><span>Your appointment</span><b>{formatClinicTime(data.appointment.scheduledAt)}</b><small>Please arrive about 10 minutes early to check in.</small></div></>}
+        {data.appointment && <><span>APPOINTMENT STATUS</span><strong>{appointmentStatusLabel(data.appointment.status)}</strong>{data.appointment.status === 'needs_attention' && <p className="appointment-status-note">Your doctor is temporarily unavailable during this appointment period. The clinic will update you when the queue can continue.</p>}<div className="patient-time-estimate"><span>Your appointment</span><b>{formatClinicTime(data.appointment.scheduledAt)}</b><small>Please arrive about 10 minutes early to check in.</small></div></>}
         {data.registration.queuePosition && <p>Current live queue position: {data.registration.queuePosition}</p>}
         <p>{data.arrivalInstructions}</p>
         {data.estimate && estimateWindow && <div className="patient-time-estimate live-estimate"><span>Estimated time until your turn</span><b>{data.estimate.minimumMinutes}–{data.estimate.maximumMinutes} minutes</b><small>Expected consultation window: {formatClinicTime(estimateWindow.start)} – {formatClinicTime(estimateWindow.end)}. This can change as the queue moves.</small></div>}

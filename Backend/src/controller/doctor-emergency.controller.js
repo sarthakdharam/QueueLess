@@ -1,11 +1,13 @@
 import { AppDataSource } from "../config/data-source.js";
 import { Doctor } from "../entities/Doctor.js";
+import { Clinic } from "../entities/Clinic.js";
 import { Appointment } from "../entities/Appointment.js";
 import { DoctorAvailabilityEvent } from "../entities/DoctorAvailabilityEvent.js";
 import { AuditLog } from "../entities/AuditLog.js";
 import { EMERGENCY_MODES } from "../services/clinic/doctor-emergencies.js";
 import { dispatchNotification } from "../services/notifications/dispatch.js";
 import { emitQueueChange } from "../sockets/socket-server.js";
+import { addDays, dateInZone, zonedTimeToUtc } from "../services/patient/clinic-availability.js";
 
 const ACTIVE_APPOINTMENT_STATUSES = ["booked", "checked_in", "needs_attention", "needs_rescheduling"];
 
@@ -29,19 +31,25 @@ export async function createDoctorEmergency(req, res, next) {
   const { mode, startsAt, endsAt, expectedReturnAt, note } = req.body;
   try {
     if (!EMERGENCY_MODES.includes(mode)) return res.status(400).json({ error: "Choose a valid availability status." });
-    const start = new Date(startsAt);
-    const end = endsAt ? new Date(endsAt) : null;
-    if (!Number.isFinite(start.getTime()) || (end && (!Number.isFinite(end.getTime()) || end <= start))) return res.status(400).json({ error: "Provide a valid unavailable period." });
+    let start = new Date(startsAt);
+    let end = endsAt ? new Date(endsAt) : null;
+    if (!Number.isFinite(start.getTime()) || (mode !== "full_day" && end && (!Number.isFinite(end.getTime()) || end <= start))) return res.status(400).json({ error: "Provide a valid unavailable period." });
     if (mode === "temporary" && !end) return res.status(400).json({ error: "Temporary unavailability requires an end time." });
     const event = await AppDataSource.transaction(async (manager) => {
       const doctor = await manager.getRepository(Doctor).findOneBy({ id: req.params.doctorId, clinicId: req.auth.clinicId, status: "active" });
       if (!doctor) throw Object.assign(new Error("Doctor not found."), { status: 404 });
+      if (mode === "full_day") {
+        const clinic = await manager.getRepository(Clinic).findOneBy({ id: req.auth.clinicId });
+        const day = dateInZone(new Date(), clinic?.timeZone || "Asia/Kolkata");
+        start = zonedTimeToUtc(day, "00:00", clinic?.timeZone || "Asia/Kolkata");
+        end = zonedTimeToUtc(addDays(day, 1), "00:00", clinic?.timeZone || "Asia/Kolkata");
+      }
       const created = await manager.getRepository(DoctorAvailabilityEvent).save(manager.getRepository(DoctorAvailabilityEvent).create({ clinicId: req.auth.clinicId, doctorId: doctor.id, mode, startsAt: start, endsAt: end, expectedReturnAt: expectedReturnAt ? new Date(expectedReturnAt) : null, note: note?.trim() || null, createdBy: req.auth.sub }));
       const appointmentStatus = mode === "full_day" ? "needs_rescheduling" : "needs_attention";
       const affected = await manager.getRepository(Appointment).createQueryBuilder("a")
         .innerJoin("registrations", "r", "r.id = a.registration_id").innerJoin("patients", "p", "p.id = a.patient_id")
         .where("a.clinic_id = :clinicId AND a.doctor_id = :doctorId AND a.status IN (:...statuses)", { clinicId: req.auth.clinicId, doctorId: doctor.id, statuses: ACTIVE_APPOINTMENT_STATUSES })
-        .andWhere("a.scheduled_at >= :start AND (:end IS NULL OR a.scheduled_at < :end)", { start, end })
+        .andWhere("a.scheduled_at >= :start AND (CAST(:end AS timestamptz) IS NULL OR a.scheduled_at < CAST(:end AS timestamptz))", { start, end })
         .select(["a.id AS appointment_id", "a.registration_id AS registration_id", "p.mobile AS mobile", "r.consent_to_contact AS consent_to_contact", "p.name AS patient_name"]).getRawMany();
       if (affected.length) await manager.getRepository(Appointment).createQueryBuilder().update().set({ status: appointmentStatus }).where("id IN (:...ids)", { ids: affected.map((row) => row.appointment_id) }).execute();
       await manager.getRepository(AuditLog).save(manager.getRepository(AuditLog).create({ clinicId: req.auth.clinicId, actorId: req.auth.sub, action: "doctor_emergency_recorded", entityType: "doctor_availability_event", entityId: created.id, metadata: { mode, startsAt: start.toISOString(), endsAt: end?.toISOString() || null, affectedPatients: affected.length } }));
@@ -65,9 +73,9 @@ export async function resumeDoctorAvailability(req, res, next) {
       if (!record) throw Object.assign(new Error("Active availability event not found."), { status: 404 });
       record.status = "resumed"; record.resumedAt = new Date();
       await manager.getRepository(DoctorAvailabilityEvent).save(record);
-      if (record.mode !== "full_day") await manager.query(`UPDATE appointments a SET status = 'booked', updated_at = now()
-        WHERE a.doctor_id = $1 AND a.status = 'needs_attention' AND a.scheduled_at >= now()
-        AND NOT EXISTS (SELECT 1 FROM doctor_availability_events e WHERE e.doctor_id = a.doctor_id AND e.status = 'active' AND e.starts_at < a.scheduled_at + (a.slot_minutes * interval '1 minute') AND (e.ends_at IS NULL OR e.ends_at > a.scheduled_at))`, [record.doctorId]);
+      await manager.query(`UPDATE appointments a SET status = 'booked', updated_at = now()
+        WHERE a.doctor_id = $1 AND a.status IN ('needs_attention', 'needs_rescheduling') AND a.scheduled_at >= $2
+        AND NOT EXISTS (SELECT 1 FROM doctor_availability_events e WHERE e.doctor_id = a.doctor_id AND e.status = 'active' AND e.starts_at < a.scheduled_at + (a.slot_minutes * interval '1 minute') AND (e.ends_at IS NULL OR e.ends_at > a.scheduled_at))`, [record.doctorId, record.startsAt]);
       await manager.getRepository(AuditLog).save(manager.getRepository(AuditLog).create({ clinicId: req.auth.clinicId, actorId: req.auth.sub, action: "doctor_availability_resumed", entityType: "doctor_availability_event", entityId: record.id, metadata: {} }));
       return record;
     });
