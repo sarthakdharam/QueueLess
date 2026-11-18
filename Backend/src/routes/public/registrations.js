@@ -7,17 +7,42 @@ import { createPatientRegistration } from "../../controller/public-registration.
 
 const router = Router();
 
-router.post("/registrations", registrationLimiter, [
-  body("clinicId").isUUID(), body("doctorId").optional({ values: "falsy" }).isUUID(),
-  body("name").trim().isLength({ min: 2, max: 160 }).withMessage("Enter your name."),
-  body("mobile").trim().matches(/^\+?[0-9\s()-]{8,20}$/).withMessage("Enter a valid mobile number."),
-  body("visitType").isIn(["appointment", "walk_in"]),
-  body("doctorId").if(body("visitType").equals("appointment")).isUUID().withMessage("Choose a doctor for your appointment."),
-  body("appointmentDate").if(body("visitType").equals("appointment")).custom(validDate).withMessage("Choose a valid appointment date."),
-  body("slotTime").if(body("visitType").equals("appointment")).matches(/^([01]\d|2[0-3]):[0-5]\d$/).withMessage("Choose an available appointment time."),
-  body("consentToContact").custom((value) => value === true || value === "true").withMessage("Consent to receive registration updates is required."),
-  header("idempotency-key").isUUID().withMessage("Retry-safe request key is required."),
-  validateRequest,
-], createPatientRegistration);
+router.post(
+  "/registrations",
+  registrationLimiter,
+  [
+    body("clinicId").isUUID(),
+    body("doctorId").optional({ values: "falsy" }).isUUID(),
+    body("name")
+      .trim()
+      .isLength({ min: 2, max: 160 })
+      .withMessage("Enter your name."),
+    body("mobile")
+      .trim()
+      .matches(/^\+?[0-9\s()-]{8,20}$/)
+      .withMessage("Enter a valid mobile number."),
+    body("visitType").isIn(["appointment", "walk_in"]),
+    body("doctorId")
+      .if(body("visitType").equals("appointment"))
+      .isUUID()
+      .withMessage("Choose a doctor for your appointment."),
+    body("appointmentDate")
+      .if(body("visitType").equals("appointment"))
+      .custom(validDate)
+      .withMessage("Choose a valid appointment date."),
+    body("slotTime")
+      .if(body("visitType").equals("appointment"))
+      .matches(/^([01]\d|2[0-3]):[0-5]\d$/)
+      .withMessage("Choose an available appointment time."),
+    body("consentToContact")
+      .custom((value) => value === true || value === "true")
+      .withMessage("Consent to receive registration updates is required."),
+    header("idempotency-key")
+      .isUUID()
+      .withMessage("Retry-safe request key is required."),
+    validateRequest,
+  ],
+  createPatientRegistration,
+);
 
 export default router;

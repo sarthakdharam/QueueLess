@@ -1,13 +1,25 @@
 export function clinicToday(timeZone = "Asia/Kolkata", now = new Date()) {
-  return new Intl.DateTimeFormat("en-CA", { timeZone, year: "numeric", month: "2-digit", day: "2-digit" }).format(now);
+  return new Intl.DateTimeFormat("en-CA", {
+    timeZone,
+    year: "numeric",
+    month: "2-digit",
+    day: "2-digit",
+  }).format(now);
 }
 
 function clockInZone(date, timeZone) {
-  return new Intl.DateTimeFormat("en-GB", { timeZone, hour: "2-digit", minute: "2-digit", hourCycle: "h23" }).format(date);
+  return new Intl.DateTimeFormat("en-GB", {
+    timeZone,
+    hour: "2-digit",
+    minute: "2-digit",
+    hourCycle: "h23",
+  }).format(date);
 }
 
 function weekdayInZone(date, timeZone) {
-  return new Intl.DateTimeFormat("en-US", { timeZone, weekday: "long" }).format(date).toLowerCase();
+  return new Intl.DateTimeFormat("en-US", { timeZone, weekday: "long" })
+    .format(date)
+    .toLowerCase();
 }
 
 export function clinicIsOpen(settings, now = new Date()) {
@@ -16,5 +28,7 @@ export function clinicIsOpen(settings, now = new Date()) {
   if (!today?.enabled) return false;
   const time = clockInZone(now, timeZone);
   if (time < today.open || time >= today.close) return false;
-  return !(settings.breaks || []).some((item) => item.start && item.end && time >= item.start && time < item.end);
+  return !(settings.breaks || []).some(
+    (item) => item.start && item.end && time >= item.start && time < item.end,
+  );
 }

@@ -1,4 +1,3 @@
-
 import "reflect-metadata";
 import { DataSource } from "typeorm";
 import dotenv from "dotenv";
@@ -50,8 +49,38 @@ export const AppDataSource = new DataSource({
   username: process.env.POSTGRES_USER,
   password: process.env.POSTGRES_PASSWORD,
   database: process.env.POSTGRES_DB,
-  entities: [Clinic, ClinicUser, Subscription, ClinicSettings, Doctor, Patient, QueueSession, Registration, QueueEntry, AuditLog, Appointment, PatientAccessToken, OtpChallenge, PatientLookupSession, Notification, Payment, ReturnEvent, DoctorAvailabilityEvent, AppointmentReschedule],
-  migrations: [InitialFoundation1760000000000, ClinicOperations1760000001000, PatientPortal1760000002000, QueueEngine1760000003000, RealtimeBilling1760000004000, PatientLookupSessions1760000005000, TruthfulSimulatorDeliveryStatus1760000006000, ClinicNotificationReadState1760000007000, DoctorEmergencyAvailability1760000008000],
+  entities: [
+    Clinic,
+    ClinicUser,
+    Subscription,
+    ClinicSettings,
+    Doctor,
+    Patient,
+    QueueSession,
+    Registration,
+    QueueEntry,
+    AuditLog,
+    Appointment,
+    PatientAccessToken,
+    OtpChallenge,
+    PatientLookupSession,
+    Notification,
+    Payment,
+    ReturnEvent,
+    DoctorAvailabilityEvent,
+    AppointmentReschedule,
+  ],
+  migrations: [
+    InitialFoundation1760000000000,
+    ClinicOperations1760000001000,
+    PatientPortal1760000002000,
+    QueueEngine1760000003000,
+    RealtimeBilling1760000004000,
+    PatientLookupSessions1760000005000,
+    TruthfulSimulatorDeliveryStatus1760000006000,
+    ClinicNotificationReadState1760000007000,
+    DoctorEmergencyAvailability1760000008000,
+  ],
   synchronize: false,
   logging: false,
 });

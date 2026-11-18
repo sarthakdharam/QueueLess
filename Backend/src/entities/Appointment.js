@@ -1,7 +1,8 @@
 import { EntitySchema } from "typeorm";
 
 export const Appointment = new EntitySchema({
-  name: "Appointment", tableName: "appointments",
+  name: "Appointment",
+  tableName: "appointments",
   columns: {
     id: { type: "uuid", primary: true, generated: "uuid" },
     registrationId: { name: "registration_id", type: "uuid", unique: true },
@@ -15,7 +16,13 @@ export const Appointment = new EntitySchema({
     updatedAt: { name: "updated_at", type: "timestamptz", updateDate: true },
   },
   indices: [
-    { name: "IDX_appointments_clinic_time", columns: ["clinicId", "scheduledAt"] },
-    { name: "IDX_appointments_doctor_time", columns: ["doctorId", "scheduledAt"] },
+    {
+      name: "IDX_appointments_clinic_time",
+      columns: ["clinicId", "scheduledAt"],
+    },
+    {
+      name: "IDX_appointments_doctor_time",
+      columns: ["doctorId", "scheduledAt"],
+    },
   ],
 });

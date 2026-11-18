@@ -14,6 +14,11 @@ export const Subscription = new EntitySchema({
     createdAt: { name: "created_at", type: "timestamptz", createDate: true },
   },
   relations: {
-    clinic: { type: "one-to-one", target: "Clinic", joinColumn: { name: "clinic_id" }, onDelete: "CASCADE" },
+    clinic: {
+      type: "one-to-one",
+      target: "Clinic",
+      joinColumn: { name: "clinic_id" },
+      onDelete: "CASCADE",
+    },
   },
 });

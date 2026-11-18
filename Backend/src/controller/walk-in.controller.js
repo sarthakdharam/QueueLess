@@ -18,39 +18,159 @@ export async function registerWalkIn(req, res, next) {
   const clinicId = req.auth.clinicId;
   const doctorId = req.body.doctorId || null;
   const mobile = normalizeMobile(req.body.mobile);
-  const day = await AppDataSource.getRepository(Clinic).findOneBy({ id: clinicId }).then((clinic) => clinicToday(clinic.timeZone));
+  const day = await AppDataSource.getRepository(Clinic)
+    .findOneBy({ id: clinicId })
+    .then((clinic) => clinicToday(clinic.timeZone));
   const lockKey = `queue:${clinicId}:${doctorId || "all"}:${day}`;
   try {
     const result = await AppDataSource.transaction(async (manager) => {
-      await manager.query("SELECT pg_advisory_xact_lock(hashtext($1))", [lockKey]);
+      await manager.query("SELECT pg_advisory_xact_lock(hashtext($1))", [
+        lockKey,
+      ]);
       const settings = await getSettings(manager, clinicId);
-      const clinic = await manager.getRepository(Clinic).findOneBy({ id: clinicId });
+      const clinic = await manager
+        .getRepository(Clinic)
+        .findOneBy({ id: clinicId });
       settings.clinic = clinic;
-      if (!settings.walkInsEnabled) throw Object.assign(new Error("Walk-in registration is disabled for this clinic."), { status: 409 });
-      if (!clinicIsOpen(settings)) throw Object.assign(new Error("The clinic is currently outside its configured working hours."), { status: 409 });
+      if (!settings.walkInsEnabled)
+        throw Object.assign(
+          new Error("Walk-in registration is disabled for this clinic."),
+          { status: 409 },
+        );
+      if (!clinicIsOpen(settings))
+        throw Object.assign(
+          new Error(
+            "The clinic is currently outside its configured working hours.",
+          ),
+          { status: 409 },
+        );
       if (doctorId) {
-        const doctor = await manager.getRepository(Doctor).findOneBy({ id: doctorId, clinicId, status: "active" });
-        if (!doctor) throw Object.assign(new Error("Selected doctor is unavailable."), { status: 400 });
-        if (await activeEmergencyForSlot({ doctorId, startsAt: new Date(), endsAt: new Date(Date.now() + 60000) })) throw Object.assign(new Error("Selected doctor is temporarily unavailable. Choose another doctor or wait until availability resumes."), { status: 409 });
+        const doctor = await manager
+          .getRepository(Doctor)
+          .findOneBy({ id: doctorId, clinicId, status: "active" });
+        if (!doctor)
+          throw Object.assign(new Error("Selected doctor is unavailable."), {
+            status: 400,
+          });
+        if (
+          await activeEmergencyForSlot({
+            doctorId,
+            startsAt: new Date(),
+            endsAt: new Date(Date.now() + 60000),
+          })
+        )
+          throw Object.assign(
+            new Error(
+              "Selected doctor is temporarily unavailable. Choose another doctor or wait until availability resumes.",
+            ),
+            { status: 409 },
+          );
       }
-      let session = await manager.getRepository(QueueSession).findOneBy({ clinicId, doctorId: doctorId || IsNull(), sessionDate: day });
-      if (!session) session = await manager.getRepository(QueueSession).save(manager.getRepository(QueueSession).create({ clinicId, doctorId, sessionDate: day }));
-      const maxToken = await manager.getRepository(QueueEntry).createQueryBuilder("q").where("q.session_id = :sessionId", { sessionId: session.id }).select("MAX(q.token_number)", "max").getRawOne();
-      const maxOrder = await manager.getRepository(QueueEntry).createQueryBuilder("q").where("q.session_id = :sessionId", { sessionId: session.id }).select("MAX(q.queue_order)", "max").getRawOne();
+      let session = await manager
+        .getRepository(QueueSession)
+        .findOneBy({
+          clinicId,
+          doctorId: doctorId || IsNull(),
+          sessionDate: day,
+        });
+      if (!session)
+        session = await manager
+          .getRepository(QueueSession)
+          .save(
+            manager
+              .getRepository(QueueSession)
+              .create({ clinicId, doctorId, sessionDate: day }),
+          );
+      const maxToken = await manager
+        .getRepository(QueueEntry)
+        .createQueryBuilder("q")
+        .where("q.session_id = :sessionId", { sessionId: session.id })
+        .select("MAX(q.token_number)", "max")
+        .getRawOne();
+      const maxOrder = await manager
+        .getRepository(QueueEntry)
+        .createQueryBuilder("q")
+        .where("q.session_id = :sessionId", { sessionId: session.id })
+        .select("MAX(q.queue_order)", "max")
+        .getRawOne();
       const tokenNumber = Number(maxToken.max || 0) + 1;
-      const patientRows = await manager.query(`INSERT INTO "patients" ("name", "mobile") VALUES ($1, $2) ON CONFLICT ("mobile") DO UPDATE SET "name" = EXCLUDED."name", "updated_at" = now() RETURNING "id"`, [req.body.name.trim(), mobile]);
+      const patientRows = await manager.query(
+        `INSERT INTO "patients" ("name", "mobile") VALUES ($1, $2) ON CONFLICT ("mobile") DO UPDATE SET "name" = EXCLUDED."name", "updated_at" = now() RETURNING "id"`,
+        [req.body.name.trim(), mobile],
+      );
       const reference = `QL${randomBytes(7).toString("hex").toUpperCase()}`;
-      const registration = await manager.getRepository(Registration).save(manager.getRepository(Registration).create({ reference, clinicId, doctorId, patientId: patientRows[0].id, visitType: "walk_in", notes: req.body.notes?.trim() || null, status: "waiting" }));
-      const queueEntry = await manager.getRepository(QueueEntry).save(manager.getRepository(QueueEntry).create({ registrationId: registration.id, sessionId: session.id, tokenNumber, queueOrder: Number(maxOrder.max || 0) + 1000, status: "waiting", checkedInAt: new Date() }));
-      await manager.getRepository(AuditLog).save(manager.getRepository(AuditLog).create({ clinicId, actorId: req.auth.sub, action: "walk_in_registered", entityType: "registration", entityId: registration.id, metadata: { tokenNumber } }));
+      const registration = await manager
+        .getRepository(Registration)
+        .save(
+          manager
+            .getRepository(Registration)
+            .create({
+              reference,
+              clinicId,
+              doctorId,
+              patientId: patientRows[0].id,
+              visitType: "walk_in",
+              notes: req.body.notes?.trim() || null,
+              status: "waiting",
+            }),
+        );
+      const queueEntry = await manager
+        .getRepository(QueueEntry)
+        .save(
+          manager
+            .getRepository(QueueEntry)
+            .create({
+              registrationId: registration.id,
+              sessionId: session.id,
+              tokenNumber,
+              queueOrder: Number(maxOrder.max || 0) + 1000,
+              status: "waiting",
+              checkedInAt: new Date(),
+            }),
+        );
+      await manager
+        .getRepository(AuditLog)
+        .save(
+          manager
+            .getRepository(AuditLog)
+            .create({
+              clinicId,
+              actorId: req.auth.sub,
+              action: "walk_in_registered",
+              entityType: "registration",
+              entityId: registration.id,
+              metadata: { tokenNumber },
+            }),
+        );
       return { registration, queueEntry, tokenNumber, sessionId: session.id };
     });
-    emitQueueChange({ clinicId, registrationId: result.registration.id, status: "waiting" });
-  void notifyApproachingPatients(clinicId, result.sessionId).catch((error) => console.error("Turn reminder failed:", process.env.NODE_ENV === "production" ? error.name : error.message));
-    return res.status(201).json({ registration: { id: result.registration.id, reference: result.registration.reference, status: result.registration.status, tokenNumber: result.tokenNumber, visitType: result.registration.visitType, createdAt: result.registration.createdAt }, message: "Walk-in registered and added to today's queue." });
+    emitQueueChange({
+      clinicId,
+      registrationId: result.registration.id,
+      status: "waiting",
+    });
+    void notifyApproachingPatients(clinicId, result.sessionId).catch((error) =>
+      console.error(
+        "Turn reminder failed:",
+        process.env.NODE_ENV === "production" ? error.name : error.message,
+      ),
+    );
+    return res
+      .status(201)
+      .json({
+        registration: {
+          id: result.registration.id,
+          reference: result.registration.reference,
+          status: result.registration.status,
+          tokenNumber: result.tokenNumber,
+          visitType: result.registration.visitType,
+          createdAt: result.registration.createdAt,
+        },
+        message: "Walk-in registered and added to today's queue.",
+      });
   } catch (error) {
-    if (error.status) return res.status(error.status).json({ error: error.message });
+    if (error.status)
+      return res.status(error.status).json({ error: error.message });
     return next(error);
   }
-
 }

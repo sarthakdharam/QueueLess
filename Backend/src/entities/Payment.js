@@ -1,7 +1,8 @@
 import { EntitySchema } from "typeorm";
 
 export const Payment = new EntitySchema({
-  name: "Payment", tableName: "payments",
+  name: "Payment",
+  tableName: "payments",
   columns: {
     id: { type: "uuid", primary: true, generated: "uuid" },
     clinicId: { name: "clinic_id", type: "uuid" },
@@ -10,7 +11,13 @@ export const Payment = new EntitySchema({
     currency: { type: "varchar", length: 3, default: "INR" },
     status: { type: "varchar", length: 24 },
     provider: { type: "varchar", length: 24, default: "simulator" },
-    providerReference: { name: "provider_reference", type: "varchar", length: 180, nullable: true, unique: true },
+    providerReference: {
+      name: "provider_reference",
+      type: "varchar",
+      length: 180,
+      nullable: true,
+      unique: true,
+    },
     createdAt: { name: "created_at", type: "timestamptz", createDate: true },
   },
 });

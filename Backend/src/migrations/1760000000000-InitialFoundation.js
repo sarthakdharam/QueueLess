@@ -15,7 +15,9 @@ export class InitialFoundation1760000000000 {
       "role" varchar(32) NOT NULL DEFAULT 'administrator', "status" varchar(24) NOT NULL DEFAULT 'active',
       "created_at" timestamptz NOT NULL DEFAULT now(), "updated_at" timestamptz NOT NULL DEFAULT now()
     )`);
-    await queryRunner.query(`CREATE INDEX "IDX_clinic_users_clinic_id" ON "clinic_users" ("clinic_id")`);
+    await queryRunner.query(
+      `CREATE INDEX "IDX_clinic_users_clinic_id" ON "clinic_users" ("clinic_id")`,
+    );
     await queryRunner.query(`CREATE TABLE "subscriptions" (
       "id" uuid PRIMARY KEY DEFAULT gen_random_uuid(), "clinic_id" uuid NOT NULL UNIQUE REFERENCES "clinics"("id") ON DELETE CASCADE,
       "plan" varchar(40) NOT NULL DEFAULT 'base', "status" varchar(24) NOT NULL DEFAULT 'trial',

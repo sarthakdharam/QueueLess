@@ -16,7 +16,9 @@ export class DoctorEmergencyAvailability1760000008000 {
       "resumed_at" timestamptz,
       "created_at" timestamptz NOT NULL DEFAULT now()
     )`);
-    await queryRunner.query(`CREATE INDEX "IDX_doctor_availability_active" ON "doctor_availability_events" ("doctor_id", "status", "starts_at")`);
+    await queryRunner.query(
+      `CREATE INDEX "IDX_doctor_availability_active" ON "doctor_availability_events" ("doctor_id", "status", "starts_at")`,
+    );
     await queryRunner.query(`CREATE TABLE "appointment_reschedules" (
       "id" uuid PRIMARY KEY DEFAULT gen_random_uuid(),
       "appointment_id" uuid NOT NULL REFERENCES "appointments"("id") ON DELETE CASCADE,
@@ -26,7 +28,9 @@ export class DoctorEmergencyAvailability1760000008000 {
       "changed_by" varchar(24) NOT NULL,
       "created_at" timestamptz NOT NULL DEFAULT now()
     )`);
-    await queryRunner.query(`CREATE INDEX "IDX_appointment_reschedules_appointment" ON "appointment_reschedules" ("appointment_id", "created_at")`);
+    await queryRunner.query(
+      `CREATE INDEX "IDX_appointment_reschedules_appointment" ON "appointment_reschedules" ("appointment_id", "created_at")`,
+    );
   }
 
   async down(queryRunner) {

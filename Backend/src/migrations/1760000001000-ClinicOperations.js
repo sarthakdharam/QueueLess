@@ -16,7 +16,9 @@ export class ClinicOperations1760000001000 {
       "availability" jsonb NOT NULL DEFAULT '{}'::jsonb, "status" varchar(24) NOT NULL DEFAULT 'active',
       "created_at" timestamptz NOT NULL DEFAULT now(), "updated_at" timestamptz NOT NULL DEFAULT now()
     )`);
-    await queryRunner.query(`CREATE INDEX "IDX_doctors_clinic_id" ON "doctors" ("clinic_id")`);
+    await queryRunner.query(
+      `CREATE INDEX "IDX_doctors_clinic_id" ON "doctors" ("clinic_id")`,
+    );
     await queryRunner.query(`CREATE TABLE "patients" (
       "id" uuid PRIMARY KEY DEFAULT gen_random_uuid(), "name" varchar(160) NOT NULL, "mobile" varchar(20) NOT NULL UNIQUE,
       "created_at" timestamptz NOT NULL DEFAULT now(), "updated_at" timestamptz NOT NULL DEFAULT now()
@@ -26,7 +28,9 @@ export class ClinicOperations1760000001000 {
       "doctor_id" uuid REFERENCES "doctors"("id") ON DELETE SET NULL, "session_date" date NOT NULL,
       "created_at" timestamptz NOT NULL DEFAULT now()
     )`);
-    await queryRunner.query(`CREATE UNIQUE INDEX "UQ_queue_sessions_scope_date" ON "queue_sessions" ("clinic_id", COALESCE("doctor_id", '00000000-0000-0000-0000-000000000000'::uuid), "session_date")`);
+    await queryRunner.query(
+      `CREATE UNIQUE INDEX "UQ_queue_sessions_scope_date" ON "queue_sessions" ("clinic_id", COALESCE("doctor_id", '00000000-0000-0000-0000-000000000000'::uuid), "session_date")`,
+    );
     await queryRunner.query(`CREATE TABLE "registrations" (
       "id" uuid PRIMARY KEY DEFAULT gen_random_uuid(), "reference" varchar(16) NOT NULL UNIQUE,
       "clinic_id" uuid NOT NULL REFERENCES "clinics"("id") ON DELETE CASCADE,
@@ -34,7 +38,9 @@ export class ClinicOperations1760000001000 {
       "visit_type" varchar(24) NOT NULL DEFAULT 'walk_in', "notes" varchar(500), "status" varchar(24) NOT NULL DEFAULT 'waiting',
       "created_at" timestamptz NOT NULL DEFAULT now(), "completed_at" timestamptz
     )`);
-    await queryRunner.query(`CREATE INDEX "IDX_registrations_clinic_status" ON "registrations" ("clinic_id", "status")`);
+    await queryRunner.query(
+      `CREATE INDEX "IDX_registrations_clinic_status" ON "registrations" ("clinic_id", "status")`,
+    );
     await queryRunner.query(`CREATE TABLE "queue_entries" (
       "id" uuid PRIMARY KEY DEFAULT gen_random_uuid(), "registration_id" uuid NOT NULL UNIQUE REFERENCES "registrations"("id") ON DELETE CASCADE,
       "session_id" uuid NOT NULL REFERENCES "queue_sessions"("id") ON DELETE CASCADE, "token_number" int NOT NULL,
@@ -48,7 +54,9 @@ export class ClinicOperations1760000001000 {
       "entity_type" varchar(60) NOT NULL, "entity_id" uuid NOT NULL, "metadata" jsonb NOT NULL DEFAULT '{}'::jsonb,
       "created_at" timestamptz NOT NULL DEFAULT now()
     )`);
-    await queryRunner.query(`CREATE INDEX "IDX_audit_logs_clinic_created" ON "audit_logs" ("clinic_id", "created_at")`);
+    await queryRunner.query(
+      `CREATE INDEX "IDX_audit_logs_clinic_created" ON "audit_logs" ("clinic_id", "created_at")`,
+    );
   }
 
   async down(queryRunner) {

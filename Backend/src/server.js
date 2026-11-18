@@ -11,7 +11,9 @@ let notificationWorker;
 
 async function startServer() {
   if (!process.env.JWT_SECRET || process.env.JWT_SECRET.length < 32) {
-    console.error("JWT_SECRET must be set to a random value with at least 32 characters.");
+    console.error(
+      "JWT_SECRET must be set to a random value with at least 32 characters.",
+    );
     process.exitCode = 1;
     return;
   }
@@ -20,14 +22,24 @@ async function startServer() {
     await AppDataSource.initialize();
     console.log("PostgreSQL connected successfully.");
   } catch (error) {
-    console.error("Failed to initialize database connection:", process.env.NODE_ENV === "production" ? error.name : error.message);
+    console.error(
+      "Failed to initialize database connection:",
+      process.env.NODE_ENV === "production" ? error.name : error.message,
+    );
     process.exitCode = 1;
     return;
   }
 
   server = createServer(app);
   initializeSocketServer(server);
-  notificationWorker = setInterval(() => { void retryFailedNotifications().catch((error) => console.error("Notification retry worker failed:", process.env.NODE_ENV === "production" ? error.name : error.message)); }, 30000);
+  notificationWorker = setInterval(() => {
+    void retryFailedNotifications().catch((error) =>
+      console.error(
+        "Notification retry worker failed:",
+        process.env.NODE_ENV === "production" ? error.name : error.message,
+      ),
+    );
+  }, 30000);
   server.listen(PORT, "127.0.0.1", () => {
     console.log(`QueueLess backend running on port ${PORT}`);
   });
@@ -40,7 +52,10 @@ async function shutdown(signal) {
   if (notificationWorker) clearInterval(notificationWorker);
 
   try {
-    if (server) await new Promise((resolve, reject) => server.close((error) => (error ? reject(error) : resolve())));
+    if (server)
+      await new Promise((resolve, reject) =>
+        server.close((error) => (error ? reject(error) : resolve())),
+      );
     if (AppDataSource.isInitialized) await AppDataSource.destroy();
   } catch (error) {
     console.error(`Graceful shutdown failed (${error.name}).`);

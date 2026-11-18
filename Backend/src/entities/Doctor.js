@@ -1,7 +1,8 @@
 import { EntitySchema } from "typeorm";
 
 export const Doctor = new EntitySchema({
-  name: "Doctor", tableName: "doctors",
+  name: "Doctor",
+  tableName: "doctors",
   columns: {
     id: { type: "uuid", primary: true, generated: "uuid" },
     clinicId: { name: "clinic_id", type: "uuid" },

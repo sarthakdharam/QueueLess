@@ -5,6 +5,11 @@ import { getDashboard } from "../../controller/clinic-dashboard.controller.js";
 
 const router = Router();
 
-router.get("/dashboard", [query("date").optional().isISO8601({ strict: true })], validateRequest, getDashboard);
+router.get(
+  "/dashboard",
+  [query("date").optional().isISO8601({ strict: true })],
+  validateRequest,
+  getDashboard,
+);
 
 export default router;

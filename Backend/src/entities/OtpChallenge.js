@@ -1,7 +1,8 @@
 import { EntitySchema } from "typeorm";
 
 export const OtpChallenge = new EntitySchema({
-  name: "OtpChallenge", tableName: "otp_challenges",
+  name: "OtpChallenge",
+  tableName: "otp_challenges",
   columns: {
     id: { type: "uuid", primary: true, generated: "uuid" },
     mobile: { type: "varchar", length: 20 },
@@ -12,5 +13,7 @@ export const OtpChallenge = new EntitySchema({
     consumedAt: { name: "consumed_at", type: "timestamptz", nullable: true },
     createdAt: { name: "created_at", type: "timestamptz", createDate: true },
   },
-  indices: [{ name: "IDX_otp_mobile_created", columns: ["mobile", "createdAt"] }],
+  indices: [
+    { name: "IDX_otp_mobile_created", columns: ["mobile", "createdAt"] },
+  ],
 });

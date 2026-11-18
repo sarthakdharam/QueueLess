@@ -11,8 +11,12 @@ export class PatientLookupSessions1760000005000 {
       "created_at" timestamptz NOT NULL DEFAULT now(),
       "last_accessed_at" timestamptz
     )`);
-    await queryRunner.query(`CREATE INDEX "IDX_patient_lookup_mobile_created" ON "patient_lookup_sessions" ("mobile", "created_at")`);
-    await queryRunner.query(`CREATE INDEX "IDX_patient_lookup_expiry" ON "patient_lookup_sessions" ("expires_at")`);
+    await queryRunner.query(
+      `CREATE INDEX "IDX_patient_lookup_mobile_created" ON "patient_lookup_sessions" ("mobile", "created_at")`,
+    );
+    await queryRunner.query(
+      `CREATE INDEX "IDX_patient_lookup_expiry" ON "patient_lookup_sessions" ("expires_at")`,
+    );
   }
 
   async down(queryRunner) {
