@@ -39,7 +39,8 @@ export default function ClinicPatients({ mode }) {
   const [error, setError] = useState("");
   const [reloadKey, setReloadKey] = useState(0);
   const load = useCallback(
-    async ({ quiet = false } = {}) => {
+    async ({ quiet = false, forceRefresh = false } = {}) => {
+      const useFreshData = forceRefresh || reloadKey > 0;
       if (quiet) setRefreshing(true);
       else setLoading(true);
       setError("");
@@ -50,10 +51,14 @@ export default function ClinicPatients({ mode }) {
             api.get(
               todayMode ? "/clinic/patients/today" : "/clinic/patients/history",
               {
+                headers: useFreshData
+                  ? { "Cache-Control": "no-cache" }
+                  : undefined,
                 params: todayMode
                   ? {
                       q: filters.q || undefined,
                       status: filters.status || undefined,
+                      refresh: useFreshData ? Date.now() : undefined,
                     }
                   : {
                       ...filters,
@@ -63,6 +68,7 @@ export default function ClinicPatients({ mode }) {
                       status: filters.status || undefined,
                       from: filters.from || undefined,
                       to: filters.to || undefined,
+                      refresh: useFreshData ? Date.now() : undefined,
                     },
               },
             ),
@@ -86,7 +92,7 @@ export default function ClinicPatients({ mode }) {
         setRefreshing(false);
       }
     },
-    [filters, pageInfo.page, todayMode],
+    [filters, pageInfo.page, reloadKey, todayMode],
   );
 
   useEffect(() => {
@@ -118,6 +124,16 @@ export default function ClinicPatients({ mode }) {
     socket.on("registration:confirmed", () => setReloadKey((key) => key + 1));
     return () => socket.disconnect();
   }, [todayMode]);
+
+  const refreshRecords = () => {
+    if (refreshing) return;
+
+    setRefreshing(true);
+    setSearchText("");
+    setFilters({ q: "", status: "", from: "", to: "" });
+    setPageInfo((old) => ({ ...old, page: 1 }));
+    setReloadKey((key) => key + 1);
+  };
 
   if (!localStorage.getItem("queueless.session"))
     return <Navigate to="/login" replace />;
@@ -159,7 +175,7 @@ export default function ClinicPatients({ mode }) {
               className="button button-dark"
               type="button"
               disabled={refreshing}
-              onClick={() => load({ quiet: true })}
+              onClick={refreshRecords}
             >
               {refreshing ? "Refreshing…" : "Refresh"} ↻
             </button>

@@ -11,7 +11,7 @@ import {
   useState,
 } from "react";
 
-export const LANGUAGES = [
+const LANGUAGES = [
   { code: "en", label: "English", locale: "en-IN" },
   { code: "hi", label: "हिन्दी", locale: "hi-IN" },
   { code: "bn", label: "বাংলা", locale: "bn-IN" },
@@ -1764,6 +1764,493 @@ Object.assign(landingCoreWords.mr, {
   "Patients on the go": "प्रवासातील रुग्ण",
 });
 
+const recentFeatureWords = {
+  hi: {
+    Analytics: "विश्लेषण",
+    "CLINIC INSIGHTS": "क्लिनिक जानकारी",
+    "See how the clinic day is moving and where patients wait.":
+      "देखें कि क्लिनिक का दिन कैसे चल रहा है और मरीज़ कहाँ प्रतीक्षा कर रहे हैं।",
+    Date: "तारीख",
+    "Loading clinic analytics…": "क्लिनिक विश्लेषण लोड हो रहा है…",
+    Registered: "पंजीकृत",
+    "visits booked or added": "बुक या जोड़ी गई मुलाक़ातें",
+    "consultations finished": "परामर्श पूरे हुए",
+    Waiting: "प्रतीक्षा में",
+    "patients still in queue": "मरीज़ अभी कतार में हैं",
+    Missed: "छूटी हुई",
+    "patients not seen": "जिन मरीज़ों को नहीं देखा गया",
+    "Average wait": "औसत प्रतीक्षा",
+    "from checked-in completed visits": "चेक-इन की गई पूरी मुलाक़ातों से",
+    "BUSIEST HOURS": "सबसे व्यस्त समय",
+    "When patients arrive most": "जब सबसे अधिक मरीज़ आते हैं",
+    "Based on appointment times and walk-in registrations.":
+      "अपॉइंटमेंट समय और वॉक-इन पंजीकरण पर आधारित।",
+    visits: "मुलाक़ातें",
+    "No visits recorded for this date.":
+      "इस तारीख के लिए कोई मुलाक़ात दर्ज नहीं है।",
+    "Missed appointment": "छूटी हुई अपॉइंटमेंट",
+    "We did not record a check-in for this visit. You can choose a new available time below.":
+      "इस मुलाक़ात के लिए चेक-इन दर्ज नहीं हुआ। नीचे नया उपलब्ध समय चुनें।",
+    "APPOINTMENT CHANGE": "अपॉइंटमेंट बदलाव",
+    "Change your appointment": "अपनी अपॉइंटमेंट बदलें",
+    "Rebook your missed appointment": "छूटी हुई अपॉइंटमेंट फिर से बुक करें",
+    "Choose a new appointment time": "नई अपॉइंटमेंट का समय चुनें",
+    "Your current appointment remains reserved until you confirm a new time.":
+      "नया समय पुष्टि करने तक आपकी मौजूदा अपॉइंटमेंट आरक्षित रहेगी।",
+    "Choose a new available time for your missed visit.":
+      "छूटी हुई मुलाक़ात के लिए नया उपलब्ध समय चुनें।",
+    "Your doctor is unavailable for this visit. Your existing booking stays protected until you confirm a replacement.":
+      "इस मुलाक़ात के लिए डॉक्टर उपलब्ध नहीं हैं। नया समय पुष्टि करने तक आपकी मौजूदा बुकिंग सुरक्षित रहेगी।",
+    "Finding available times…": "उपलब्ध समय खोजा जा रहा है…",
+    "Choose a new time": "नया समय चुनें",
+    "View available times": "उपलब्ध समय देखें",
+    "Choose a date": "तारीख चुनें",
+    "Choose a time": "समय चुनें",
+    "Select a time": "समय चुनें",
+    "Confirming…": "पुष्टि की जा रही है…",
+    "Confirm new appointment": "नई अपॉइंटमेंट की पुष्टि करें",
+    "Your new appointment has been confirmed.":
+      "आपकी नई अपॉइंटमेंट की पुष्टि हो गई है।",
+    "No future appointment slots are available. Please contact the clinic.":
+      "भविष्य के लिए कोई अपॉइंटमेंट स्लॉट उपलब्ध नहीं है। कृपया क्लिनिक से संपर्क करें।",
+    "Refreshing…": "रीफ़्रेश हो रहा है…",
+    min: "मिनट",
+    "Show password": "पासवर्ड दिखाएँ",
+    "Hide password": "पासवर्ड छिपाएँ",
+    "Enter a valid 10-digit Indian mobile number.":
+      "मान्य 10 अंकों का भारतीय मोबाइल नंबर दर्ज करें।",
+    "This appointment has changed. Refresh and choose a time again.":
+      "यह अपॉइंटमेंट बदल गई है। रीफ़्रेश करके फिर समय चुनें।",
+    "This appointment can no longer be changed.":
+      "इस अपॉइंटमेंट को अब बदला नहीं जा सकता।",
+    "That replacement slot is no longer available. Choose another time.":
+      "वह वैकल्पिक स्लॉट अब उपलब्ध नहीं है। दूसरा समय चुनें।",
+    "This doctor is unavailable at that time. Choose another slot.":
+      "डॉक्टर उस समय उपलब्ध नहीं हैं। दूसरा स्लॉट चुनें।",
+  },
+  bn: {
+    Analytics: "বিশ্লেষণ",
+    "CLINIC INSIGHTS": "ক্লিনিকের তথ্য",
+    "See how the clinic day is moving and where patients wait.":
+      "ক্লিনিকের দিন কীভাবে চলছে এবং রোগীরা কোথায় অপেক্ষা করছেন দেখুন।",
+    Date: "তারিখ",
+    "Loading clinic analytics…": "ক্লিনিক বিশ্লেষণ লোড হচ্ছে…",
+    Registered: "নিবন্ধিত",
+    "visits booked or added": "বুক করা বা যোগ করা ভিজিট",
+    "consultations finished": "পরামর্শ সম্পন্ন হয়েছে",
+    Waiting: "অপেক্ষমাণ",
+    "patients still in queue": "রোগীরা এখনও সারিতে আছেন",
+    Missed: "মিস হয়েছে",
+    "patients not seen": "যেসব রোগীকে দেখা হয়নি",
+    "Average wait": "গড় অপেক্ষা",
+    "from checked-in completed visits": "চেক-ইন করা সম্পন্ন ভিজিট থেকে",
+    "BUSIEST HOURS": "সবচেয়ে ব্যস্ত সময়",
+    "When patients arrive most": "যখন সবচেয়ে বেশি রোগী আসেন",
+    "Based on appointment times and walk-in registrations.":
+      "অ্যাপয়েন্টমেন্টের সময় ও ওয়াক-ইন নিবন্ধনের ভিত্তিতে।",
+    visits: "ভিজিট",
+    "No visits recorded for this date.": "এই তারিখে কোনো ভিজিট রেকর্ড নেই।",
+    "Missed appointment": "মিস হওয়া অ্যাপয়েন্টমেন্ট",
+    "We did not record a check-in for this visit. You can choose a new available time below.":
+      "এই ভিজিটের জন্য কোনো চেক-ইন রেকর্ড হয়নি। নিচে নতুন উপলব্ধ সময় বেছে নিন।",
+    "APPOINTMENT CHANGE": "অ্যাপয়েন্টমেন্ট পরিবর্তন",
+    "Change your appointment": "আপনার অ্যাপয়েন্টমেন্ট পরিবর্তন করুন",
+    "Rebook your missed appointment":
+      "মিস হওয়া অ্যাপয়েন্টমেন্ট আবার বুক করুন",
+    "Choose a new appointment time": "নতুন অ্যাপয়েন্টমেন্টের সময় বেছে নিন",
+    "Your current appointment remains reserved until you confirm a new time.":
+      "নতুন সময় নিশ্চিত না করা পর্যন্ত আপনার বর্তমান অ্যাপয়েন্টমেন্ট সংরক্ষিত থাকবে।",
+    "Choose a new available time for your missed visit.":
+      "মিস হওয়া ভিজিটের জন্য নতুন উপলব্ধ সময় বেছে নিন।",
+    "Your doctor is unavailable for this visit. Your existing booking stays protected until you confirm a replacement.":
+      "এই ভিজিটের জন্য আপনার ডাক্তার উপলব্ধ নন। বিকল্প নিশ্চিত না করা পর্যন্ত আপনার বুকিং সুরক্ষিত থাকবে।",
+    "Finding available times…": "উপলব্ধ সময় খোঁজা হচ্ছে…",
+    "Choose a new time": "নতুন সময় বেছে নিন",
+    "View available times": "উপলব্ধ সময় দেখুন",
+    "Choose a date": "তারিখ বেছে নিন",
+    "Choose a time": "সময় বেছে নিন",
+    "Select a time": "সময় নির্বাচন করুন",
+    "Confirming…": "নিশ্চিত করা হচ্ছে…",
+    "Confirm new appointment": "নতুন অ্যাপয়েন্টমেন্ট নিশ্চিত করুন",
+    "Your new appointment has been confirmed.":
+      "আপনার নতুন অ্যাপয়েন্টমেন্ট নিশ্চিত হয়েছে।",
+    "No future appointment slots are available. Please contact the clinic.":
+      "ভবিষ্যতের কোনো অ্যাপয়েন্টমেন্ট স্লট উপলব্ধ নেই। ক্লিনিকে যোগাযোগ করুন।",
+    "Refreshing…": "রিফ্রেশ হচ্ছে…",
+    min: "মিনিট",
+    "Show password": "পাসওয়ার্ড দেখান",
+    "Hide password": "পাসওয়ার্ড লুকান",
+    "Enter a valid 10-digit Indian mobile number.":
+      "একটি বৈধ ১০ অঙ্কের ভারতীয় মোবাইল নম্বর লিখুন।",
+    "This appointment has changed. Refresh and choose a time again.":
+      "এই অ্যাপয়েন্টমেন্ট পরিবর্তিত হয়েছে। রিফ্রেশ করে আবার সময় বেছে নিন।",
+    "This appointment can no longer be changed.":
+      "এই অ্যাপয়েন্টমেন্ট আর পরিবর্তন করা যাবে না।",
+    "That replacement slot is no longer available. Choose another time.":
+      "বিকল্প স্লটটি আর উপলব্ধ নেই। অন্য সময় বেছে নিন।",
+    "This doctor is unavailable at that time. Choose another slot.":
+      "ডাক্তার ওই সময় উপলব্ধ নন। অন্য স্লট বেছে নিন।",
+  },
+  ta: {
+    Analytics: "பகுப்பாய்வு",
+    "CLINIC INSIGHTS": "கிளினிக் தகவல்கள்",
+    "See how the clinic day is moving and where patients wait.":
+      "கிளினிக் நாள் எவ்வாறு நகர்கிறது, நோயாளிகள் எங்கு காத்திருக்கிறார்கள் என்பதைப் பாருங்கள்.",
+    Date: "தேதி",
+    "Loading clinic analytics…": "கிளினிக் பகுப்பாய்வு ஏற்றப்படுகிறது…",
+    Registered: "பதிவு செய்யப்பட்டவை",
+    "visits booked or added":
+      "முன்பதிவு செய்யப்பட்ட அல்லது சேர்க்கப்பட்ட வருகைகள்",
+    "consultations finished": "ஆலோசனைகள் முடிந்தன",
+    Waiting: "காத்திருப்பு",
+    "patients still in queue": "நோயாளிகள் இன்னும் வரிசையில் உள்ளனர்",
+    Missed: "தவறியது",
+    "patients not seen": "பார்க்கப்படாத நோயாளிகள்",
+    "Average wait": "சராசரி காத்திருப்பு",
+    "from checked-in completed visits":
+      "செக்-இன் செய்யப்பட்ட முடிந்த வருகைகளிலிருந்து",
+    "BUSIEST HOURS": "அதிக நெரிசல் நேரங்கள்",
+    "When patients arrive most": "அதிக நோயாளிகள் வரும் நேரம்",
+    "Based on appointment times and walk-in registrations.":
+      "முன்பதிவு நேரம் மற்றும் நேரடி பதிவு அடிப்படையில்.",
+    visits: "வருகைகள்",
+    "No visits recorded for this date.":
+      "இந்த தேதிக்கு வருகைகள் பதிவு செய்யப்படவில்லை.",
+    "Missed appointment": "தவறிய முன்பதிவு",
+    "We did not record a check-in for this visit. You can choose a new available time below.":
+      "இந்த வருகைக்கு செக்-இன் பதிவு இல்லை. கீழே புதிய கிடைக்கும் நேரத்தைத் தேர்ந்தெடுக்கலாம்.",
+    "APPOINTMENT CHANGE": "முன்பதிவு மாற்றம்",
+    "Change your appointment": "உங்கள் முன்பதிவை மாற்றுங்கள்",
+    "Rebook your missed appointment":
+      "தவறிய முன்பதிவை மீண்டும் பதிவு செய்யுங்கள்",
+    "Choose a new appointment time":
+      "புதிய முன்பதிவு நேரத்தைத் தேர்ந்தெடுக்கவும்",
+    "Your current appointment remains reserved until you confirm a new time.":
+      "புதிய நேரத்தை உறுதிப்படுத்தும் வரை உங்கள் தற்போதைய முன்பதிவு ஒதுக்கப்பட்டிருக்கும்.",
+    "Choose a new available time for your missed visit.":
+      "தவறிய வருகைக்கு புதிய கிடைக்கும் நேரத்தைத் தேர்ந்தெடுக்கவும்.",
+    "Your doctor is unavailable for this visit. Your existing booking stays protected until you confirm a replacement.":
+      "இந்த வருகைக்கு உங்கள் மருத்துவர் கிடைக்கவில்லை. மாற்று நேரத்தை உறுதிப்படுத்தும் வரை உங்கள் முன்பதிவு பாதுகாக்கப்படும்.",
+    "Finding available times…": "கிடைக்கும் நேரங்கள் தேடப்படுகின்றன…",
+    "Choose a new time": "புதிய நேரத்தைத் தேர்ந்தெடுக்கவும்",
+    "View available times": "கிடைக்கும் நேரங்களைப் பார்க்கவும்",
+    "Choose a date": "தேதியைத் தேர்ந்தெடுக்கவும்",
+    "Choose a time": "நேரத்தைத் தேர்ந்தெடுக்கவும்",
+    "Select a time": "நேரத்தைத் தேர்ந்தெடுக்கவும்",
+    "Confirming…": "உறுதிப்படுத்தப்படுகிறது…",
+    "Confirm new appointment": "புதிய முன்பதிவை உறுதிப்படுத்தவும்",
+    "Your new appointment has been confirmed.":
+      "உங்கள் புதிய முன்பதிவு உறுதிப்படுத்தப்பட்டது.",
+    "No future appointment slots are available. Please contact the clinic.":
+      "எதிர்கால முன்பதிவு இடங்கள் இல்லை. கிளினிக்கைத் தொடர்புகொள்ளவும்.",
+    "Refreshing…": "புதுப்பிக்கப்படுகிறது…",
+    min: "நிமிடம்",
+    "Show password": "கடவுச்சொல்லைக் காண்பி",
+    "Hide password": "கடவுச்சொல்லை மறை",
+    "Enter a valid 10-digit Indian mobile number.":
+      "சரியான 10 இலக்க இந்திய மொபைல் எண்ணை உள்ளிடவும்.",
+    "This appointment has changed. Refresh and choose a time again.":
+      "இந்த முன்பதிவு மாறிவிட்டது. புதுப்பித்து மீண்டும் நேரத்தைத் தேர்ந்தெடுக்கவும்.",
+    "This appointment can no longer be changed.":
+      "இந்த முன்பதிவை இனி மாற்ற முடியாது.",
+    "That replacement slot is no longer available. Choose another time.":
+      "அந்த மாற்று இடம் இனி கிடைக்காது. வேறு நேரத்தைத் தேர்ந்தெடுக்கவும்.",
+    "This doctor is unavailable at that time. Choose another slot.":
+      "அந்த நேரத்தில் மருத்துவர் கிடைக்கவில்லை. வேறு இடத்தைத் தேர்ந்தெடுக்கவும்.",
+  },
+  te: {
+    Analytics: "విశ్లేషణలు",
+    "CLINIC INSIGHTS": "క్లినిక్ సమాచారం",
+    "See how the clinic day is moving and where patients wait.":
+      "క్లినిక్ రోజు ఎలా సాగుతోంది, రోగులు ఎక్కడ వేచి ఉన్నారో చూడండి.",
+    Date: "తేదీ",
+    "Loading clinic analytics…": "క్లినిక్ విశ్లేషణలు లోడ్ అవుతున్నాయి…",
+    Registered: "నమోదైనవి",
+    "visits booked or added": "బుక్ చేసిన లేదా జోడించిన సందర్శనలు",
+    "consultations finished": "సంప్రదింపులు పూర్తయ్యాయి",
+    Waiting: "వేచి ఉన్నారు",
+    "patients still in queue": "రోగులు ఇంకా క్యూలో ఉన్నారు",
+    Missed: "తప్పిపోయింది",
+    "patients not seen": "చూడని రోగులు",
+    "Average wait": "సగటు నిరీక్షణ",
+    "from checked-in completed visits":
+      "చెక్-ఇన్ చేసిన పూర్తయిన సందర్శనల నుండి",
+    "BUSIEST HOURS": "అత్యంత రద్దీ సమయాలు",
+    "When patients arrive most": "అత్యధిక రోగులు వచ్చే సమయం",
+    "Based on appointment times and walk-in registrations.":
+      "అపాయింట్‌మెంట్ సమయాలు మరియు వాక్-ఇన్ నమోదుల ఆధారంగా.",
+    visits: "సందర్శనలు",
+    "No visits recorded for this date.": "ఈ తేదీకి సందర్శనలు నమోదు కాలేదు.",
+    "Missed appointment": "తప్పిపోయిన అపాయింట్‌మెంట్",
+    "We did not record a check-in for this visit. You can choose a new available time below.":
+      "ఈ సందర్శనకు చెక్-ఇన్ నమోదు కాలేదు. దిగువన కొత్త అందుబాటులో ఉన్న సమయాన్ని ఎంచుకోండి.",
+    "APPOINTMENT CHANGE": "అపాయింట్‌మెంట్ మార్పు",
+    "Change your appointment": "మీ అపాయింట్‌మెంట్ మార్చండి",
+    "Rebook your missed appointment":
+      "తప్పిపోయిన అపాయింట్‌మెంట్‌ను మళ్లీ బుక్ చేయండి",
+    "Choose a new appointment time": "కొత్త అపాయింట్‌మెంట్ సమయాన్ని ఎంచుకోండి",
+    "Your current appointment remains reserved until you confirm a new time.":
+      "కొత్త సమయాన్ని నిర్ధారించే వరకు మీ ప్రస్తుత అపాయింట్‌మెంట్ రిజర్వ్‌గా ఉంటుంది.",
+    "Choose a new available time for your missed visit.":
+      "తప్పిపోయిన సందర్శనకు కొత్త అందుబాటులో ఉన్న సమయాన్ని ఎంచుకోండి.",
+    "Your doctor is unavailable for this visit. Your existing booking stays protected until you confirm a replacement.":
+      "ఈ సందర్శనకు మీ వైద్యుడు అందుబాటులో లేరు. ప్రత్యామ్నాయం నిర్ధారించే వరకు మీ బుకింగ్ రక్షించబడుతుంది.",
+    "Finding available times…": "అందుబాటులో ఉన్న సమయాలు వెతుకుతున్నాం…",
+    "Choose a new time": "కొత్త సమయాన్ని ఎంచుకోండి",
+    "View available times": "అందుబాటులో ఉన్న సమయాలను చూడండి",
+    "Choose a date": "తేదీని ఎంచుకోండి",
+    "Choose a time": "సమయాన్ని ఎంచుకోండి",
+    "Select a time": "సమయాన్ని ఎంచుకోండి",
+    "Confirming…": "నిర్ధారిస్తోంది…",
+    "Confirm new appointment": "కొత్త అపాయింట్‌మెంట్ నిర్ధారించండి",
+    "Your new appointment has been confirmed.":
+      "మీ కొత్త అపాయింట్‌మెంట్ నిర్ధారించబడింది.",
+    "No future appointment slots are available. Please contact the clinic.":
+      "భవిష్యత్ అపాయింట్‌మెంట్ స్లాట్‌లు లేవు. క్లినిక్‌ను సంప్రదించండి.",
+    "Refreshing…": "రిఫ్రెష్ అవుతోంది…",
+    min: "నిమిషాలు",
+    "Show password": "పాస్‌వర్డ్ చూపించు",
+    "Hide password": "పాస్‌వర్డ్ దాచు",
+    "Enter a valid 10-digit Indian mobile number.":
+      "చెల్లుబాటు అయ్యే 10 అంకెల భారతీయ మొబైల్ నంబర్ నమోదు చేయండి.",
+    "This appointment has changed. Refresh and choose a time again.":
+      "ఈ అపాయింట్‌మెంట్ మారింది. రిఫ్రెష్ చేసి మళ్లీ సమయాన్ని ఎంచుకోండి.",
+    "This appointment can no longer be changed.":
+      "ఈ అపాయింట్‌మెంట్‌ను ఇక మార్చలేరు.",
+    "That replacement slot is no longer available. Choose another time.":
+      "ఆ ప్రత్యామ్నాయ స్లాట్ ఇక అందుబాటులో లేదు. వేరే సమయాన్ని ఎంచుకోండి.",
+    "This doctor is unavailable at that time. Choose another slot.":
+      "ఆ సమయంలో వైద్యుడు అందుబాటులో లేరు. వేరే స్లాట్ ఎంచుకోండి.",
+  },
+  mr: {
+    Analytics: "विश्लेषण",
+    "CLINIC INSIGHTS": "क्लिनिक माहिती",
+    "See how the clinic day is moving and where patients wait.":
+      "क्लिनिकचा दिवस कसा चालला आहे आणि रुग्ण कुठे थांबले आहेत ते पाहा.",
+    Date: "तारीख",
+    "Loading clinic analytics…": "क्लिनिक विश्लेषण लोड होत आहे…",
+    Registered: "नोंदणीकृत",
+    "visits booked or added": "बुक केलेल्या किंवा जोडलेल्या भेटी",
+    "consultations finished": "सल्लामसलत पूर्ण",
+    Waiting: "प्रतीक्षेत",
+    "patients still in queue": "रुग्ण अजून रांगेत आहेत",
+    Missed: "चुकलेले",
+    "patients not seen": "न पाहिलेले रुग्ण",
+    "Average wait": "सरासरी प्रतीक्षा",
+    "from checked-in completed visits": "चेक-इन केलेल्या पूर्ण भेटींमधून",
+    "BUSIEST HOURS": "सर्वाधिक व्यस्त वेळा",
+    "When patients arrive most": "जेव्हा सर्वाधिक रुग्ण येतात",
+    "Based on appointment times and walk-in registrations.":
+      "अपॉइंटमेंट वेळा आणि थेट भेट नोंदींवर आधारित.",
+    visits: "भेटी",
+    "No visits recorded for this date.":
+      "या तारखेसाठी कोणत्याही भेटी नोंदल्या नाहीत.",
+    "Missed appointment": "चुकलेली अपॉइंटमेंट",
+    "We did not record a check-in for this visit. You can choose a new available time below.":
+      "या भेटीसाठी चेक-इन नोंदले गेले नाही. खाली नवीन उपलब्ध वेळ निवडा.",
+    "APPOINTMENT CHANGE": "अपॉइंटमेंट बदल",
+    "Change your appointment": "तुमची अपॉइंटमेंट बदला",
+    "Rebook your missed appointment": "चुकलेली अपॉइंटमेंट पुन्हा बुक करा",
+    "Choose a new appointment time": "नवीन अपॉइंटमेंट वेळ निवडा",
+    "Your current appointment remains reserved until you confirm a new time.":
+      "तुम्ही नवीन वेळ निश्चित करेपर्यंत तुमची सध्याची अपॉइंटमेंट राखीव राहील.",
+    "Choose a new available time for your missed visit.":
+      "चुकलेल्या भेटीसाठी नवीन उपलब्ध वेळ निवडा.",
+    "Your doctor is unavailable for this visit. Your existing booking stays protected until you confirm a replacement.":
+      "या भेटीसाठी तुमचे डॉक्टर उपलब्ध नाहीत. पर्यायी वेळ निश्चित करेपर्यंत तुमचे बुकिंग सुरक्षित राहील.",
+    "Finding available times…": "उपलब्ध वेळा शोधत आहोत…",
+    "Choose a new time": "नवीन वेळ निवडा",
+    "View available times": "उपलब्ध वेळा पहा",
+    "Choose a date": "तारीख निवडा",
+    "Choose a time": "वेळ निवडा",
+    "Select a time": "वेळ निवडा",
+    "Confirming…": "निश्चित करत आहे…",
+    "Confirm new appointment": "नवीन अपॉइंटमेंट निश्चित करा",
+    "Your new appointment has been confirmed.":
+      "तुमची नवीन अपॉइंटमेंट निश्चित झाली आहे.",
+    "No future appointment slots are available. Please contact the clinic.":
+      "भविष्यातील अपॉइंटमेंट स्लॉट उपलब्ध नाहीत. कृपया क्लिनिकशी संपर्क साधा.",
+    "Refreshing…": "रिफ्रेश होत आहे…",
+    min: "मिनिटे",
+    "Show password": "पासवर्ड दाखवा",
+    "Hide password": "पासवर्ड लपवा",
+    "Enter a valid 10-digit Indian mobile number.":
+      "वैध 10 अंकी भारतीय मोबाईल नंबर टाका.",
+    "This appointment has changed. Refresh and choose a time again.":
+      "ही अपॉइंटमेंट बदलली आहे. रिफ्रेश करून पुन्हा वेळ निवडा.",
+    "This appointment can no longer be changed.":
+      "ही अपॉइंटमेंट आता बदलता येणार नाही.",
+    "That replacement slot is no longer available. Choose another time.":
+      "तो पर्यायी स्लॉट आता उपलब्ध नाही. दुसरी वेळ निवडा.",
+    "This doctor is unavailable at that time. Choose another slot.":
+      "त्या वेळी डॉक्टर उपलब्ध नाहीत. दुसरा स्लॉट निवडा.",
+  },
+};
+
+Object.assign(recentFeatureWords.hi, {
+  "VISIT FEEDBACK": "मुलाक़ात प्रतिक्रिया",
+  "How was your visit?": "आपकी मुलाक़ात कैसी रही?",
+  "Your feedback helps the clinic improve future visits.":
+    "आपकी प्रतिक्रिया क्लिनिक को भविष्य की मुलाक़ातें बेहतर बनाने में मदद करती है।",
+  "Rate your visit": "अपनी मुलाक़ात को रेट करें",
+  "out of 5": "5 में से",
+  "Helpful staff": "सहायक स्टाफ",
+  "Clear updates": "स्पष्ट जानकारी",
+  "Short wait": "कम प्रतीक्षा",
+  "Good consultation": "अच्छा परामर्श",
+  "Optional comment": "वैकल्पिक टिप्पणी",
+  "Tell us more about your visit": "अपनी मुलाक़ात के बारे में और बताएँ",
+  "Submit feedback": "प्रतिक्रिया भेजें",
+  "Submitting…": "भेजा जा रहा है…",
+  "Thank you for your feedback": "आपकी प्रतिक्रिया के लिए धन्यवाद",
+  "You rated this visit": "आपने इस मुलाक़ात को रेट किया",
+  "Visit rating": "मुलाक़ात रेटिंग",
+  "feedback responses": "प्रतिक्रिया उत्तर",
+  "no feedback responses yet": "अभी कोई प्रतिक्रिया नहीं",
+  "Feedback is available after your consultation is completed.":
+    "परामर्श पूरा होने के बाद प्रतिक्रिया उपलब्ध होगी।",
+  "Feedback has already been submitted.":
+    "प्रतिक्रिया पहले ही भेजी जा चुकी है।",
+  "Your feedback could not be submitted. Please try again.":
+    "आपकी प्रतिक्रिया नहीं भेजी जा सकी। कृपया फिर कोशिश करें।",
+  "Thank you for sharing your feedback.":
+    "अपनी प्रतिक्रिया साझा करने के लिए धन्यवाद।",
+});
+Object.assign(recentFeatureWords.bn, {
+  "VISIT FEEDBACK": "সাক্ষাৎ প্রতিক্রিয়া",
+  "How was your visit?": "আপনার সাক্ষাৎ কেমন ছিল?",
+  "Your feedback helps the clinic improve future visits.":
+    "আপনার প্রতিক্রিয়া ক্লিনিককে ভবিষ্যতের সাক্ষাৎ উন্নত করতে সাহায্য করে।",
+  "Rate your visit": "আপনার সাক্ষাৎ মূল্যায়ন করুন",
+  "out of 5": "৫-এর মধ্যে",
+  "Helpful staff": "সহায়ক কর্মী",
+  "Clear updates": "স্পষ্ট আপডেট",
+  "Short wait": "কম অপেক্ষা",
+  "Good consultation": "ভালো পরামর্শ",
+  "Optional comment": "ঐচ্ছিক মন্তব্য",
+  "Tell us more about your visit": "আপনার সাক্ষাৎ সম্পর্কে আরও বলুন",
+  "Submit feedback": "প্রতিক্রিয়া পাঠান",
+  "Submitting…": "পাঠানো হচ্ছে…",
+  "Thank you for your feedback": "আপনার প্রতিক্রিয়ার জন্য ধন্যবাদ",
+  "You rated this visit": "আপনি এই সাক্ষাৎ মূল্যায়ন করেছেন",
+  "Visit rating": "সাক্ষাৎ রেটিং",
+  "feedback responses": "প্রতিক্রিয়া",
+  "no feedback responses yet": "এখনও কোনো প্রতিক্রিয়া নেই",
+  "Feedback is available after your consultation is completed.":
+    "পরামর্শ সম্পন্ন হওয়ার পরে প্রতিক্রিয়া পাওয়া যাবে।",
+  "Feedback has already been submitted.":
+    "প্রতিক্রিয়া ইতিমধ্যে পাঠানো হয়েছে।",
+  "Your feedback could not be submitted. Please try again.":
+    "আপনার প্রতিক্রিয়া পাঠানো যায়নি। আবার চেষ্টা করুন।",
+  "Thank you for sharing your feedback.":
+    "আপনার প্রতিক্রিয়া ভাগ করে নেওয়ার জন্য ধন্যবাদ।",
+});
+Object.assign(recentFeatureWords.ta, {
+  "VISIT FEEDBACK": "வருகை கருத்து",
+  "How was your visit?": "உங்கள் வருகை எப்படி இருந்தது?",
+  "Your feedback helps the clinic improve future visits.":
+    "உங்கள் கருத்து எதிர்கால வருகைகளை மேம்படுத்த கிளினிக்கிற்கு உதவுகிறது।",
+  "Rate your visit": "உங்கள் வருகையை மதிப்பிடுங்கள்",
+  "out of 5": "5 இல்",
+  "Helpful staff": "உதவிகரமான பணியாளர்கள்",
+  "Clear updates": "தெளிவான தகவல்கள்",
+  "Short wait": "குறைந்த காத்திருப்பு",
+  "Good consultation": "நல்ல ஆலோசனை",
+  "Optional comment": "விருப்பக் கருத்து",
+  "Tell us more about your visit": "உங்கள் வருகையைப் பற்றி மேலும் கூறுங்கள்",
+  "Submit feedback": "கருத்தை அனுப்பவும்",
+  "Submitting…": "அனுப்பப்படுகிறது…",
+  "Thank you for your feedback": "உங்கள் கருத்துக்கு நன்றி",
+  "You rated this visit": "இந்த வருகைக்கு நீங்கள் அளித்த மதிப்பீடு",
+  "Visit rating": "வருகை மதிப்பீடு",
+  "feedback responses": "கருத்துகள்",
+  "no feedback responses yet": "இன்னும் கருத்துகள் இல்லை",
+  "Feedback is available after your consultation is completed.":
+    "ஆலோசனை முடிந்த பின் கருத்து வழங்கலாம்।",
+  "Feedback has already been submitted.": "கருத்து ஏற்கனவே அனுப்பப்பட்டது।",
+  "Your feedback could not be submitted. Please try again.":
+    "கருத்தை அனுப்ப முடியவில்லை. மீண்டும் முயற்சிக்கவும்।",
+  "Thank you for sharing your feedback.":
+    "உங்கள் கருத்தைப் பகிர்ந்ததற்கு நன்றி।",
+});
+Object.assign(recentFeatureWords.te, {
+  "VISIT FEEDBACK": "సందర్శన అభిప్రాయం",
+  "How was your visit?": "మీ సందర్శన ఎలా ఉంది?",
+  "Your feedback helps the clinic improve future visits.":
+    "మీ అభిప్రాయం భవిష్యత్ సందర్శనలను మెరుగుపరచడంలో క్లినిక్‌కు సహాయపడుతుంది।",
+  "Rate your visit": "మీ సందర్శనకు రేటింగ్ ఇవ్వండి",
+  "out of 5": "5 లో",
+  "Helpful staff": "సహాయక సిబ్బంది",
+  "Clear updates": "స్పష్టమైన సమాచారం",
+  "Short wait": "తక్కువ వేచి ఉండటం",
+  "Good consultation": "మంచి సంప్రదింపులు",
+  "Optional comment": "ఐచ్ఛిక వ్యాఖ్య",
+  "Tell us more about your visit": "మీ సందర్శన గురించి మరింత చెప్పండి",
+  "Submit feedback": "అభిప్రాయం పంపండి",
+  "Submitting…": "పంపుతోంది…",
+  "Thank you for your feedback": "మీ అభిప్రాయానికి ధన్యవాదాలు",
+  "You rated this visit": "మీరు ఈ సందర్శనకు రేటింగ్ ఇచ్చారు",
+  "Visit rating": "సందర్శన రేటింగ్",
+  "feedback responses": "అభిప్రాయాలు",
+  "no feedback responses yet": "ఇంకా అభిప్రాయాలు లేవు",
+  "Feedback is available after your consultation is completed.":
+    "సంప్రదింపులు పూర్తయిన తర్వాత అభిప్రాయం అందుబాటులో ఉంటుంది।",
+  "Feedback has already been submitted.": "అభిప్రాయం ఇప్పటికే పంపబడింది।",
+  "Your feedback could not be submitted. Please try again.":
+    "మీ అభిప్రాయం పంపబడలేదు. మళ్లీ ప్రయత్నించండి।",
+  "Thank you for sharing your feedback.":
+    "మీ అభిప్రాయాన్ని పంచుకున్నందుకు ధన్యవాదాలు।",
+});
+Object.assign(recentFeatureWords.mr, {
+  "VISIT FEEDBACK": "भेटीचा अभिप्राय",
+  "How was your visit?": "तुमची भेट कशी होती?",
+  "Your feedback helps the clinic improve future visits.":
+    "तुमचा अभिप्राय क्लिनिकला भविष्यातील भेटी सुधारण्यास मदत करतो।",
+  "Rate your visit": "तुमच्या भेटीला रेटिंग द्या",
+  "out of 5": "5 पैकी",
+  "Helpful staff": "मदत करणारे कर्मचारी",
+  "Clear updates": "स्पष्ट माहिती",
+  "Short wait": "कमी प्रतीक्षा",
+  "Good consultation": "चांगला सल्ला",
+  "Optional comment": "ऐच्छिक टिप्पणी",
+  "Tell us more about your visit": "तुमच्या भेटीबद्दल अधिक सांगा",
+  "Submit feedback": "अभिप्राय पाठवा",
+  "Submitting…": "पाठवत आहे…",
+  "Thank you for your feedback": "तुमच्या अभिप्रायाबद्दल धन्यवाद",
+  "You rated this visit": "तुम्ही या भेटीला रेटिंग दिले",
+  "Visit rating": "भेटीचे रेटिंग",
+  "feedback responses": "अभिप्राय",
+  "no feedback responses yet": "अजून अभिप्राय नाही",
+  "Feedback is available after your consultation is completed.":
+    "सल्लामसलत पूर्ण झाल्यावर अभिप्राय उपलब्ध होईल।",
+  "Feedback has already been submitted.": "अभिप्राय आधीच पाठवला आहे।",
+  "Your feedback could not be submitted. Please try again.":
+    "तुमचा अभिप्राय पाठवता आला नाही. पुन्हा प्रयत्न करा।",
+  "Thank you for sharing your feedback.":
+    "तुमचा अभिप्राय शेअर केल्याबद्दल धन्यवाद।",
+});
+
+Object.assign(recentFeatureWords.hi, {
+  reviews: "समीक्षाएँ",
+  "No ratings yet": "अभी कोई रेटिंग नहीं",
+});
+Object.assign(recentFeatureWords.bn, {
+  reviews: "পর্যালোচনা",
+  "No ratings yet": "এখনও কোনো রেটিং নেই",
+});
+Object.assign(recentFeatureWords.ta, {
+  reviews: "மதிப்புரைகள்",
+  "No ratings yet": "இன்னும் மதிப்பீடுகள் இல்லை",
+});
+Object.assign(recentFeatureWords.te, {
+  reviews: "సమీక్షలు",
+  "No ratings yet": "ఇంకా రేటింగ్‌లు లేవు",
+});
+Object.assign(recentFeatureWords.mr, {
+  reviews: "पुनरावलोकने",
+  "No ratings yet": "अजून रेटिंग नाही",
+});
+
 const languageContext = createContext(null);
 
 export function LanguageProvider({ children }) {
@@ -1801,6 +2288,7 @@ function translated(value, language) {
     statusWords[language]?.[trimmed] ||
     screenWords[language]?.[trimmed] ||
     clinicUiWords[language]?.[trimmed] ||
+    recentFeatureWords[language]?.[trimmed] ||
     landingWords[language]?.[trimmed] ||
     landingCoreWords[language]?.[trimmed];
   if (!replacement) return value;

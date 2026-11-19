@@ -2,7 +2,10 @@ import test from "node:test";
 import assert from "node:assert/strict";
 import { createHmac } from "node:crypto";
 import { calculateReturnPlacement } from "../src/services/queue/return-policy.js";
-import { normalizeMobile } from "../src/utils/normalize-mobile.js";
+import {
+  isValidIndianMobile,
+  normalizeMobile,
+} from "../src/utils/normalize-mobile.js";
 import {
   validDate,
   zonedTimeToUtc,
@@ -28,6 +31,12 @@ import {
 } from "../src/services/patient/credential-policy.js";
 import { mobileLookupCandidates } from "../src/services/patient/mobile-lookup.js";
 import { emergencyAffectsSlot } from "../src/services/clinic/doctor-emergencies.js";
+import { rescheduleMode } from "../src/services/patient/appointment-rescheduling.js";
+import {
+  appointmentFitsClinicHours,
+  isNoShowDue,
+  NO_SHOW_GRACE_MINUTES,
+} from "../src/services/appointments/no-show-recovery.js";
 
 test("return policy places a returning patient after the configured number", () => {
   const queue = [1000, 2000, 3000, 4000, 5000, 6000].map(
@@ -131,8 +140,93 @@ test("emergency availability overlaps only the affected booking window", () => {
   );
 });
 
+test("appointments become eligible for no-show recovery after local closing time and grace period", () => {
+  const workingHours = {
+    saturday: { enabled: true, open: "09:00", close: "17:00" },
+  };
+  const scheduledAt = "2026-10-31T04:30:00.000Z";
+  assert.equal(
+    isNoShowDue({
+      scheduledAt,
+      timeZone: "Asia/Kolkata",
+      workingHours,
+      now: new Date("2026-10-31T11:59:00.000Z"),
+    }),
+    false,
+  );
+  assert.equal(
+    isNoShowDue({
+      scheduledAt,
+      timeZone: "Asia/Kolkata",
+      workingHours,
+      now: new Date("2026-10-31T12:00:00.000Z"),
+    }),
+    true,
+  );
+  assert.equal(NO_SHOW_GRACE_MINUTES, 30);
+});
+
+test("existing bookings outside newly shortened clinic hours need rescheduling", () => {
+  const workingHours = {
+    wednesday: { enabled: true, open: "09:00", close: "15:00" },
+  };
+  assert.equal(
+    appointmentFitsClinicHours({
+      scheduledAt: "2026-11-18T10:00:00.000Z",
+      slotMinutes: 15,
+      timeZone: "Asia/Kolkata",
+      workingHours,
+    }),
+    false,
+  );
+  assert.equal(
+    appointmentFitsClinicHours({
+      scheduledAt: "2026-11-18T09:15:00.000Z",
+      slotMinutes: 15,
+      timeZone: "Asia/Kolkata",
+      workingHours,
+    }),
+    true,
+  );
+});
+
+test("appointment changes and missed-visit rebooking use distinct reschedule modes", () => {
+  const now = new Date("2026-11-18T09:00:00.000Z");
+  assert.equal(
+    rescheduleMode(
+      { status: "booked", scheduledAt: "2026-11-19T09:00:00.000Z" },
+      now,
+    ),
+    "patient_change",
+  );
+  assert.equal(
+    rescheduleMode(
+      { status: "booked", scheduledAt: "2026-11-18T08:00:00.000Z" },
+      now,
+    ),
+    null,
+  );
+  assert.equal(
+    rescheduleMode({ status: "missed", scheduledAt: now }, now),
+    "missed_rebooking",
+  );
+  assert.equal(
+    rescheduleMode({ status: "needs_rescheduling", scheduledAt: now }, now),
+    "clinic_recovery",
+  );
+});
+
 test("mobile normalization removes presentation characters only", () => {
   assert.equal(normalizeMobile("+91 (98765) 43210"), "+919876543210");
+});
+
+test("Indian mobile validation accepts exactly ten mobile digits with an optional +91 prefix", () => {
+  assert.equal(isValidIndianMobile("9876543210"), true);
+  assert.equal(isValidIndianMobile("+91 98765 43210"), true);
+  assert.equal(isValidIndianMobile("5876543210"), false);
+  assert.equal(isValidIndianMobile("987654321"), false);
+  assert.equal(isValidIndianMobile("98765432101"), false);
+  assert.equal(isValidIndianMobile("+1 9876543210"), false);
 });
 
 test("queue transitions enforce the full allowed status flow", () => {

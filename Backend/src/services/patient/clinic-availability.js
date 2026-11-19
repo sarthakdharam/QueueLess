@@ -11,7 +11,12 @@ const DAY_NAMES = [
   "friday",
   "saturday",
 ];
-export const OPEN_STATUSES = ["booked", "confirmed", "checked_in"];
+export const OPEN_STATUSES = [
+  "booked",
+  "confirmed",
+  "checked_in",
+  "needs_rescheduling",
+];
 
 export function dateInZone(date, timeZone) {
   const fields = Object.fromEntries(

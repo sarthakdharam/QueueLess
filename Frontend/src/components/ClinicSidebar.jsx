@@ -9,6 +9,7 @@ export default function ClinicSidebar({ clinicName = "Clinic" }) {
     ["/clinic/queue", "▦", t("Queue dashboard")],
     ["/clinic/patients/today", "◷", t("Today's Patients")],
     ["/clinic/patients/history", "▤", t("Patient History")],
+    ["/clinic/analytics", "◫", t("Analytics")],
     ["/clinic/doctor-availability", "▧", t("Doctor availability")],
     ["/clinic/setup", "⚙", t("Clinic settings")],
   ];

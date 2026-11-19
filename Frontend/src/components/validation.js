@@ -38,8 +38,14 @@ export const INDIAN_REGIONS = [
 ];
 
 export const requiredMessage = (label) => `${label} is required.`;
-export const validMobile = (value) =>
-  /^\+?[0-9\s()-]{8,20}$/.test(value.trim());
+export const validMobile = (value) => {
+  const input = String(value || "").trim();
+  if (!/^\+?[0-9\s()-]+$/.test(input)) return false;
+  const digits = input.replace(/\D/g, "");
+  const nationalNumber =
+    digits.length === 12 && digits.startsWith("91") ? digits.slice(2) : digits;
+  return /^[6-9]\d{9}$/.test(nationalNumber);
+};
 
 export function validateFields(values, rules) {
   return Object.entries(rules).reduce((errors, [field, checks]) => {
@@ -61,7 +67,7 @@ export const minLength = (length, label) => ({
 });
 export const mobileRule = {
   test: validMobile,
-  message: "Enter a valid mobile number.",
+  message: "Enter a valid 10-digit Indian mobile number.",
 };
 export function parseAppointmentCapacity(value) {
   if (typeof value !== "string" || !/^\d+$/.test(value)) return null;

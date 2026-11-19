@@ -9,6 +9,7 @@ import notificationRoutes from "./notifications.js";
 import billingRoutes from "./billing.js";
 import patientRoutes from "./patients.js";
 import doctorEmergencyRoutes from "./doctor-emergencies.js";
+import analyticsRoutes from "./analytics.js";
 
 const clinicRouter = Router();
 clinicRouter.use(requireAuth);
@@ -18,6 +19,7 @@ clinicRouter.use(patientRoutes);
 clinicRouter.use(settingsRoutes);
 clinicRouter.use(doctorRoutes);
 clinicRouter.use(doctorEmergencyRoutes);
+clinicRouter.use(analyticsRoutes);
 clinicRouter.use(dashboardRoutes);
 clinicRouter.use(walkInRoutes);
 clinicRouter.use(queueRoutes);

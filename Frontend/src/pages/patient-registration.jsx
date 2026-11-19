@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { Link, Navigate } from "react-router-dom";
-import { useAppLanguage } from "../i18n.jsx";
+import { useAppLanguage, useTranslate } from "../i18n.jsx";
 import PatientShell from "../components/PatientShell.jsx";
 import { api } from "../api/client.js";
 import { connectPatientQueue } from "../api/realtime.js";
@@ -8,6 +8,7 @@ import ConfirmDialog from "../components/ConfirmDialog.jsx";
 
 export default function PatientRegistration() {
   const { locale } = useAppLanguage();
+  const t = useTranslate();
   const [secret] = useState(
     () =>
       window.location.hash.slice(1) ||
@@ -24,18 +25,50 @@ export default function PatientRegistration() {
   const [rescheduleOptions, setRescheduleOptions] = useState(null);
   const [selectedDate, setSelectedDate] = useState("");
   const [selectedSlot, setSelectedSlot] = useState("");
+  const [feedbackRating, setFeedbackRating] = useState(0);
+  const [feedbackCategories, setFeedbackCategories] = useState([]);
+  const [feedbackComment, setFeedbackComment] = useState("");
+  const [feedbackBusy, setFeedbackBusy] = useState(false);
   const formatClinicTime = (value) =>
     new Date(value).toLocaleString(locale, {
       dateStyle: "medium",
       timeStyle: "short",
       timeZone: data?.clinic?.timeZone,
     });
+  const formatRescheduleDate = (date) =>
+    new Date(`${date}T12:00:00.000Z`).toLocaleDateString(locale, {
+      weekday: "long",
+      month: "short",
+      day: "numeric",
+      timeZone: "UTC",
+    });
+  const formatRescheduleTime = (time) => {
+    const [hour, minute] = time.split(":").map(Number);
+    return new Intl.DateTimeFormat(locale, {
+      hour: "numeric",
+      minute: "2-digit",
+      hour12: true,
+      timeZone: "UTC",
+    }).format(new Date(Date.UTC(2000, 0, 1, hour, minute)));
+  };
   const appointmentStatusLabel = (status) =>
     ({
       needs_attention: "Needs attention",
       needs_rescheduling: "Needs rescheduling",
+      missed: "Missed appointment",
       checked_in: "Checked in",
     })[status] || status;
+  const appointmentRescheduleMode = (appointment, referenceTime) => {
+    if (!appointment) return null;
+    if (appointment.status === "missed") return "missed_rebooking";
+    if (appointment.status === "needs_rescheduling") return "clinic_recovery";
+    if (
+      appointment.status === "booked" &&
+      new Date(appointment.scheduledAt).getTime() > referenceTime
+    )
+      return "patient_change";
+    return null;
+  };
 
   useEffect(() => {
     if (!secret) return;
@@ -86,6 +119,10 @@ export default function PatientRegistration() {
           end: estimateReferenceTime + data.estimate.maximumMinutes * 60000,
         }
       : null;
+  const rescheduleMode = appointmentRescheduleMode(
+    data?.appointment,
+    estimateReferenceTime || 0,
+  );
 
   const updateNotifications = async () => {
     if (actionBusy) return;
@@ -187,7 +224,11 @@ export default function PatientRegistration() {
     try {
       await api.post(
         "/patient/reschedule",
-        { date: selectedDate, slotTime: selectedSlot },
+        {
+          date: selectedDate,
+          slotTime: selectedSlot,
+          expectedScheduledAt: data.appointment.scheduledAt,
+        },
         {
           headers: { Authorization: `Bearer ${secret}` },
           successMessage: "Your new appointment has been confirmed.",
@@ -208,6 +249,42 @@ export default function PatientRegistration() {
       await loadRescheduleOptions();
     } finally {
       setActionBusy(false);
+    }
+  };
+
+  const submitFeedback = async (event) => {
+    event.preventDefault();
+    if (!feedbackRating || feedbackBusy) return;
+    setFeedbackBusy(true);
+    try {
+      const { data: response } = await api.post(
+        "/patient/feedback",
+        {
+          rating: feedbackRating,
+          categories: feedbackCategories,
+          comment: feedbackComment,
+        },
+        {
+          headers: { Authorization: `Bearer ${secret}` },
+          successMessage: "Thank you for sharing your feedback.",
+        },
+      );
+      setData((current) => ({
+        ...current,
+        feedback: {
+          ...current.feedback,
+          submitted: true,
+          response: response.feedback,
+        },
+      }));
+      setError("");
+    } catch (requestError) {
+      setError(
+        requestError.response?.data?.error ||
+          "Your feedback could not be submitted. Please try again.",
+      );
+    } finally {
+      setFeedbackBusy(false);
     }
   };
 
@@ -264,6 +341,12 @@ export default function PatientRegistration() {
                       queue can continue.
                     </p>
                   )}
+                  {data.appointment.status === "missed" && (
+                    <p className="appointment-status-note">
+                      We did not record a check-in for this visit. You can
+                      choose a new available time below.
+                    </p>
+                  )}
                   <div className="patient-time-estimate">
                     <span>Your appointment</span>
                     <b>{formatClinicTime(data.appointment.scheduledAt)}</b>
@@ -295,17 +378,114 @@ export default function PatientRegistration() {
                 </div>
               )}
             </div>
-            {data.appointment?.status === "needs_rescheduling" && (
+            {data.feedback?.eligible && (
+              <section
+                className="patient-feedback-panel"
+                aria-labelledby="feedback-title"
+              >
+                {data.feedback.submitted ? (
+                  <>
+                    <div className="eyebrow">VISIT FEEDBACK</div>
+                    <h2 id="feedback-title">
+                      {t("Thank you for your feedback")}
+                    </h2>
+                    <p>
+                      {t("You rated this visit")}{" "}
+                      {data.feedback.response?.rating}/5.
+                    </p>
+                  </>
+                ) : (
+                  <form onSubmit={submitFeedback}>
+                    <div className="eyebrow">VISIT FEEDBACK</div>
+                    <h2 id="feedback-title">{t("How was your visit?")}</h2>
+                    <p>
+                      {t(
+                        "Your feedback helps the clinic improve future visits.",
+                      )}
+                    </p>
+                    <fieldset
+                      className="feedback-rating"
+                      aria-label={t("Rate your visit")}
+                    >
+                      {[1, 2, 3, 4, 5].map((rating) => (
+                        <button
+                          key={rating}
+                          type="button"
+                          className={
+                            rating <= feedbackRating ? "is-selected" : ""
+                          }
+                          aria-label={`${rating} ${t("out of 5")}`}
+                          aria-pressed={rating === feedbackRating}
+                          onClick={() => setFeedbackRating(rating)}
+                        >
+                          ★
+                        </button>
+                      ))}
+                    </fieldset>
+                    <div className="feedback-categories">
+                      {[
+                        "Helpful staff",
+                        "Clear updates",
+                        "Short wait",
+                        "Good consultation",
+                      ].map((category) => (
+                        <label key={category}>
+                          <input
+                            type="checkbox"
+                            checked={feedbackCategories.includes(category)}
+                            onChange={() =>
+                              setFeedbackCategories((current) =>
+                                current.includes(category)
+                                  ? current.filter((item) => item !== category)
+                                  : [...current, category],
+                              )
+                            }
+                          />
+                          {t(category)}
+                        </label>
+                      ))}
+                    </div>
+                    <label className="feedback-comment">
+                      {t("Optional comment")}
+                      <textarea
+                        value={feedbackComment}
+                        maxLength="1000"
+                        placeholder={t("Tell us more about your visit")}
+                        onChange={(event) =>
+                          setFeedbackComment(event.target.value)
+                        }
+                      />
+                    </label>
+                    <button
+                      className="button button-dark"
+                      disabled={!feedbackRating || feedbackBusy}
+                    >
+                      {feedbackBusy ? t("Submitting…") : t("Submit feedback")}
+                    </button>
+                  </form>
+                )}
+              </section>
+            )}
+            {rescheduleMode && (
               <section
                 className="patient-reschedule-panel"
                 aria-labelledby="reschedule-title"
               >
                 <div>
                   <div className="eyebrow">APPOINTMENT CHANGE</div>
-                  <h2 id="reschedule-title">Choose a new appointment time</h2>
+                  <h2 id="reschedule-title">
+                    {rescheduleMode === "patient_change"
+                      ? "Change your appointment"
+                      : rescheduleMode === "missed_rebooking"
+                        ? "Rebook your missed appointment"
+                        : "Choose a new appointment time"}
+                  </h2>
                   <p>
-                    Your doctor is unavailable for this visit. Your existing
-                    booking stays protected until you confirm a replacement.
+                    {rescheduleMode === "patient_change"
+                      ? "Your current appointment remains reserved until you confirm a new time."
+                      : rescheduleMode === "missed_rebooking"
+                        ? "Choose a new available time for your missed visit."
+                        : "Your doctor is unavailable for this visit. Your existing booking stays protected until you confirm a replacement."}
                   </p>
                 </div>
                 {!rescheduleOptions ? (
@@ -317,7 +497,9 @@ export default function PatientRegistration() {
                   >
                     {actionBusy
                       ? "Finding available times…"
-                      : "View available times"}
+                      : rescheduleMode === "patient_change"
+                        ? "Choose a new time"
+                        : "View available times"}
                   </button>
                 ) : rescheduleOptions.days.length ? (
                   <div className="reschedule-controls">
@@ -332,13 +514,7 @@ export default function PatientRegistration() {
                       >
                         {rescheduleOptions.days.map((day) => (
                           <option key={day.date} value={day.date}>
-                            {new Date(
-                              `${day.date}T12:00:00`,
-                            ).toLocaleDateString(locale, {
-                              weekday: "long",
-                              month: "short",
-                              day: "numeric",
-                            })}
+                            {formatRescheduleDate(day.date)}
                           </option>
                         ))}
                       </select>
@@ -358,7 +534,7 @@ export default function PatientRegistration() {
                           )?.slots || []
                         ).map((slot) => (
                           <option key={slot.time} value={slot.time}>
-                            {slot.label}
+                            {formatRescheduleTime(slot.time)}
                           </option>
                         ))}
                       </select>

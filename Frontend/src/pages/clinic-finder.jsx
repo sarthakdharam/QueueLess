@@ -2,8 +2,10 @@ import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import PatientShell from "../components/PatientShell.jsx";
 import { api } from "../api/client.js";
+import { useTranslate } from "../i18n.jsx";
 
 export default function ClinicFinder() {
+  const t = useTranslate();
   const [q, setQ] = useState("");
   const [clinics, setClinics] = useState([]);
   const [busy, setBusy] = useState(true);
@@ -66,6 +68,21 @@ export default function ClinicFinder() {
                   {clinic.contact_number && (
                     <small>{clinic.contact_number}</small>
                   )}
+                  <div className="clinic-rating">
+                    <span aria-hidden="true">★</span>
+                    {clinic.review_count ? (
+                      <>
+                        <strong>
+                          {Number(clinic.average_rating).toFixed(1)}
+                        </strong>
+                        <small>
+                          {clinic.review_count} {t("reviews")}
+                        </small>
+                      </>
+                    ) : (
+                      <small>{t("No ratings yet")}</small>
+                    )}
+                  </div>
                 </div>
                 <Link
                   className="button button-dark"

@@ -31,6 +31,7 @@ export default function AuthPage({ mode }) {
   const [error, setError] = useState("");
   const [fieldErrors, setFieldErrors] = useState({});
   const [busy, setBusy] = useState(false);
+  const [showPassword, setShowPassword] = useState(false);
   const update = (event) => {
     const { name, value, checked, type } = event.target;
     const nextValue = type === "checkbox" ? checked : value;
@@ -319,24 +320,41 @@ export default function AuthPage({ mode }) {
               </label>
               <label className={fieldErrors.password ? "has-field-error" : ""}>
                 Password<span className="required-mark"> *</span>
-                <input
-                  name="password"
-                  type="password"
-                  autoComplete={
-                    isRegister ? "new-password" : "current-password"
-                  }
-                  required
-                  minLength={isRegister ? 8 : undefined}
-                  value={form.password}
-                  onChange={update}
-                  aria-invalid={!!fieldErrors.password}
-                  aria-describedby={
-                    fieldErrors.password ? "password-error" : undefined
-                  }
-                  placeholder={
-                    isRegister ? "Create a strong password" : "Your password"
-                  }
-                />
+                <span className="password-input-wrap">
+                  <input
+                    name="password"
+                    type={showPassword ? "text" : "password"}
+                    autoComplete={
+                      isRegister ? "new-password" : "current-password"
+                    }
+                    required
+                    minLength={isRegister ? 8 : undefined}
+                    value={form.password}
+                    onChange={update}
+                    aria-invalid={!!fieldErrors.password}
+                    aria-describedby={
+                      fieldErrors.password ? "password-error" : undefined
+                    }
+                    placeholder={
+                      isRegister ? "Create a strong password" : "Your password"
+                    }
+                  />
+                  <button
+                    type="button"
+                    className="password-visibility-toggle"
+                    onClick={() => setShowPassword((visible) => !visible)}
+                    aria-label={
+                      showPassword ? "Hide password" : "Show password"
+                    }
+                    title={showPassword ? "Hide password" : "Show password"}
+                  >
+                    <svg viewBox="0 0 24 24" aria-hidden="true">
+                      <path d="M2.5 12s3.4-5.5 9.5-5.5S21.5 12 21.5 12 18.1 17.5 12 17.5 2.5 12 2.5 12Z" />
+                      <circle cx="12" cy="12" r="2.6" />
+                      {showPassword && <path d="m4 4 16 16" />}
+                    </svg>
+                  </button>
+                </span>
                 {isRegister && (
                   <small className="password-hint">
                     At least 8 characters, with uppercase, lowercase, number,

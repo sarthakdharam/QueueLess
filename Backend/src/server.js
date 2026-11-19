@@ -3,11 +3,28 @@ import app from "./app.js";
 import { createServer } from "node:http";
 import { initializeSocketServer } from "./sockets/socket-server.js";
 import { retryFailedNotifications } from "./services/notifications/dispatch.js";
+import {
+  reconcileAppointmentsOutsideClinicHours,
+  recoverOverdueAppointments,
+} from "./services/appointments/no-show-recovery.js";
 
 const PORT = process.env.PORT || 3000;
 let server;
 let isShuttingDown = false;
 let notificationWorker;
+let noShowWorker;
+
+function runNoShowRecovery() {
+  void (async () => {
+    await reconcileAppointmentsOutsideClinicHours();
+    await recoverOverdueAppointments();
+  })().catch((error) =>
+    console.error(
+      "Appointment recovery failed:",
+      process.env.NODE_ENV === "production" ? error.name : error.message,
+    ),
+  );
+}
 
 async function startServer() {
   if (!process.env.JWT_SECRET || process.env.JWT_SECRET.length < 32) {
@@ -40,6 +57,8 @@ async function startServer() {
       ),
     );
   }, 30000);
+  runNoShowRecovery();
+  noShowWorker = setInterval(runNoShowRecovery, 5 * 60 * 1000);
   server.listen(PORT, "127.0.0.1", () => {
     console.log(`QueueLess backend running on port ${PORT}`);
   });
@@ -50,6 +69,7 @@ async function shutdown(signal) {
   isShuttingDown = true;
   console.log(`${signal} received. Shutting down QueueLess backend...`);
   if (notificationWorker) clearInterval(notificationWorker);
+  if (noShowWorker) clearInterval(noShowWorker);
 
   try {
     if (server)

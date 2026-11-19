@@ -2,7 +2,6 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import { Link, Navigate } from "react-router-dom";
 import { Localized, useAppLanguage } from "../i18n.jsx";
 import { api } from "../api/client.js";
-import Brand from "../components/Brand.jsx";
 import { connectClinicQueue } from "../api/realtime.js";
 import { FieldError } from "../components/FieldError.jsx";
 import DropdownSelect from "../components/DropdownSelect.jsx";
@@ -326,62 +325,7 @@ export default function ClinicDashboard() {
   return (
     <Localized>
       <main className="portal-shell">
-        <aside className="portal-sidebar">
-          <Brand to="/clinic/queue" />
-          <div className="side-clinic">
-            <span className="clinic-avatar">
-              {setup.clinic.name.slice(0, 1)}
-            </span>
-            <div>
-              <b>{setup.clinic.name}</b>
-              <small>Clinic workspace</small>
-            </div>
-            <span>⌄</span>
-          </div>
-          <div className="side-label">WORKSPACE</div>
-          <Link className="side-link selected" to="/clinic/queue">
-            <span>▦</span> Queue dashboard
-          </Link>
-          <Link className="side-link" to="/clinic/patients/today">
-            <span>◷</span> Today's Patients
-          </Link>
-          <Link className="side-link" to="/clinic/patients/history">
-            <span>▤</span> Patient History
-          </Link>
-          <Link className="side-link" to="/clinic/doctor-availability">
-            <span>▧</span> Doctor availability
-          </Link>
-          <Link
-            className="side-link"
-            to="/clinic/setup"
-            state={{ from: "/clinic/queue" }}
-          >
-            <span>⚙</span> Clinic settings
-          </Link>
-          <div className="sidebar-bottom">
-            <span className="clinic-avatar staff-avatar">
-              {setup.clinic.name.slice(0, 1)}
-            </span>
-            <div>
-              <b>Clinic administrator</b>
-              <small>Administrator</small>
-            </div>
-            <button
-              aria-label="Sign out"
-              title="Sign out"
-              className="sidebar-signout-button"
-              onClick={() => {
-                localStorage.removeItem("queueless.session");
-                window.location.href = "/";
-              }}
-            >
-              <svg viewBox="0 0 24 24" aria-hidden="true">
-                <path d="M10 17l5-5-5-5m5 5H3" />
-                <path d="M12 3h7a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-7" />
-              </svg>
-            </button>
-          </div>
-        </aside>
+        <ClinicSidebar clinicName={setup.clinic.name} />
         <section
           className={`portal-main ${isViewingToday ? "" : "dashboard-schedule-readonly"}`}
         >

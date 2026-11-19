@@ -1,3 +1,4 @@
+/* Global QueueLess portal theme. Kept in a dedicated stylesheet for reliable Vite HMR updates. */
 :root {
   --brand-950: #201843;
   --brand-900: #30245f;
@@ -461,6 +462,42 @@ footer {
   border-color: var(--brand-500);
   box-shadow: 0 0 0 3px #8974f229;
   outline: 0;
+}
+.password-input-wrap {
+  position: relative;
+  display: block;
+}
+.auth-card .password-input-wrap input {
+  padding-right: 46px;
+}
+.password-visibility-toggle {
+  position: absolute;
+  top: 50%;
+  right: 7px;
+  display: grid;
+  width: 34px;
+  height: 34px;
+  place-items: center;
+  padding: 0;
+  border: 0;
+  border-radius: 8px;
+  background: transparent;
+  color: var(--brand-700);
+  cursor: pointer;
+  transform: translateY(-50%);
+}
+.password-visibility-toggle:hover {
+  background: var(--brand-100);
+  color: var(--brand-900);
+}
+.password-visibility-toggle svg {
+  width: 18px;
+  height: 18px;
+  fill: none;
+  stroke: currentColor;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  stroke-width: 1.8;
 }
 .password-hint,
 .setup-grid small,
@@ -1575,6 +1612,9 @@ footer {
 .table-pagination [aria-current="page"] {
   white-space: nowrap;
 }
+.clinic-patients-page .table-pagination {
+  padding-right: 220px;
+}
 table {
   color: var(--ink);
 }
@@ -1990,6 +2030,29 @@ td > small,
 .slot small,
 .confirmation-card small {
   color: #625d78;
+}
+.clinic-rating {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  margin-top: 12px;
+  padding: 6px 9px;
+  border: 1px solid #f0ddb0;
+  border-radius: 999px;
+  background: #fffaf0;
+  color: #7a5510;
+  font-size: 12px;
+  line-height: 1;
+}
+.clinic-rating > span {
+  color: #d99217;
+  font-size: 15px;
+}
+.clinic-rating strong {
+  color: #4f3911;
+}
+.clinic-rating small {
+  color: #806d48;
 }
 .patient-form {
   border-color: var(--line);
@@ -2741,6 +2804,10 @@ td > small,
   .clinic-patients-page .portal-main {
     overflow: hidden;
   }
+  .clinic-patients-page .table-pagination {
+    padding-right: 0;
+    padding-bottom: 72px;
+  }
   .history-pagination {
     align-items: flex-start;
     flex-direction: column;
@@ -3201,6 +3268,75 @@ td > small,
   background: linear-gradient(135deg, #f8f5ff, #fff);
   box-shadow: 0 12px 28px #2c1b5410;
 }
+.patient-feedback-panel {
+  margin: 18px 0;
+  padding: 22px;
+  border: 1px solid #dcd2fa;
+  border-radius: 16px;
+  background: linear-gradient(135deg, #fffbf5, #fff 62%);
+  box-shadow: 0 12px 28px #2c1b5410;
+}
+.patient-feedback-panel h2 {
+  margin: 5px 0 8px;
+  font-size: 21px;
+}
+.patient-feedback-panel p {
+  color: var(--muted);
+  line-height: 1.6;
+}
+.feedback-rating {
+  display: flex;
+  gap: 7px;
+  margin: 18px 0;
+  padding: 0;
+  border: 0;
+}
+.feedback-rating button {
+  width: 42px;
+  height: 42px;
+  border: 1px solid #e1d7f3;
+  border-radius: 12px;
+  background: #fff;
+  color: #b6a6d4;
+  font-size: 22px;
+  cursor: pointer;
+}
+.feedback-rating button.is-selected {
+  border-color: #e5a72f;
+  background: #fff5d9;
+  color: #e6a326;
+}
+.feedback-categories {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 9px;
+  margin: 0 0 16px;
+}
+.feedback-categories label {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  padding: 8px 10px;
+  border: 1px solid #e4dcf6;
+  border-radius: 999px;
+  background: #fff;
+  color: #50466c;
+  font-size: 13px;
+}
+.feedback-categories input {
+  accent-color: var(--brand-600);
+}
+.feedback-comment {
+  display: grid;
+  gap: 7px;
+  margin-bottom: 14px;
+  color: #50466c;
+  font-weight: 700;
+}
+.feedback-comment textarea {
+  min-height: 88px;
+  resize: vertical;
+}
 .patient-reschedule-panel h2 {
   margin: 5px 0 8px;
   font-size: 21px;
@@ -3216,9 +3352,180 @@ td > small,
   align-items: end;
   gap: 12px;
 }
+.reschedule-controls label {
+  gap: 8px;
+  padding: 11px 12px 12px;
+  border: 1px solid #e4dcf6;
+  border-radius: 12px;
+  background: #ffffffb8;
+  color: #50466c;
+  box-shadow: inset 0 1px #fff;
+}
+.reschedule-controls select {
+  min-height: 46px;
+  padding-right: 38px;
+  border-color: #d9ccf2;
+  border-radius: 9px;
+  background-color: #fff;
+  color: var(--ink);
+  font-weight: 700;
+  cursor: pointer;
+}
+.reschedule-controls select:focus {
+  outline: none;
+  border-color: var(--brand-500);
+  box-shadow: 0 0 0 3px #a855f71c;
+}
 .reschedule-controls .button {
   min-height: 44px;
   white-space: nowrap;
+}
+.analytics-header {
+  align-items: flex-start;
+}
+.analytics-actions {
+  display: flex;
+  align-items: end;
+  gap: 10px;
+}
+.analytics-actions label {
+  display: grid;
+  gap: 6px;
+  color: var(--muted);
+  font-size: 11px;
+  font-weight: 750;
+}
+.analytics-actions input {
+  min-height: 42px;
+  padding: 0 10px;
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  background: #fff;
+  color: var(--ink);
+  font: inherit;
+}
+.analytics-metrics {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(175px, 1fr));
+  gap: 14px;
+  margin: 20px 0;
+}
+.analytics-metric,
+.analytics-hours {
+  border: 1px solid var(--line);
+  border-radius: 16px;
+  background: #fff;
+  box-shadow: 0 10px 26px #30245f0d;
+}
+.analytics-metric {
+  display: grid;
+  gap: 7px;
+  min-height: 132px;
+  padding: 18px;
+}
+.analytics-metric span {
+  color: #645a7e;
+  font-size: 12px;
+  font-weight: 700;
+}
+.analytics-metric strong {
+  color: var(--brand-900);
+  font-size: 29px;
+  line-height: 1;
+}
+.analytics-metric small {
+  color: var(--muted);
+  font-size: 11px;
+  line-height: 1.45;
+}
+.analytics-hours {
+  display: grid;
+  grid-template-columns: minmax(240px, 0.8fr) 1.2fr;
+  gap: 24px;
+  padding: 24px;
+}
+.analytics-hours h2 {
+  margin: 5px 0 7px;
+  font-size: 21px;
+}
+.analytics-hours p {
+  margin: 0;
+  color: var(--muted);
+  line-height: 1.55;
+}
+.analytics-donut-chart {
+  display: flex;
+  min-height: 190px;
+  align-items: center;
+  justify-content: center;
+  gap: 34px;
+  padding: 8px 10px;
+}
+.analytics-donut {
+  position: relative;
+  display: grid;
+  width: 154px;
+  height: 154px;
+  flex: none;
+  place-items: center;
+  border-radius: 50%;
+  background: var(--donut-segments);
+  box-shadow: 0 14px 28px #30245f1c;
+}
+.analytics-donut::after {
+  position: absolute;
+  inset: 20px;
+  border-radius: 50%;
+  background: #fff;
+  content: "";
+}
+.analytics-donut > div {
+  position: relative;
+  z-index: 1;
+  display: grid;
+  gap: 2px;
+  place-items: center;
+}
+.analytics-donut strong {
+  color: var(--brand-900);
+  font-size: 30px;
+  line-height: 1;
+}
+.analytics-donut span {
+  color: var(--muted);
+  font-size: 11px;
+  font-weight: 700;
+}
+.analytics-chart-legend {
+  display: grid;
+  min-width: 180px;
+  gap: 10px;
+}
+.analytics-chart-legend > div {
+  display: grid;
+  grid-template-columns: 10px 1fr auto;
+  align-items: center;
+  gap: 9px;
+  padding-bottom: 9px;
+  border-bottom: 1px solid #ebe6f4;
+}
+.analytics-chart-legend i {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+}
+.analytics-chart-legend span {
+  color: var(--ink);
+  font-size: 12px;
+  font-weight: 750;
+}
+.analytics-chart-legend b {
+  color: var(--muted);
+  font-size: 11px;
+  font-weight: 700;
+}
+.analytics-empty {
+  align-self: center;
 }
 @media (max-width: 800px) {
   .availability-form form {
@@ -3232,6 +3539,12 @@ td > small,
   }
   .reschedule-controls .button {
     grid-column: span 2;
+  }
+  .analytics-metrics {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+  .analytics-hours {
+    grid-template-columns: 1fr;
   }
 }
 @media (max-width: 700px) {
@@ -3257,6 +3570,21 @@ td > small,
   .availability-note,
   .reschedule-controls .button {
     grid-column: auto;
+  }
+  .analytics-actions {
+    width: 100%;
+    align-items: end;
+  }
+  .analytics-actions label,
+  .analytics-actions input {
+    width: 100%;
+  }
+  .analytics-metrics {
+    grid-template-columns: 1fr 1fr;
+  }
+  .analytics-donut-chart {
+    flex-direction: column;
+    align-items: flex-start;
   }
   .availability-form .button {
     width: 100%;

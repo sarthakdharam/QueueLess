@@ -24,8 +24,22 @@ export async function searchClinics(req, res, next) {
         "c.contact_number AS contact_number",
         "c.time_zone AS time_zone",
       ])
+      .addSelect(
+        `(SELECT round(avg(af.rating)::numeric, 1)
+            FROM appointment_feedback af
+           WHERE af.clinic_id = c.id)`,
+        "average_rating",
+      )
+      .addSelect(
+        `(SELECT count(*)::int
+            FROM appointment_feedback af
+           WHERE af.clinic_id = c.id)`,
+        "review_count",
+      )
       .distinct(true)
-      .orderBy("c.name", "ASC")
+      .orderBy("average_rating", "DESC", "NULLS LAST")
+      .addOrderBy("review_count", "DESC")
+      .addOrderBy("c.name", "ASC")
       .limit(50);
     if (req.query.q)
       builder.andWhere(

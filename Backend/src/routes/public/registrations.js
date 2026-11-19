@@ -4,6 +4,7 @@ import { validateRequest } from "../../middleware/validate-request.js";
 import { registrationLimiter } from "../../middleware/patient-rate-limits.js";
 import { validDate } from "../../services/patient/clinic-availability.js";
 import { createPatientRegistration } from "../../controller/public-registration.controller.js";
+import { isValidIndianMobile } from "../../utils/normalize-mobile.js";
 
 const router = Router();
 
@@ -19,8 +20,8 @@ router.post(
       .withMessage("Enter your name."),
     body("mobile")
       .trim()
-      .matches(/^\+?[0-9\s()-]{8,20}$/)
-      .withMessage("Enter a valid mobile number."),
+      .custom(isValidIndianMobile)
+      .withMessage("Enter a valid 10-digit Indian mobile number."),
     body("visitType").isIn(["appointment", "walk_in"]),
     body("doctorId")
       .if(body("visitType").equals("appointment"))

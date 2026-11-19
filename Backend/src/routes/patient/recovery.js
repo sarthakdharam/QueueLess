@@ -11,6 +11,7 @@ import {
 } from "../../controller/patient-recovery.controller.js";
 import { requirePatientLookup } from "../../middleware/patient-lookup.js";
 import { lookupReadLimiter } from "../../middleware/patient-rate-limits.js";
+import { isValidIndianMobile } from "../../utils/normalize-mobile.js";
 
 const router = Router();
 
@@ -20,7 +21,8 @@ router.post(
   [
     body("mobile")
       .trim()
-      .matches(/^\+?[0-9\s()-]{8,20}$/),
+      .custom(isValidIndianMobile)
+      .withMessage("Enter a valid 10-digit Indian mobile number."),
     validateRequest,
   ],
   requestRecoveryCode,
@@ -32,7 +34,8 @@ router.post(
   [
     body("mobile")
       .trim()
-      .matches(/^\+?[0-9\s()-]{8,20}$/),
+      .custom(isValidIndianMobile)
+      .withMessage("Enter a valid 10-digit Indian mobile number."),
     body("code").isLength({ min: 6, max: 6 }).isNumeric(),
     validateRequest,
   ],

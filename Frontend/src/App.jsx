@@ -17,6 +17,7 @@ import ClinicBilling from "./pages/clinic-billing.jsx";
 import ClinicNotifications from "./pages/clinic-notifications.jsx";
 import ClinicPatients from "./pages/clinic-patients.jsx";
 import ClinicDoctorAvailability from "./pages/clinic-doctor-availability.jsx";
+import ClinicAnalytics from "./pages/clinic-analytics.jsx";
 import ToastViewport from "./components/ToastViewport.jsx";
 
 export default function App() {
@@ -47,6 +48,7 @@ export default function App() {
           path="/clinic/doctor-availability"
           element={<ClinicDoctorAvailability />}
         />
+        <Route path="/clinic/analytics" element={<ClinicAnalytics />} />
         <Route path="/clinic/billing" element={<ClinicBilling />} />
         <Route path="/clinic/notifications" element={<ClinicNotifications />} />
         <Route path="*" element={<Navigate to="/" replace />} />

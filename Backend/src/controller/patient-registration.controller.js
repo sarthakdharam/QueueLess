@@ -18,6 +18,10 @@ import {
 } from "../services/patient/clinic-availability.js";
 import { activeEmergencyForSlot } from "../services/clinic/doctor-emergencies.js";
 import { dispatchNotification } from "../services/notifications/dispatch.js";
+import {
+  RESCHEDULABLE_APPOINTMENT_STATUSES,
+  rescheduleMode,
+} from "../services/patient/appointment-rescheduling.js";
 
 export async function getPatientRegistration(req, res, next) {
   try {
@@ -129,6 +133,12 @@ export async function getPatientRegistration(req, res, next) {
           "This is an estimate based on queue position and configured slot length; delays may change it.",
       };
     }
+    const feedback = await AppDataSource.query(
+      `SELECT rating, categories, comment, created_at
+         FROM appointment_feedback
+        WHERE registration_id = $1`,
+      [raw.registration_id],
+    );
     return res.json({
       registration: {
         reference: raw.reference,
@@ -163,8 +173,86 @@ export async function getPatientRegistration(req, res, next) {
       arrivalInstructions:
         "Online registration does not confirm physical arrival. Please check in with the receptionist when you reach the clinic.",
       estimate,
+      feedback: {
+        eligible: raw.queue_status === "completed",
+        submitted: feedback.length > 0,
+        response: feedback[0]
+          ? {
+              rating: Number(feedback[0].rating),
+              categories: feedback[0].categories || [],
+              comment: feedback[0].comment,
+              createdAt: feedback[0].created_at,
+            }
+          : null,
+      },
     });
   } catch (error) {
+    return next(error);
+  }
+}
+
+export async function submitAppointmentFeedback(req, res, next) {
+  try {
+    const { rating, categories = [], comment = "" } = req.body;
+    const cleanCategories = [...new Set(categories)]
+      .filter((item) => typeof item === "string")
+      .slice(0, 5);
+    const cleanComment = comment.trim();
+    const result = await AppDataSource.transaction(async (manager) => {
+      await manager.query("SELECT pg_advisory_xact_lock(hashtext($1))", [
+        `feedback:${req.patientAccess.registrationId}`,
+      ]);
+      const rows = await manager.query(
+        `SELECT r.clinic_id
+           FROM registrations r
+           JOIN queue_entries q ON q.registration_id = r.id
+          WHERE r.id = $1 AND q.status = 'completed'
+          FOR UPDATE`,
+        [req.patientAccess.registrationId],
+      );
+      if (!rows[0]) {
+        throw Object.assign(
+          new Error(
+            "Feedback is available after your consultation is completed.",
+          ),
+          { status: 409 },
+        );
+      }
+      const existing = await manager.query(
+        `SELECT id FROM appointment_feedback WHERE registration_id = $1`,
+        [req.patientAccess.registrationId],
+      );
+      if (existing[0]) {
+        throw Object.assign(new Error("Feedback has already been submitted."), {
+          status: 409,
+        });
+      }
+      const [feedback] = await manager.query(
+        `INSERT INTO appointment_feedback (registration_id, clinic_id, rating, categories, comment)
+         VALUES ($1, $2, $3, $4::jsonb, $5)
+         RETURNING rating, categories, comment, created_at`,
+        [
+          req.patientAccess.registrationId,
+          rows[0].clinic_id,
+          rating,
+          JSON.stringify(cleanCategories),
+          cleanComment || null,
+        ],
+      );
+      return feedback;
+    });
+    return res.status(201).json({
+      feedback: {
+        rating: Number(result.rating),
+        categories: result.categories || [],
+        comment: result.comment,
+        createdAt: result.created_at,
+      },
+      message: "Thank you for sharing your feedback.",
+    });
+  } catch (error) {
+    if (error.status)
+      return res.status(error.status).json({ error: error.message });
     return next(error);
   }
 }
@@ -210,12 +298,11 @@ export async function getRescheduleOptions(req, res, next) {
     const appointment = await AppDataSource.getRepository(
       Appointment,
     ).findOneBy({ registrationId: req.patientAccess.registrationId });
-    if (!appointment || appointment.status !== "needs_rescheduling")
-      return res
-        .status(409)
-        .json({
-          error: "This appointment does not currently need rescheduling.",
-        });
+    const mode = rescheduleMode(appointment);
+    if (!mode)
+      return res.status(409).json({
+        error: "This appointment does not currently need rescheduling.",
+      });
     const clinicData = await loadPublicClinic(appointment.clinicId);
     const doctor = clinicData?.doctors.find(
       (item) => item.id === appointment.doctorId,
@@ -239,7 +326,11 @@ export async function getRescheduleOptions(req, res, next) {
       });
       if (slots.length) days.push({ date, slots });
     }
-    return res.json({ doctor: { id: doctor.id, name: doctor.name }, days });
+    return res.json({
+      doctor: { id: doctor.id, name: doctor.name },
+      mode,
+      days,
+    });
   } catch (error) {
     return next(error);
   }
@@ -247,16 +338,15 @@ export async function getRescheduleOptions(req, res, next) {
 
 export async function reschedulePatientAppointment(req, res, next) {
   try {
-    const { date, slotTime } = req.body;
+    const { date, slotTime, expectedScheduledAt } = req.body;
     const appointment = await AppDataSource.getRepository(
       Appointment,
     ).findOneBy({ registrationId: req.patientAccess.registrationId });
-    if (!appointment || appointment.status !== "needs_rescheduling")
-      return res
-        .status(409)
-        .json({
-          error: "This appointment does not currently need rescheduling.",
-        });
+    const mode = rescheduleMode(appointment);
+    if (!mode)
+      return res.status(409).json({
+        error: "This appointment does not currently need rescheduling.",
+      });
     const clinicData = await loadPublicClinic(appointment.clinicId);
     const doctor = clinicData?.doctors.find(
       (item) => item.id === appointment.doctorId,
@@ -277,22 +367,36 @@ export async function reschedulePatientAppointment(req, res, next) {
       date,
     });
     if (!allowed.some((item) => item.startsAt === slot.toISOString()))
-      return res
-        .status(409)
-        .json({
-          error:
-            "That replacement slot is no longer available. Choose another time.",
-        });
+      return res.status(409).json({
+        error:
+          "That replacement slot is no longer available. Choose another time.",
+      });
     const result = await AppDataSource.transaction(async (manager) => {
       await manager.query("SELECT pg_advisory_xact_lock(hashtext($1))", [
         `appointment:${appointment.clinicId}:${appointment.doctorId}:${slot.toISOString()}`,
       ]);
       const current = await manager
         .getRepository(Appointment)
-        .findOneBy({ id: appointment.id, status: "needs_rescheduling" });
+        .createQueryBuilder("a")
+        .where(
+          "a.id = :id AND a.status IN (:...statuses) AND a.scheduled_at = :expectedScheduledAt",
+          {
+            id: appointment.id,
+            statuses: RESCHEDULABLE_APPOINTMENT_STATUSES,
+            expectedScheduledAt: new Date(expectedScheduledAt),
+          },
+        )
+        .getOne();
       if (!current)
         throw Object.assign(
-          new Error("This appointment has already been updated."),
+          new Error(
+            "This appointment has changed. Refresh and choose a time again.",
+          ),
+          { status: 409 },
+        );
+      if (!rescheduleMode(current))
+        throw Object.assign(
+          new Error("This appointment can no longer be changed."),
           { status: 409 },
         );
       if (
@@ -331,25 +435,19 @@ export async function reschedulePatientAppointment(req, res, next) {
       const queueEntry = await manager
         .getRepository(QueueEntry)
         .findOneBy({ registrationId: current.registrationId });
-      let session = await manager
-        .getRepository(QueueSession)
-        .findOneBy({
-          clinicId: current.clinicId,
-          doctorId: current.doctorId,
-          sessionDate: date,
-        });
+      let session = await manager.getRepository(QueueSession).findOneBy({
+        clinicId: current.clinicId,
+        doctorId: current.doctorId,
+        sessionDate: date,
+      });
       if (!session)
-        session = await manager
-          .getRepository(QueueSession)
-          .save(
-            manager
-              .getRepository(QueueSession)
-              .create({
-                clinicId: current.clinicId,
-                doctorId: current.doctorId,
-                sessionDate: date,
-              }),
-          );
+        session = await manager.getRepository(QueueSession).save(
+          manager.getRepository(QueueSession).create({
+            clinicId: current.clinicId,
+            doctorId: current.doctorId,
+            sessionDate: date,
+          }),
+        );
       if (queueEntry) {
         const max = await manager
           .getRepository(QueueEntry)
@@ -358,37 +456,34 @@ export async function reschedulePatientAppointment(req, res, next) {
           .select("MAX(q.token_number)", "max_token")
           .addSelect("MAX(q.queue_order)", "max_order")
           .getRawOne();
-        await manager
-          .getRepository(QueueEntry)
-          .update(
-            { id: queueEntry.id },
-            {
-              sessionId: session.id,
-              tokenNumber: Number(max.max_token || 0) + 1,
-              queueOrder: Number(max.max_order || 0) + 1000,
-              status: "registered",
-              checkedInAt: null,
-              calledAt: null,
-              consultationStartedAt: null,
-            },
-          );
+        await manager.getRepository(QueueEntry).update(
+          { id: queueEntry.id },
+          {
+            sessionId: session.id,
+            tokenNumber: Number(max.max_token || 0) + 1,
+            queueOrder: Number(max.max_order || 0) + 1000,
+            status: "registered",
+            checkedInAt: null,
+            calledAt: null,
+            consultationStartedAt: null,
+          },
+        );
       }
       const oldTime = current.scheduledAt;
       current.scheduledAt = slot;
       current.status = "booked";
       await manager.getRepository(Appointment).save(current);
       await manager
-        .getRepository(AppointmentReschedule)
-        .save(
-          manager
-            .getRepository(AppointmentReschedule)
-            .create({
-              appointmentId: current.id,
-              previousScheduledAt: oldTime,
-              newScheduledAt: slot,
-              changedBy: "patient",
-            }),
-        );
+        .getRepository(Registration)
+        .update({ id: current.registrationId }, { status: "registered" });
+      await manager.getRepository(AppointmentReschedule).save(
+        manager.getRepository(AppointmentReschedule).create({
+          appointmentId: current.id,
+          previousScheduledAt: oldTime,
+          newScheduledAt: slot,
+          changedBy: mode,
+        }),
+      );
       return current;
     });
     const registrationRows = await AppDataSource.query(

@@ -8,6 +8,7 @@ import {
   getClinicSession,
 } from "../controller/auth.controller.js";
 import { INDIAN_REGIONS } from "../utils/indian-regions.js";
+import { isValidIndianMobile } from "../utils/normalize-mobile.js";
 
 export const authRouter = Router();
 const authLimiter = rateLimit({
@@ -63,8 +64,8 @@ authRouter.post(
       .withMessage("Choose a valid Indian state or Union Territory."),
     body("contactNumber")
       .trim()
-      .matches(/^\+?[0-9\s()-]{8,20}$/)
-      .withMessage("Enter a valid clinic phone number."),
+      .custom(isValidIndianMobile)
+      .withMessage("Enter a valid 10-digit clinic mobile number."),
     emailRule,
     body("adminName")
       .trim()
