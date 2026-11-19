@@ -41,10 +41,13 @@ export default function StateSelect({
   const [open, setOpen] = useState(false);
   const [active, setActive] = useState(0);
   const root = useRef(null);
-  const displayedQuery = query === null ? value || "" : query;
+  const regionLabel = (region) => t(region);
+  const displayedQuery = query === null ? regionLabel(value || "") : query;
   const normalizedQuery = displayedQuery.trim().toLowerCase();
   const matchingRegions = INDIAN_REGIONS.filter((region) =>
-    region.toLowerCase().includes(normalizedQuery),
+    [region, regionLabel(region)].some((label) =>
+      label.toLowerCase().includes(normalizedQuery),
+    ),
   );
   const matches =
     matchingRegions.length || normalizedQuery.length < 5
@@ -61,7 +64,7 @@ export default function StateSelect({
   }, []);
   const choose = (region) => {
     onChange(region);
-    setQuery(region);
+    setQuery(null);
     setOpen(false);
   };
   return (
@@ -88,9 +91,11 @@ export default function StateSelect({
           event.currentTarget.setSelectionRange(end, end);
         }}
         onBlur={() => {
-          const exactMatch = INDIAN_REGIONS.find(
-            (region) =>
-              region.toLowerCase() === displayedQuery.trim().toLowerCase(),
+          const exactMatch = INDIAN_REGIONS.find((region) =>
+            [region, regionLabel(region)].some(
+              (label) =>
+                label.toLowerCase() === displayedQuery.trim().toLowerCase(),
+            ),
           );
           if (exactMatch) choose(exactMatch);
           else if (matches.length === 1) choose(matches[0]);
@@ -141,7 +146,7 @@ export default function StateSelect({
                 }}
                 onMouseEnter={() => setActive(matches.indexOf(region))}
               >
-                {region}
+                {regionLabel(region)}
               </li>
             ))
           ) : (
@@ -153,7 +158,7 @@ export default function StateSelect({
         </ul>
       )}
       <span className="sr-only" aria-live="polite">
-        {value ? `${t("Selected")} ${value}` : ""}
+        {value ? `${t("Selected")} ${regionLabel(value)}` : ""}
       </span>
     </div>
   );

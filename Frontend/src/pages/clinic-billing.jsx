@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useState } from "react";
 import { Navigate } from "react-router-dom";
-import { Localized } from "../i18n.jsx";
+import { Localized, useAppLanguage, useTranslate } from "../i18n.jsx";
 import { api } from "../api/client.js";
 import ClinicPageHeader from "../components/ClinicPageHeader.jsx";
 import ClinicLoading from "../components/ClinicLoading.jsx";
@@ -20,6 +20,8 @@ function loadCheckoutScript() {
 }
 
 export default function ClinicBilling() {
+  const { locale } = useAppLanguage();
+  const t = useTranslate();
   const [billing, setBilling] = useState(null);
   const [pendingPayment, setPendingPayment] = useState(null);
   const [error, setError] = useState("");
@@ -121,8 +123,9 @@ export default function ClinicBilling() {
   };
 
   const subscription = billing?.subscription;
-  const statusLabel =
-    subscription?.accessStatus === "expired" ? "Expired" : subscription?.status;
+  const statusLabel = t(
+    subscription?.accessStatus === "expired" ? "Expired" : subscription?.status,
+  );
   const expiryDate =
     subscription?.status === "active"
       ? subscription.renewalDate
@@ -166,12 +169,16 @@ export default function ClinicBilling() {
                 <article className="metric-card">
                   <span>Current plan</span>
                   <strong>{billing.plan.name}</strong>
-                  <small>₹{billing.plan.price} per month</small>
+                  <small>
+                    ₹{billing.plan.price} {t("per month")}
+                  </small>
                 </article>
                 <article className="metric-card">
                   <span>Subscription status</span>
                   <strong>{statusLabel}</strong>
-                  <small>{subscription.daysRemaining} days remaining</small>
+                  <small>
+                    {subscription.daysRemaining} {t("days remaining")}
+                  </small>
                 </article>
                 <article className="metric-card">
                   <span>
@@ -180,16 +187,17 @@ export default function ClinicBilling() {
                       : "Renews on"}
                   </span>
                   <strong>
-                    {new Date(expiryDate).toLocaleDateString("en-IN")}
+                    {new Date(expiryDate).toLocaleDateString(locale)}
                   </strong>
-                  <small>Clinic records remain available</small>
+                  <small>{t("Clinic records remain available")}</small>
                 </article>
               </section>
               <section className="queue-panel billing-panel">
                 <h2>QueueLess Base</h2>
                 <p>
-                  ₹500/month after your one-month trial. Payment is confirmed by
-                  the provider before the subscription is activated.
+                  {t(
+                    "₹500/month after your one-month trial. Payment is confirmed by the provider before the subscription is activated.",
+                  )}
                 </p>
                 <button
                   className="button button-dark"
@@ -228,12 +236,12 @@ export default function ClinicBilling() {
                           <tr key={payment.id}>
                             <td>
                               {new Date(payment.createdAt).toLocaleString(
-                                "en-IN",
+                                locale,
                               )}
                             </td>
                             <td>₹{(payment.amount / 100).toFixed(2)}</td>
-                            <td>{payment.status}</td>
-                            <td>{payment.provider}</td>
+                            <td>{t(payment.status)}</td>
+                            <td>{t(payment.provider)}</td>
                           </tr>
                         ))}
                       </tbody>

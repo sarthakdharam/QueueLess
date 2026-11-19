@@ -19,11 +19,13 @@ import ClinicPatients from "./pages/clinic-patients.jsx";
 import ClinicDoctorAvailability from "./pages/clinic-doctor-availability.jsx";
 import ClinicAnalytics from "./pages/clinic-analytics.jsx";
 import ToastViewport from "./components/ToastViewport.jsx";
+import ThemeToggle from "./components/ThemeToggle.jsx";
 
 export default function App() {
   return (
     <LanguageProvider>
       <LanguageSwitcher />
+      <ThemeToggle />
       <ToastViewport />
       <Routes>
         <Route path="/" element={<Landing />} />

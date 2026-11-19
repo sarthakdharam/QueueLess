@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { Navigate } from "react-router-dom";
-import { Localized } from "../i18n.jsx";
+import { Localized, useAppLanguage } from "../i18n.jsx";
 import { api } from "../api/client.js";
 import ClinicSidebar from "../components/ClinicSidebar.jsx";
 import DropdownSelect from "../components/DropdownSelect.jsx";
@@ -28,6 +28,7 @@ const modeOptions = [
 ];
 
 export default function ClinicDoctorAvailability() {
+  const { locale } = useAppLanguage();
   const [board, setBoard] = useState(null);
   const [error, setError] = useState("");
   const [busy, setBusy] = useState(false);
@@ -288,16 +289,16 @@ export default function ClinicDoctorAvailability() {
                               </span>
                             </td>
                             <td>
-                              {new Date(item.startsAt).toLocaleString()}{" "}
+                              {new Date(item.startsAt).toLocaleString(locale)}{" "}
                               {item.endsAt
-                                ? `– ${new Date(item.endsAt).toLocaleString()}`
+                                ? `– ${new Date(item.endsAt).toLocaleString(locale)}`
                                 : ""}
                             </td>
                             <td>
                               {item.expectedReturnAt
                                 ? new Date(
                                     item.expectedReturnAt,
-                                  ).toLocaleString()
+                                  ).toLocaleString(locale)
                                 : "Not confirmed"}
                             </td>
                             <td>

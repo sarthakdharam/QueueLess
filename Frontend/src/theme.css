@@ -18,6 +18,433 @@
   --mint: #16836d;
 }
 
+/* Appearance preference */
+.theme-toggle {
+  position: fixed;
+  z-index: 1200;
+  right: 24px;
+  bottom: 94px;
+  display: inline-flex;
+  min-height: 42px;
+  align-items: center;
+  gap: 8px;
+  padding: 0 13px;
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  background: var(--surface);
+  box-shadow: 0 8px 24px #30245f1c;
+  color: var(--ink);
+  font: inherit;
+  font-size: 12px;
+  font-weight: 750;
+  cursor: pointer;
+}
+.theme-toggle:hover {
+  border-color: var(--brand-500);
+  background: var(--brand-100);
+}
+.theme-toggle svg {
+  width: 17px;
+  height: 17px;
+  fill: none;
+  stroke: currentColor;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  stroke-width: 1.8;
+}
+
+html[data-theme="dark"] {
+  color-scheme: dark;
+  --ink: #f5efff;
+  --muted: #c9c0db;
+  --line: #52436d;
+  --surface: #241a36;
+  --surface-soft: #17101f;
+  --brand-100: #3c2b5f;
+  --brand-500: #ad91ff;
+  --brand-600: #9d7dff;
+  --brand-700: #c1afff;
+  --brand-800: #d9d0ff;
+  --brand-900: #f1eaff;
+}
+html[data-theme="dark"],
+html[data-theme="dark"] body,
+html[data-theme="dark"] #root {
+  background: #17101f;
+  color: var(--ink);
+}
+html[data-theme="dark"] .landing,
+html[data-theme="dark"] .portal-shell,
+html[data-theme="dark"] .setup-shell,
+html[data-theme="dark"] .patient-shell,
+html[data-theme="dark"] .auth-main {
+  background:
+    radial-gradient(ellipse at 72% 0%, #382356 0, transparent 42%),
+    linear-gradient(135deg, #17101f, #21172f 58%, #191222);
+  color: var(--ink);
+}
+html[data-theme="dark"] .topbar,
+html[data-theme="dark"] .portal-header,
+html[data-theme="dark"] .patient-header,
+html[data-theme="dark"] .auth-card,
+html[data-theme="dark"] .language-trigger,
+html[data-theme="dark"] .language-popover,
+html[data-theme="dark"] .theme-toggle {
+  border-color: var(--line);
+  background: #241a36;
+  color: var(--ink);
+}
+html[data-theme="dark"] .portal-sidebar {
+  background: linear-gradient(165deg, #1d132e, #120c1e 78%, #170f25);
+  border-color: #0e0818;
+}
+html[data-theme="dark"]
+  :is(
+    .metric-card,
+    .queue-panel,
+    .walkin-panel,
+    .billing-panel,
+    .patient-list-filters,
+    .patient-list-table,
+    .clinic-result,
+    .patient-empty,
+    .confirmation-card,
+    .patient-form,
+    .patient-feedback-panel,
+    .patient-reschedule-panel,
+    .analytics-metric,
+    .analytics-hours,
+    .setup-panel,
+    .private-link-actions,
+    .patient-contact-details,
+    .clinic-booking-card
+  ) {
+  border-color: var(--line);
+  background: #241a36;
+  color: var(--ink);
+  box-shadow: 0 12px 28px #09051055;
+}
+html[data-theme="dark"]
+  :is(
+    input,
+    select,
+    textarea,
+    .dropdown-trigger,
+    .dropdown-popover,
+    .state-options
+  ) {
+  border-color: #5a4975 !important;
+  background: #1d152a !important;
+  color: var(--ink) !important;
+}
+html[data-theme="dark"] :is(input, select, textarea)::placeholder {
+  color: #b5abc8;
+}
+html[data-theme="dark"]
+  :is(
+    .patient-intro,
+    .confirmation-card small,
+    .clinic-result p,
+    .clinic-result small,
+    .metric-card > span,
+    .metric-card small,
+    .dashboard-header > div > p,
+    .panel-title p,
+    .analytics-metric small,
+    .analytics-metric span,
+    .analytics-hours p,
+    .patient-feedback-panel p
+  ) {
+  color: var(--muted);
+}
+html[data-theme="dark"]
+  :is(
+    .metric-card strong,
+    .confirmation-card > strong,
+    .analytics-metric strong,
+    h1,
+    h2,
+    h3
+  ) {
+  color: var(--ink);
+}
+html[data-theme="dark"] .button-dark,
+html[data-theme="dark"] .portal-shell .button-dark {
+  background: linear-gradient(145deg, #b59cff, #8669dc);
+  color: #1b102b;
+  box-shadow:
+    0 3px 0 #624ab7,
+    0 7px 15px #08041055,
+    inset 0 1px #e9e1ff;
+}
+html[data-theme="dark"] .button-light,
+html[data-theme="dark"] .text-button,
+html[data-theme="dark"] .text-link {
+  color: #d2c3ff;
+}
+html[data-theme="dark"] .clinic-rating {
+  border-color: #745523;
+  background: #332712;
+  color: #f2cb76;
+}
+html[data-theme="dark"] .clinic-rating strong,
+html[data-theme="dark"] .clinic-rating small {
+  color: #f3dba5;
+}
+html[data-theme="dark"] .language-option:hover,
+html[data-theme="dark"] .language-option.is-selected,
+html[data-theme="dark"] .state-options li:hover,
+html[data-theme="dark"] .state-options li.active {
+  background: #392853 !important;
+  color: #f4efff !important;
+}
+html[data-theme="dark"] .patient-page,
+html[data-theme="dark"] .patient-layout-main,
+html[data-theme="dark"] .patient-footer {
+  background:
+    radial-gradient(ellipse at 72% 0%, #382356 0, transparent 42%),
+    linear-gradient(135deg, #17101f, #21172f 58%, #191222);
+  color: var(--ink);
+}
+html[data-theme="dark"] .patient-aside,
+html[data-theme="dark"] .patient-aside-copy {
+  border-color: var(--line);
+  background: #241a36;
+  color: var(--ink);
+}
+html[data-theme="dark"] .queue-panel .panel-title,
+html[data-theme="dark"] .walkin-panel .panel-title,
+html[data-theme="dark"] .clinic-availability-page .panel-title {
+  background: linear-gradient(180deg, #2d2042, #241a36);
+  border-color: var(--line);
+}
+html[data-theme="dark"] .panel-title h2,
+html[data-theme="dark"] .patient-content h1,
+html[data-theme="dark"] .patient-aside-copy h2,
+html[data-theme="dark"] .patient-header-actions a,
+html[data-theme="dark"] .patient-header-note,
+html[data-theme="dark"] .patient-footer {
+  color: var(--ink);
+}
+html[data-theme="dark"] .patient-aside-copy p,
+html[data-theme="dark"] .patient-footer,
+html[data-theme="dark"] .patient-header-note {
+  color: var(--muted);
+}
+html[data-theme="dark"] .setup-heading,
+html[data-theme="dark"] .setup-submit,
+html[data-theme="dark"] .break-times,
+html[data-theme="dark"] .break-times label {
+  border-color: var(--line);
+  background: #241a36;
+  color: var(--ink);
+}
+html[data-theme="dark"]
+  :is(
+    .setup-heading > p,
+    .setup-panel small,
+    .setup-panel label,
+    .break-times label
+  ) {
+  color: var(--muted);
+}
+html[data-theme="dark"] :is(.patient-list-table, .queue-panel) table {
+  background: #241a36;
+  color: var(--ink);
+}
+html[data-theme="dark"] :is(.patient-list-table, .queue-panel) thead {
+  background: #34234a;
+}
+html[data-theme="dark"] :is(.patient-list-table, .queue-panel) th {
+  color: #d8cdf1;
+}
+html[data-theme="dark"] :is(.patient-list-table, .queue-panel) td {
+  border-color: #4d3a68;
+  color: #d6cde6;
+}
+html[data-theme="dark"]
+  :is(.patient-list-table, .queue-panel)
+  :is(td > b, .table-token) {
+  color: #f5efff;
+}
+html[data-theme="dark"]
+  :is(.patient-list-table, .queue-panel)
+  :is(td > small, .table-token + small) {
+  color: #b9aece;
+}
+html[data-theme="dark"] .landing::after {
+  background-image:
+    linear-gradient(
+      90deg,
+      rgb(25 13 38 / 78%),
+      rgb(36 20 54 / 69%) 54%,
+      rgb(25 13 38 / 58%)
+    ),
+    linear-gradient(
+      180deg,
+      rgb(15 8 24 / 32%),
+      rgb(27 14 41 / 48%) 74%,
+      rgb(18 10 28 / 64%)
+    );
+  backdrop-filter: blur(1.5px) brightness(0.72);
+}
+html[data-theme="dark"]
+  :is(
+    .hero-copy h1,
+    .hero-copy h1 em,
+    .hero-description,
+    .topbar nav,
+    .trust-strip > span,
+    .trust-strip b
+  ) {
+  color: #f5efff;
+  -webkit-text-fill-color: currentColor;
+}
+html[data-theme="dark"] .doctor-list > span {
+  border-color: #65488a;
+  background: linear-gradient(145deg, #3a2454, #2a193f);
+  color: #d9cbed;
+  box-shadow: inset 0 1px #ffffff12;
+}
+html[data-theme="dark"] .doctor-list > span b {
+  color: #f4eeff;
+}
+html[data-theme="dark"] .subscription-link {
+  border-color: #72529b;
+  background: linear-gradient(145deg, #4b2d6f, #37204f);
+  box-shadow:
+    0 3px 0 #241337,
+    0 7px 13px #08041066,
+    inset 0 1px #ffffff1a;
+  color: #f4eeff !important;
+}
+html[data-theme="dark"] .subscription-link:before {
+  background: #ffffff24;
+}
+html[data-theme="dark"] .subscription-link:hover {
+  background: linear-gradient(145deg, #59367f, #40255e);
+  box-shadow:
+    0 4px 0 #241337,
+    0 10px 17px #08041077,
+    inset 0 1px #ffffff24;
+  color: #fff !important;
+}
+html[data-theme="dark"] .subscription-link:active {
+  box-shadow:
+    0 1px 0 #241337,
+    0 3px 7px #08041066;
+}
+html[data-theme="dark"] .subscription-link-icon {
+  border-color: #ffffff20;
+  background: #5a397d;
+  box-shadow: inset 0 1px #ffffff18;
+}
+html[data-theme="dark"] .subscription-link-arrow {
+  color: #d9c7ff;
+}
+html[data-theme="dark"] .notification-icon-link {
+  border-color: #65488a;
+  background: linear-gradient(145deg, #38224f, #29193d);
+  box-shadow:
+    inset 0 1px #ffffff12,
+    0 3px 9px #08041055;
+  color: #e5d9ff;
+}
+html[data-theme="dark"] .notification-icon-link:hover {
+  background: linear-gradient(145deg, #4b2d6f, #37204f);
+  color: #fff;
+}
+html[data-theme="dark"] .notification-count-badge {
+  border-color: #2a193f;
+  box-shadow: 0 2px 7px #08041088;
+}
+html[data-theme="dark"] .hours-table thead {
+  background: #34234a;
+}
+html[data-theme="dark"] .hours-table th {
+  color: #d8cdf1;
+}
+html[data-theme="dark"] .hours-table td {
+  border-color: #4d3a68;
+  color: #d6cde6;
+}
+/* Keep every route back control readable and visually consistent in dark mode. */
+html[data-theme="dark"]
+  :is(
+    .back-link,
+    .back-arrow-link,
+    .clinic-header-back-icon,
+    .patient-back-link
+  ) {
+  color: #f1eaff;
+}
+html[data-theme="dark"]
+  :is(
+    .back-link,
+    .back-arrow-link.portal-back-link,
+    .notifications-back-link,
+    .patient-back-link,
+    .clinic-header-back-icon
+  ) {
+  border-color: #60477d;
+  background: #2c1d42;
+  box-shadow:
+    0 4px 12px #09051166,
+    inset 0 1px #74579866;
+}
+html[data-theme="dark"] :is(.back-link, .patient-back-link) {
+  min-height: 38px;
+  align-items: center;
+  padding: 0 12px;
+  border: 1px solid #60477d;
+  border-radius: 10px;
+  text-decoration: none;
+}
+html[data-theme="dark"]
+  :is(
+    .back-link,
+    .back-arrow-link.portal-back-link,
+    .notifications-back-link,
+    .patient-back-link,
+    .clinic-header-back-icon
+  ):hover {
+  background: #3b2857;
+  color: #fff;
+}
+html[data-theme="dark"] :is(.back-arrow-link, .clinic-header-back-icon):before {
+  background: #4b326a;
+  color: #f1eaff;
+}
+html[data-theme="dark"] .back-arrow-link:hover:before {
+  background: #62448a;
+}
+html[data-theme="dark"] .clinic-header-back-icon svg {
+  stroke: #f1eaff;
+}
+html[data-theme="dark"] .analytics-donut {
+  box-shadow: 0 14px 28px #08041088;
+}
+html[data-theme="dark"] .analytics-donut::after {
+  background: #21172f;
+  box-shadow: inset 0 0 0 1px #57416f;
+}
+html[data-theme="dark"] .analytics-donut strong {
+  color: #f4efff;
+}
+html[data-theme="dark"] .analytics-donut span,
+html[data-theme="dark"] .analytics-chart-legend b {
+  color: #c8b9df;
+}
+html[data-theme="dark"] .analytics-chart-legend span {
+  color: #f1eaff;
+}
+html[data-theme="dark"] .analytics-chart-legend > div {
+  border-bottom-color: #59436f;
+}
+html[data-theme="dark"] .hero-copy .eyebrow {
+  color: #d4c5ff;
+}
+
 body {
   background: var(--surface-soft);
   color: var(--ink);
@@ -3589,4 +4016,339 @@ td > small,
   .availability-form .button {
     width: 100%;
   }
+}
+
+/* Final dark-mode component overrides: placed last so legacy light rules cannot win. */
+html[data-theme="dark"] .break-config,
+html[data-theme="dark"] .break-times,
+html[data-theme="dark"] .break-times label,
+html[data-theme="dark"] .setup-submit,
+html[data-theme="dark"] .setup-heading {
+  border-color: var(--line);
+  background: #241a36;
+  color: var(--ink);
+}
+html[data-theme="dark"] .patient-time-estimate {
+  border-color: #5d477e;
+  background: linear-gradient(135deg, #2e2144, #21172f);
+  color: var(--ink);
+}
+html[data-theme="dark"] .patient-time-estimate > span,
+html[data-theme="dark"] .patient-time-estimate > b,
+html[data-theme="dark"] .patient-time-estimate small {
+  color: #efe8ff !important;
+}
+html[data-theme="dark"] .patient-time-estimate.live-estimate {
+  border-color: #396c68;
+  background: linear-gradient(135deg, #183b3c, #202b42);
+}
+html[data-theme="dark"] .appointment-status-note {
+  border-color: #89632b;
+  background: #3d2b13;
+  color: #f4d99d;
+}
+html[data-theme="dark"] .slot-picker {
+  border-color: var(--line);
+  background: #21172f;
+}
+html[data-theme="dark"] .slot {
+  border-color: #5a4975;
+  background: #2a1d3e;
+  color: #f5efff;
+}
+html[data-theme="dark"] .slot.selected {
+  border-color: #af93ff;
+  background: #44306a;
+}
+html[data-theme="dark"] .slot small {
+  color: #cdc1e1;
+}
+html[data-theme="dark"] :is(.patient-list-table, .queue-panel) table {
+  background: #241a36;
+  color: var(--ink);
+}
+html[data-theme="dark"] :is(.patient-list-table, .queue-panel) thead {
+  background: #34234a;
+}
+html[data-theme="dark"] :is(.patient-list-table, .queue-panel) th {
+  color: #d8cdf1;
+}
+html[data-theme="dark"] :is(.patient-list-table, .queue-panel) td {
+  border-color: #4d3a68;
+  color: #d6cde6;
+}
+html[data-theme="dark"]
+  :is(.patient-list-table, .queue-panel)
+  :is(td > b, .table-token) {
+  color: #f5efff;
+}
+html[data-theme="dark"]
+  :is(.patient-list-table, .queue-panel)
+  :is(td > small, .table-token + small) {
+  color: #b9aece;
+}
+html[data-theme="dark"] .queue-panel .panel-title,
+html[data-theme="dark"] .walkin-panel .panel-title,
+html[data-theme="dark"] .clinic-availability-page .panel-title {
+  background: linear-gradient(180deg, #2d2042, #241a36);
+  border-color: var(--line);
+}
+html[data-theme="dark"] .landing::after {
+  background-image:
+    linear-gradient(
+      90deg,
+      rgb(25 13 38 / 78%),
+      rgb(36 20 54 / 69%) 54%,
+      rgb(25 13 38 / 58%)
+    ),
+    linear-gradient(
+      180deg,
+      rgb(15 8 24 / 32%),
+      rgb(27 14 41 / 48%) 74%,
+      rgb(18 10 28 / 64%)
+    );
+  backdrop-filter: blur(1.5px) brightness(0.72);
+}
+html[data-theme="dark"]
+  :is(
+    .hero-copy h1,
+    .hero-copy h1 em,
+    .hero-description,
+    .topbar nav,
+    .trust-strip > span,
+    .trust-strip b
+  ) {
+  color: #f5efff;
+  -webkit-text-fill-color: currentColor;
+}
+
+/* Keep dark-mode surfaces after all light-theme and responsive declarations. */
+html[data-theme="dark"] .landing,
+html[data-theme="dark"] .portal-shell,
+html[data-theme="dark"] .setup-shell,
+html[data-theme="dark"] .patient-shell,
+html[data-theme="dark"] .auth-main {
+  background:
+    radial-gradient(ellipse at 72% 0%, #382356 0, transparent 42%),
+    linear-gradient(135deg, #17101f, #21172f 58%, #191222);
+  color: var(--ink);
+}
+html[data-theme="dark"] .topbar,
+html[data-theme="dark"] .portal-header,
+html[data-theme="dark"] .patient-header,
+html[data-theme="dark"] .auth-card,
+html[data-theme="dark"] .language-trigger,
+html[data-theme="dark"] .language-popover,
+html[data-theme="dark"] .theme-toggle {
+  border-color: var(--line);
+  background: #241a36;
+  color: var(--ink);
+}
+html[data-theme="dark"] .portal-sidebar {
+  background: linear-gradient(165deg, #1d132e, #120c1e 78%, #170f25);
+  border-color: #0e0818;
+}
+html[data-theme="dark"]
+  :is(
+    .metric-card,
+    .queue-panel,
+    .walkin-panel,
+    .billing-panel,
+    .patient-list-filters,
+    .patient-list-table,
+    .clinic-result,
+    .patient-empty,
+    .confirmation-card,
+    .patient-form,
+    .patient-feedback-panel,
+    .patient-reschedule-panel,
+    .analytics-metric,
+    .analytics-hours,
+    .setup-panel,
+    .private-link-actions,
+    .patient-contact-details,
+    .clinic-booking-card
+  ) {
+  border-color: var(--line);
+  background: #241a36;
+  color: var(--ink);
+  box-shadow: 0 12px 28px #09051055;
+}
+html[data-theme="dark"]
+  :is(
+    input,
+    select,
+    textarea,
+    .dropdown-trigger,
+    .dropdown-popover,
+    .state-options
+  ) {
+  border-color: #5a4975 !important;
+  background: #1d152a !important;
+  color: var(--ink) !important;
+}
+html[data-theme="dark"] :is(input, select, textarea)::placeholder {
+  color: #b5abc8;
+}
+html[data-theme="dark"]
+  :is(
+    .patient-intro,
+    .confirmation-card small,
+    .clinic-result p,
+    .clinic-result small,
+    .metric-card > span,
+    .metric-card small,
+    .dashboard-header > div > p,
+    .panel-title p,
+    .analytics-metric small,
+    .analytics-metric span,
+    .analytics-hours p,
+    .patient-feedback-panel p
+  ) {
+  color: var(--muted);
+}
+html[data-theme="dark"]
+  :is(
+    .metric-card strong,
+    .confirmation-card > strong,
+    .analytics-metric strong,
+    h1,
+    h2,
+    h3
+  ) {
+  color: var(--ink);
+}
+html[data-theme="dark"] .button-dark,
+html[data-theme="dark"] .portal-shell .button-dark {
+  background: linear-gradient(145deg, #b59cff, #8669dc);
+  color: #1b102b;
+  box-shadow:
+    0 3px 0 #624ab7,
+    0 7px 15px #08041055,
+    inset 0 1px #e9e1ff;
+}
+html[data-theme="dark"] .button-light,
+html[data-theme="dark"] .text-button,
+html[data-theme="dark"] .text-link {
+  color: #d2c3ff;
+}
+html[data-theme="dark"] .clinic-rating {
+  border-color: #745523;
+  background: #332712;
+  color: #f2cb76;
+}
+html[data-theme="dark"] .clinic-rating strong,
+html[data-theme="dark"] .clinic-rating small {
+  color: #f3dba5;
+}
+html[data-theme="dark"] .language-option:hover,
+html[data-theme="dark"] .language-option.is-selected,
+html[data-theme="dark"] .state-options li:hover,
+html[data-theme="dark"] .state-options li.active {
+  background: #392853 !important;
+  color: #f4efff !important;
+}
+@media (max-width: 700px) {
+  .theme-toggle {
+    right: 18px;
+    bottom: 84px;
+  }
+}
+
+/* Dark-mode landing and auth surfaces: placed after all legacy light rules. */
+html[data-theme="dark"] .hours-table .hours-header,
+html[data-theme="dark"] .hours-table .hours-header span {
+  background: #34234a !important;
+  color: #d8cdf1;
+}
+html[data-theme="dark"] .hours-table td {
+  border-color: #4d3a68;
+  color: #d6cde6;
+}
+html[data-theme="dark"] .portal-header-right > span {
+  border-color: #624884;
+  background: linear-gradient(145deg, #3b2457, #2a193f);
+  box-shadow:
+    inset 0 1px #ffffff14,
+    0 3px 10px #09041155;
+  color: #f2ecff;
+}
+html[data-theme="dark"] .clinic-settings-header .header-signout-button {
+  border-color: #72529b;
+  background: linear-gradient(145deg, #4a2b6d, #37204f);
+  box-shadow:
+    0 3px 0 #241337,
+    0 6px 13px #08041066,
+    inset 0 1px #ffffff1a;
+  color: #f4eeff;
+}
+html[data-theme="dark"] .clinic-settings-header .header-signout-button:hover {
+  background: linear-gradient(145deg, #57337d, #40255e);
+}
+html[data-theme="dark"] .clinic-settings-header .header-signout-button:active {
+  box-shadow:
+    0 1px 0 #241337,
+    0 2px 5px #08041066;
+}
+html[data-theme="dark"] .benefit-card,
+html[data-theme="dark"] .audience-card,
+html[data-theme="dark"] .cta-section {
+  border-color: #57416f;
+  background: linear-gradient(145deg, #2d1f42, #21172f);
+  color: #f5efff;
+  box-shadow: 0 14px 34px #08041055;
+}
+html[data-theme="dark"]
+  :is(.benefit-card h3, .audience-card h2, .cta-section h2) {
+  color: #f5efff;
+}
+html[data-theme="dark"] :is(.benefit-card p, .audience-card p, .cta-section p) {
+  color: #d1c5e6;
+}
+html[data-theme="dark"] .benefit-icon {
+  background: #442d63;
+  color: #d7c7ff;
+}
+html[data-theme="dark"] .auth-side {
+  background: linear-gradient(145deg, #291a3d, #1b112a);
+  color: #f5efff;
+}
+html[data-theme="dark"] .auth-side :is(h1, p, .brand) {
+  color: #f5efff;
+}
+html[data-theme="dark"] .auth-main,
+html[data-theme="dark"] .auth-card {
+  background: #21172f;
+  color: #f5efff;
+}
+html[data-theme="dark"] .auth-card :is(h1, h2, p, label) {
+  color: #f5efff;
+}
+html[data-theme="dark"] .landing::after {
+  background-image:
+    linear-gradient(
+      90deg,
+      rgb(25 13 38 / 78%),
+      rgb(36 20 54 / 69%) 54%,
+      rgb(25 13 38 / 58%)
+    ),
+    linear-gradient(
+      180deg,
+      rgb(15 8 24 / 32%),
+      rgb(27 14 41 / 48%) 74%,
+      rgb(18 10 28 / 64%)
+    );
+  backdrop-filter: blur(1.5px) brightness(0.72);
+}
+html[data-theme="dark"]
+  :is(
+    .hero-copy h1,
+    .hero-copy h1 em,
+    .hero-description,
+    .topbar nav,
+    .trust-strip > span,
+    .trust-strip b
+  ) {
+  color: #f5efff;
+  -webkit-text-fill-color: currentColor;
 }

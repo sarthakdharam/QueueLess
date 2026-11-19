@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { Link } from "react-router-dom";
 import PatientShell from "../components/PatientShell.jsx";
+import { useAppLanguage } from "../i18n.jsx";
 import { api } from "../api/client.js";
 import { FieldError } from "../components/FieldError.jsx";
 import {
@@ -18,6 +19,7 @@ const ACTIVE = new Set([
 ]);
 
 export default function PatientRecovery() {
+  const { locale } = useAppLanguage();
   const [mobile, setMobile] = useState("+91 ");
   const [code, setCode] = useState("");
   const [developmentCode, setDevelopmentCode] = useState("");
@@ -245,7 +247,7 @@ export default function PatientRecovery() {
   );
   const formatTime = (item) =>
     item.appointment
-      ? new Date(item.appointment.scheduledAt).toLocaleString("en-IN", {
+      ? new Date(item.appointment.scheduledAt).toLocaleString(locale, {
           dateStyle: "medium",
           timeStyle: "short",
           timeZone: item.clinic.timeZone || "Asia/Kolkata",

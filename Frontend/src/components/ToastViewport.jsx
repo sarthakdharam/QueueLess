@@ -1,7 +1,9 @@
 import { useEffect, useState } from "react";
+import { useTranslate } from "../i18n.jsx";
 import { subscribeToToasts } from "../utils/toast.js";
 
 export default function ToastViewport() {
+  const t = useTranslate();
   const [toast, setToast] = useState(null);
 
   useEffect(() => subscribeToToasts((next) => setToast(next)), []);
@@ -17,10 +19,10 @@ export default function ToastViewport() {
       className={`app-toast app-toast-${toast.variant}`}
       role={toast.variant === "error" ? "alert" : "status"}
     >
-      <span>{toast.message}</span>
+      <span>{t(toast.message)}</span>
       <button
         type="button"
-        aria-label="Dismiss message"
+        aria-label={t("Dismiss message")}
         onClick={() => setToast(null)}
       >
         ×

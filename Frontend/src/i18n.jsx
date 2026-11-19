@@ -2251,6 +2251,1145 @@ Object.assign(recentFeatureWords.mr, {
   "No ratings yet": "अजून रेटिंग नाही",
 });
 
+Object.assign(recentFeatureWords.hi, {
+  "Dark mode": "डार्क मोड",
+  "Light mode": "लाइट मोड",
+  "Switch to": "बदलें",
+});
+Object.assign(recentFeatureWords.bn, {
+  "Dark mode": "ডার্ক মোড",
+  "Light mode": "লাইট মোড",
+  "Switch to": "পরিবর্তন করুন",
+});
+Object.assign(recentFeatureWords.ta, {
+  "Dark mode": "டார்க் பயன்முறை",
+  "Light mode": "லைட் பயன்முறை",
+  "Switch to": "மாற்றவும்",
+});
+Object.assign(recentFeatureWords.te, {
+  "Dark mode": "డార్క్ మోడ్",
+  "Light mode": "లైట్ మోడ్",
+  "Switch to": "మార్చండి",
+});
+Object.assign(recentFeatureWords.mr, {
+  "Dark mode": "डार्क मोड",
+  "Light mode": "लाइट मोड",
+  "Switch to": "बदला",
+});
+
+// Labels shared by the public, clinic, recovery, notification and emergency
+// screens. Keeping this catalogue complete prevents a page from falling back
+// to English simply because it was added after the original language files.
+const completeUiWords = {
+  hi: {
+    "Care, made a little clearer": "देखभाल, थोड़ी और आसान",
+    "YOUR VISIT": "आपकी मुलाक़ात",
+    "One step at a time": "एक समय में एक कदम",
+    "YOUR VISIT, AT YOUR PACE": "आपकी मुलाक़ात, आपकी गति से",
+    "A little more clarity.": "थोड़ी और स्पष्टता।",
+    "A little less waiting.": "थोड़ा कम इंतज़ार।",
+    "Find your clinic, keep your visit details close, and know what to expect when you arrive.":
+      "अपना क्लिनिक खोजें, मुलाक़ात की जानकारी पास रखें और पहुँचने पर क्या होगा जानें।",
+    "Your visit link stays private": "आपका मुलाक़ात लिंक निजी रहता है",
+    "Your visit, with a little more clarity.":
+      "आपकी मुलाक़ात, थोड़ी और स्पष्टता के साथ।",
+    "Back to clinic search": "क्लिनिक खोज पर वापस",
+    "All clinics": "सभी क्लिनिक",
+    "Loading clinic…": "क्लिनिक लोड हो रहा है…",
+    "Registration confirmed successfully.": "पंजीकरण सफलतापूर्वक पक्का हो गया।",
+    "Copy private appointment link": "निजी अपॉइंटमेंट लिंक कॉपी करें",
+    "Private appointment link copied.": "निजी अपॉइंटमेंट लिंक कॉपी हो गया।",
+    "Your appointment": "आपकी अपॉइंटमेंट",
+    "Please arrive about 10 minutes early to check in.":
+      "चेक-इन के लिए लगभग 10 मिनट पहले पहुँचें।",
+    "Discard appointment details?": "अपॉइंटमेंट विवरण हटाएँ?",
+    "Your appointment details have not been submitted. Leaving will clear this form.":
+      "आपकी अपॉइंटमेंट जानकारी जमा नहीं हुई है। पेज छोड़ने पर यह फ़ॉर्म साफ़ हो जाएगा।",
+    "Leave booking": "बुकिंग छोड़ें",
+    "Continue booking": "बुकिंग जारी रखें",
+    "Temporarily unavailable": "अस्थायी रूप से उपलब्ध नहीं",
+    "Unavailable for this day": "आज के लिए उपलब्ध नहीं",
+    "Unavailable until further notice": "अगली सूचना तक उपलब्ध नहीं",
+    "DOCTOR AVAILABILITY": "डॉक्टर की उपलब्धता",
+    "Availability calendar": "उपलब्धता कैलेंडर",
+    "Record emergencies, pause new bookings, and keep affected patients informed.":
+      "आपातस्थिति दर्ज करें, नई बुकिंग रोकें और प्रभावित मरीज़ों को सूचित रखें।",
+    "View date": "तारीख देखें",
+    "Update doctor availability": "डॉक्टर की उपलब्धता अपडेट करें",
+    "Existing appointments are never silently cancelled.":
+      "मौजूदा अपॉइंटमेंट कभी चुपचाप रद्द नहीं की जातीं।",
+    "Availability status": "उपलब्धता स्थिति",
+    "Unavailable from": "अनुपलब्ध होने का समय",
+    "Unavailable until": "अनुपलब्ध रहने का समय",
+    "Expected return": "अपेक्षित वापसी",
+    "Internal note": "आंतरिक नोट",
+    "Reason or handover note": "कारण या हैंडओवर नोट",
+    "Record availability change": "उपलब्धता बदलाव दर्ज करें",
+    "Emergency management": "आपात प्रबंधन",
+    "Resume availability": "उपलब्धता फिर शुरू करें",
+    "Not confirmed": "पुष्टि नहीं हुई",
+    "No availability changes for this date":
+      "इस तारीख के लिए कोई उपलब्धता बदलाव नहीं",
+    "All doctors follow their normal published schedule.":
+      "सभी डॉक्टर अपने सामान्य प्रकाशित समय का पालन कर रहे हैं।",
+    Notifications: "सूचनाएँ",
+    "PATIENT MESSAGING": "मरीज़ संदेश",
+    "Development simulator": "डेवलपमेंट सिम्युलेटर",
+    "Simulate success": "सफलता सिम्युलेट करें",
+    "Simulate failure": "विफलता सिम्युलेट करें",
+    "New notifications": "नई सूचनाएँ",
+    "No new notifications.": "कोई नई सूचना नहीं।",
+    "Plans and billing": "प्लान और बिलिंग",
+    "Current plan": "मौजूदा प्लान",
+    "Subscription status": "सब्सक्रिप्शन स्थिति",
+    "Payment history": "भुगतान इतिहास",
+    "Renew or subscribe": "रिन्यू या सब्सक्राइब करें",
+    "No payments recorded.": "कोई भुगतान दर्ज नहीं है।",
+  },
+  bn: {
+    "Care, made a little clearer": "যত্ন, আরও একটু সহজ",
+    "YOUR VISIT": "আপনার সাক্ষাৎ",
+    "One step at a time": "এক ধাপ করে",
+    "YOUR VISIT, AT YOUR PACE": "আপনার সাক্ষাৎ, আপনার গতিতে",
+    "A little more clarity.": "আরও একটু স্পষ্টতা।",
+    "A little less waiting.": "আরও একটু কম অপেক্ষা।",
+    "Find your clinic, keep your visit details close, and know what to expect when you arrive.":
+      "আপনার ক্লিনিক খুঁজুন, সাক্ষাতের তথ্য কাছে রাখুন এবং পৌঁছালে কী আশা করবেন জানুন।",
+    "Your visit link stays private": "আপনার সাক্ষাতের লিঙ্ক ব্যক্তিগত থাকে",
+    "Your visit, with a little more clarity.":
+      "আপনার সাক্ষাৎ, আরও একটু স্পষ্টতার সঙ্গে।",
+    "Back to clinic search": "ক্লিনিক খোঁজায় ফিরুন",
+    "All clinics": "সব ক্লিনিক",
+    "Loading clinic…": "ক্লিনিক লোড হচ্ছে…",
+    "Registration confirmed successfully.": "নিবন্ধন সফলভাবে নিশ্চিত হয়েছে।",
+    "Copy private appointment link":
+      "ব্যক্তিগত অ্যাপয়েন্টমেন্ট লিঙ্ক কপি করুন",
+    "Private appointment link copied.":
+      "ব্যক্তিগত অ্যাপয়েন্টমেন্ট লিঙ্ক কপি হয়েছে।",
+    "Your appointment": "আপনার অ্যাপয়েন্টমেন্ট",
+    "Please arrive about 10 minutes early to check in.":
+      "চেক-ইনের জন্য প্রায় ১০ মিনিট আগে আসুন।",
+    "Discard appointment details?": "অ্যাপয়েন্টমেন্টের তথ্য বাতিল করবেন?",
+    "Your appointment details have not been submitted. Leaving will clear this form.":
+      "আপনার অ্যাপয়েন্টমেন্টের তথ্য জমা হয়নি। চলে গেলে এই ফর্মটি মুছে যাবে।",
+    "Leave booking": "বুকিং ছাড়ুন",
+    "Continue booking": "বুকিং চালিয়ে যান",
+    "Temporarily unavailable": "সাময়িকভাবে অনুপলব্ধ",
+    "Unavailable for this day": "আজকের জন্য অনুপলব্ধ",
+    "Unavailable until further notice":
+      "পরবর্তী নির্দেশ না দেওয়া পর্যন্ত অনুপলব্ধ",
+    "DOCTOR AVAILABILITY": "ডাক্তারের উপলভ্যতা",
+    "Availability calendar": "উপলভ্যতা ক্যালেন্ডার",
+    "Record emergencies, pause new bookings, and keep affected patients informed.":
+      "জরুরি অবস্থা নথিভুক্ত করুন, নতুন বুকিং বন্ধ রাখুন এবং প্রভাবিত রোগীদের জানিয়ে রাখুন।",
+    "View date": "তারিখ দেখুন",
+    "Update doctor availability": "ডাক্তারের উপলভ্যতা আপডেট করুন",
+    "Existing appointments are never silently cancelled.":
+      "বিদ্যমান অ্যাপয়েন্টমেন্ট কখনও নীরবে বাতিল করা হয় না।",
+    "Availability status": "উপলভ্যতার অবস্থা",
+    "Unavailable from": "অনুপলব্ধ শুরু",
+    "Unavailable until": "অনুপলব্ধ থাকবে",
+    "Expected return": "ফেরার সম্ভাব্য সময়",
+    "Internal note": "অভ্যন্তরীণ নোট",
+    "Reason or handover note": "কারণ বা হ্যান্ডওভার নোট",
+    "Record availability change": "উপলভ্যতার পরিবর্তন নথিভুক্ত করুন",
+    "Emergency management": "জরুরি ব্যবস্থাপনা",
+    "Resume availability": "উপলভ্যতা পুনরায় চালু করুন",
+    "Not confirmed": "নিশ্চিত নয়",
+    "No availability changes for this date":
+      "এই তারিখে উপলভ্যতার কোনো পরিবর্তন নেই",
+    "All doctors follow their normal published schedule.":
+      "সব ডাক্তার তাদের স্বাভাবিক প্রকাশিত সময়সূচি মেনে চলেন।",
+    Notifications: "বিজ্ঞপ্তি",
+    "PATIENT MESSAGING": "রোগী বার্তা",
+    "Development simulator": "ডেভেলপমেন্ট সিমুলেটর",
+    "Simulate success": "সাফল্য সিমুলেট করুন",
+    "Simulate failure": "ব্যর্থতা সিমুলেট করুন",
+    "New notifications": "নতুন বিজ্ঞপ্তি",
+    "No new notifications.": "কোনও নতুন বিজ্ঞপ্তি নেই।",
+    "Plans and billing": "প্ল্যান ও বিলিং",
+    "Current plan": "বর্তমান প্ল্যান",
+    "Subscription status": "সাবস্ক্রিপশন অবস্থা",
+    "Payment history": "পেমেন্টের ইতিহাস",
+    "Renew or subscribe": "নবায়ন বা সাবস্ক্রাইব করুন",
+    "No payments recorded.": "কোনও পেমেন্ট রেকর্ড নেই।",
+  },
+  ta: {
+    "Care, made a little clearer": "கவனிப்பு, இன்னும் கொஞ்சம் தெளிவு",
+    "YOUR VISIT": "உங்கள் வருகை",
+    "One step at a time": "ஒவ்வொரு படியாக",
+    "YOUR VISIT, AT YOUR PACE": "உங்கள் வருகை, உங்கள் வேகத்தில்",
+    "A little more clarity.": "இன்னும் கொஞ்சம் தெளிவு।",
+    "A little less waiting.": "இன்னும் கொஞ்சம் குறைந்த காத்திருப்பு।",
+    "Find your clinic, keep your visit details close, and know what to expect when you arrive.":
+      "உங்கள் கிளினிக்கைக் கண்டறிந்து, வருகை விவரங்களை அருகில் வைத்துக்கொண்டு, வரும்போது என்ன எதிர்பார்க்கலாம் என்பதை அறியுங்கள்।",
+    "Your visit link stays private":
+      "உங்கள் வருகை இணைப்பு தனிப்பட்டதாக இருக்கும்",
+    "Your visit, with a little more clarity.":
+      "உங்கள் வருகை, இன்னும் கொஞ்சம் தெளிவுடன்।",
+    "Back to clinic search": "கிளினிக் தேடலுக்குத் திரும்பு",
+    "All clinics": "அனைத்து கிளினிக்குகள்",
+    "Loading clinic…": "கிளினிக் ஏற்றப்படுகிறது…",
+    "Registration confirmed successfully.":
+      "பதிவு வெற்றிகரமாக உறுதிசெய்யப்பட்டது।",
+    "Copy private appointment link":
+      "தனிப்பட்ட முன்பதிவு இணைப்பை நகலெடுக்கவும்",
+    "Private appointment link copied.":
+      "தனிப்பட்ட முன்பதிவு இணைப்பு நகலெடுக்கப்பட்டது।",
+    "Your appointment": "உங்கள் முன்பதிவு",
+    "Please arrive about 10 minutes early to check in.":
+      "செக்-இன் செய்ய சுமார் 10 நிமிடங்கள் முன்பே வரவும்।",
+    "Discard appointment details?": "முன்பதிவு விவரங்களை நீக்கவா?",
+    "Your appointment details have not been submitted. Leaving will clear this form.":
+      "உங்கள் முன்பதிவு விவரங்கள் சமர்ப்பிக்கப்படவில்லை. வெளியேறினால் இந்தப் படிவம் அழிக்கப்படும்।",
+    "Leave booking": "முன்பதிவை விட்டு வெளியேறு",
+    "Continue booking": "முன்பதிவைத் தொடரவும்",
+    "Temporarily unavailable": "தற்காலிகமாக கிடைக்கவில்லை",
+    "Unavailable for this day": "இன்று கிடைக்கவில்லை",
+    "Unavailable until further notice": "அடுத்த அறிவிப்பு வரை கிடைக்கவில்லை",
+    "DOCTOR AVAILABILITY": "மருத்துவர் கிடைக்கும் நேரம்",
+    "Availability calendar": "கிடைக்கும் நேர காலண்டர்",
+    "Record emergencies, pause new bookings, and keep affected patients informed.":
+      "அவசரநிலையைப் பதிவு செய்து, புதிய முன்பதிவுகளை நிறுத்தி, பாதிக்கப்பட்ட நோயாளிகளுக்குத் தெரிவிக்கவும்।",
+    "View date": "தேதியைப் பார்க்கவும்",
+    "Update doctor availability":
+      "மருத்துவர் கிடைக்கும் நேரத்தைப் புதுப்பிக்கவும்",
+    "Existing appointments are never silently cancelled.":
+      "இருக்கும் முன்பதிவுகள் ஒருபோதும் அமைதியாக ரத்து செய்யப்படாது।",
+    "Availability status": "கிடைக்கும் நிலை",
+    "Unavailable from": "கிடைக்காத தொடக்க நேரம்",
+    "Unavailable until": "கிடைக்காத முடிவு நேரம்",
+    "Expected return": "எதிர்பார்க்கப்படும் திரும்பும் நேரம்",
+    "Internal note": "உள் குறிப்பு",
+    "Reason or handover note": "காரணம் அல்லது பொறுப்பு மாற்றக் குறிப்பு",
+    "Record availability change": "கிடைக்கும் மாற்றத்தைப் பதிவு செய்க",
+    "Emergency management": "அவசர மேலாண்மை",
+    "Resume availability": "கிடைப்பை மீண்டும் தொடங்கவும்",
+    "Not confirmed": "உறுதிசெய்யப்படவில்லை",
+    "No availability changes for this date":
+      "இந்தத் தேதிக்கு கிடைக்கும் மாற்றங்கள் இல்லை",
+    "All doctors follow their normal published schedule.":
+      "அனைத்து மருத்துவர்களும் தங்கள் வழக்கமான வெளியிடப்பட்ட அட்டவணையைப் பின்பற்றுகிறார்கள்।",
+    Notifications: "அறிவிப்புகள்",
+    "PATIENT MESSAGING": "நோயாளர் செய்திகள்",
+    "Development simulator": "மேம்பாட்டு சிமுலேட்டர்",
+    "Simulate success": "வெற்றியைச் சிமுலேட் செய்க",
+    "Simulate failure": "தோல்வியைச் சிமுலேட் செய்க",
+    "New notifications": "புதிய அறிவிப்புகள்",
+    "No new notifications.": "புதிய அறிவிப்புகள் இல்லை।",
+    "Plans and billing": "திட்டங்கள் மற்றும் பில்லிங்",
+    "Current plan": "தற்போதைய திட்டம்",
+    "Subscription status": "சந்தா நிலை",
+    "Payment history": "கட்டண வரலாறு",
+    "Renew or subscribe": "புதுப்பிக்கவும் அல்லது சந்தா பெறவும்",
+    "No payments recorded.": "கட்டணங்கள் எதுவும் பதிவு செய்யப்படவில்லை।",
+  },
+  te: {
+    "Care, made a little clearer": "సంరక్షణ, ఇంకొంచెం స్పష్టంగా",
+    "YOUR VISIT": "మీ సందర్శన",
+    "One step at a time": "ఒక్కో అడుగు చొప్పున",
+    "YOUR VISIT, AT YOUR PACE": "మీ సందర్శన, మీ వేగంతో",
+    "A little more clarity.": "ఇంకొంచెం స్పష్టత।",
+    "A little less waiting.": "ఇంకొంచెం తక్కువ నిరీక్షణ।",
+    "Find your clinic, keep your visit details close, and know what to expect when you arrive.":
+      "మీ క్లినిక్‌ను కనుగొని, సందర్శన వివరాలను దగ్గర ఉంచుకుని, చేరుకున్నప్పుడు ఏమి ఆశించాలో తెలుసుకోండి।",
+    "Your visit link stays private": "మీ సందర్శన లింక్ ప్రైవేట్‌గా ఉంటుంది",
+    "Your visit, with a little more clarity.":
+      "మీ సందర్శన, ఇంకొంచెం స్పష్టతతో।",
+    "Back to clinic search": "క్లినిక్ శోధనకు తిరిగి వెళ్ళండి",
+    "All clinics": "అన్ని క్లినిక్‌లు",
+    "Loading clinic…": "క్లినిక్ లోడ్ అవుతోంది…",
+    "Registration confirmed successfully.":
+      "నమోదు విజయవంతంగా నిర్ధారించబడింది।",
+    "Copy private appointment link":
+      "ప్రైవేట్ అపాయింట్‌మెంట్ లింక్ కాపీ చేయండి",
+    "Private appointment link copied.":
+      "ప్రైవేట్ అపాయింట్‌మెంట్ లింక్ కాపీ అయింది।",
+    "Your appointment": "మీ అపాయింట్‌మెంట్",
+    "Please arrive about 10 minutes early to check in.":
+      "చెక్-ఇన్ కోసం సుమారు 10 నిమిషాల ముందుగా రండి।",
+    "Discard appointment details?": "అపాయింట్‌మెంట్ వివరాలను తొలగించాలా?",
+    "Your appointment details have not been submitted. Leaving will clear this form.":
+      "మీ అపాయింట్‌మెంట్ వివరాలు సమర్పించబడలేదు. బయటకు వెళితే ఈ ఫారమ్ తొలగిపోతుంది।",
+    "Leave booking": "బుకింగ్ వదిలివేయండి",
+    "Continue booking": "బుకింగ్ కొనసాగించండి",
+    "Temporarily unavailable": "తాత్కాలికంగా అందుబాటులో లేదు",
+    "Unavailable for this day": "ఈ రోజుకు అందుబాటులో లేదు",
+    "Unavailable until further notice": "తదుపరి సమాచారం వరకు అందుబాటులో లేదు",
+    "DOCTOR AVAILABILITY": "వైద్యుడి లభ్యత",
+    "Availability calendar": "లభ్యత క్యాలెండర్",
+    "Record emergencies, pause new bookings, and keep affected patients informed.":
+      "అత్యవసర పరిస్థితులను నమోదు చేసి, కొత్త బుకింగ్‌లను నిలిపి, ప్రభావిత రోగులకు తెలియజేయండి।",
+    "View date": "తేదీ చూడండి",
+    "Update doctor availability": "వైద్యుడి లభ్యతను నవీకరించండి",
+    "Existing appointments are never silently cancelled.":
+      "ఉన్న అపాయింట్‌మెంట్‌లు ఎప్పుడూ నిశ్శబ్దంగా రద్దు చేయబడవు।",
+    "Availability status": "లభ్యత స్థితి",
+    "Unavailable from": "అందుబాటులో లేని ప్రారంభ సమయం",
+    "Unavailable until": "అందుబాటులో లేని ముగింపు సమయం",
+    "Expected return": "అంచనా తిరుగు సమయం",
+    "Internal note": "అంతర్గత గమనిక",
+    "Reason or handover note": "కారణం లేదా హ్యాండోవర్ గమనిక",
+    "Record availability change": "లభ్యత మార్పును నమోదు చేయండి",
+    "Emergency management": "అత్యవసర నిర్వహణ",
+    "Resume availability": "లభ్యతను మళ్లీ ప్రారంభించండి",
+    "Not confirmed": "నిర్ధారించబడలేదు",
+    "No availability changes for this date": "ఈ తేదీకి లభ్యత మార్పులు లేవు",
+    "All doctors follow their normal published schedule.":
+      "అందరు వైద్యులు తమ సాధారణ ప్రచురిత షెడ్యూల్‌ను అనుసరిస్తారు।",
+    Notifications: "నోటిఫికేషన్‌లు",
+    "PATIENT MESSAGING": "రోగి సందేశాలు",
+    "Development simulator": "డెవలప్‌మెంట్ సిమ్యులేటర్",
+    "Simulate success": "విజయాన్ని సిమ్యులేట్ చేయండి",
+    "Simulate failure": "విఫలతను సిమ్యులేట్ చేయండి",
+    "New notifications": "కొత్త నోటిఫికేషన్‌లు",
+    "No new notifications.": "కొత్త నోటిఫికేషన్‌లు లేవు।",
+    "Plans and billing": "ప్లాన్‌లు మరియు బిల్లింగ్",
+    "Current plan": "ప్రస్తుత ప్లాన్",
+    "Subscription status": "సబ్‌స్క్రిప్షన్ స్థితి",
+    "Payment history": "చెల్లింపు చరిత్ర",
+    "Renew or subscribe": "పునరుద్ధరించండి లేదా సభ్యత్వం తీసుకోండి",
+    "No payments recorded.": "చెల్లింపులు నమోదు కాలేదు।",
+  },
+  mr: {
+    "Care, made a little clearer": "काळजी, थोडी अधिक स्पष्ट",
+    "YOUR VISIT": "तुमची भेट",
+    "One step at a time": "एकावेळी एक पाऊल",
+    "YOUR VISIT, AT YOUR PACE": "तुमची भेट, तुमच्या गतीने",
+    "A little more clarity.": "थोडी अधिक स्पष्टता।",
+    "A little less waiting.": "थोडी कमी प्रतीक्षा।",
+    "Find your clinic, keep your visit details close, and know what to expect when you arrive.":
+      "तुमचे क्लिनिक शोधा, भेटीची माहिती जवळ ठेवा आणि पोहोचल्यावर काय अपेक्षित आहे ते जाणून घ्या।",
+    "Your visit link stays private": "तुमची भेट लिंक खाजगी राहते",
+    "Your visit, with a little more clarity.":
+      "तुमची भेट, थोड्या अधिक स्पष्टतेसह।",
+    "Back to clinic search": "क्लिनिक शोधाकडे परत",
+    "All clinics": "सर्व क्लिनिक",
+    "Loading clinic…": "क्लिनिक लोड होत आहे…",
+    "Registration confirmed successfully.": "नोंदणी यशस्वीरित्या निश्चित झाली।",
+    "Copy private appointment link": "खाजगी अपॉइंटमेंट लिंक कॉपी करा",
+    "Private appointment link copied.": "खाजगी अपॉइंटमेंट लिंक कॉपी झाली।",
+    "Your appointment": "तुमची अपॉइंटमेंट",
+    "Please arrive about 10 minutes early to check in.":
+      "हजेरीसाठी सुमारे 10 मिनिटे आधी या।",
+    "Discard appointment details?": "अपॉइंटमेंटचे तपशील हटवायचे?",
+    "Your appointment details have not been submitted. Leaving will clear this form.":
+      "तुमचे अपॉइंटमेंट तपशील जमा केलेले नाहीत. बाहेर पडल्यास हा फॉर्म साफ होईल।",
+    "Leave booking": "बुकिंग सोडा",
+    "Continue booking": "बुकिंग सुरू ठेवा",
+    "Temporarily unavailable": "तात्पुरते अनुपलब्ध",
+    "Unavailable for this day": "आजसाठी अनुपलब्ध",
+    "Unavailable until further notice": "पुढील सूचनेपर्यंत अनुपलब्ध",
+    "DOCTOR AVAILABILITY": "डॉक्टर उपलब्धता",
+    "Availability calendar": "उपलब्धता कॅलेंडर",
+    "Record emergencies, pause new bookings, and keep affected patients informed.":
+      "आपत्कालीन स्थिती नोंदवा, नवीन बुकिंग थांबवा आणि प्रभावित रुग्णांना माहिती द्या।",
+    "View date": "तारीख पहा",
+    "Update doctor availability": "डॉक्टरांची उपलब्धता अपडेट करा",
+    "Existing appointments are never silently cancelled.":
+      "असलेल्या अपॉइंटमेंट कधीही न सांगता रद्द केल्या जात नाहीत।",
+    "Availability status": "उपलब्धता स्थिती",
+    "Unavailable from": "अनुपलब्ध सुरू",
+    "Unavailable until": "अनुपलब्ध पर्यंत",
+    "Expected return": "अपेक्षित परतण्याची वेळ",
+    "Internal note": "अंतर्गत नोंद",
+    "Reason or handover note": "कारण किंवा हस्तांतरण नोंद",
+    "Record availability change": "उपलब्धता बदल नोंदवा",
+    "Emergency management": "आपत्कालीन व्यवस्थापन",
+    "Resume availability": "उपलब्धता पुन्हा सुरू करा",
+    "Not confirmed": "निश्चित नाही",
+    "No availability changes for this date": "या तारखेसाठी उपलब्धता बदल नाहीत",
+    "All doctors follow their normal published schedule.":
+      "सर्व डॉक्टर त्यांचे सामान्य प्रकाशित वेळापत्रक पाळतात।",
+    Notifications: "सूचना",
+    "PATIENT MESSAGING": "रुग्ण संदेश",
+    "Development simulator": "डेव्हलपमेंट सिम्युलेटर",
+    "Simulate success": "यश सिम्युलेट करा",
+    "Simulate failure": "अपयश सिम्युलेट करा",
+    "New notifications": "नवीन सूचना",
+    "No new notifications.": "नवीन सूचना नाहीत।",
+    "Plans and billing": "प्लॅन आणि बिलिंग",
+    "Current plan": "सध्याचा प्लॅन",
+    "Subscription status": "सदस्यत्व स्थिती",
+    "Payment history": "पेमेंट इतिहास",
+    "Renew or subscribe": "नूतनीकरण किंवा सदस्यत्व घ्या",
+    "No payments recorded.": "पेमेंट नोंदलेले नाहीत।",
+  },
+};
+
+Object.assign(completeUiWords.hi, {
+  "Clinic name": "क्लिनिक का नाम",
+  "Clinic address": "क्लिनिक का पता",
+  "Clinic phone": "क्लिनिक फ़ोन",
+  "GET STARTED": "शुरू करें",
+  "WELCOME BACK": "वापसी पर स्वागत है",
+  "Set up your clinic": "अपना क्लिनिक सेट करें",
+  "Sign in to QueueLess": "QueueLess में लॉगिन करें",
+  "Create your clinic workspace. Your first month is on us.":
+    "अपना क्लिनिक कार्यक्षेत्र बनाएँ। पहला महीना मुफ़्त है।",
+  "Manage your clinic queue and appointments.":
+    "अपनी क्लिनिक कतार और अपॉइंटमेंट संभालें।",
+  "Create a strong password": "मज़बूत पासवर्ड बनाएँ",
+  "Your password": "आपका पासवर्ड",
+  "Create clinic account": "क्लिनिक खाता बनाएँ",
+  "Already set up?": "पहले से सेट है?",
+  "New to QueueLess?": "QueueLess पर नए हैं?",
+  "Register your clinic": "अपना क्लिनिक पंजीकृत करें",
+  "Doctor availability": "डॉक्टर की उपलब्धता",
+  Scheduled: "निर्धारित",
+  "appointments booked": "अपॉइंटमेंट बुक हुईं",
+  "Clinic schedule": "क्लिनिक समय-सारणी",
+  "Choose clinic schedule date": "क्लिनिक समय-सारणी की तारीख चुनें",
+});
+Object.assign(completeUiWords.bn, {
+  "Clinic name": "ক্লিনিকের নাম",
+  "Clinic address": "ক্লিনিকের ঠিকানা",
+  "Clinic phone": "ক্লিনিক ফোন",
+  "GET STARTED": "শুরু করুন",
+  "WELCOME BACK": "আবার স্বাগতম",
+  "Set up your clinic": "আপনার ক্লিনিক সেট আপ করুন",
+  "Sign in to QueueLess": "QueueLess-এ সাইন ইন করুন",
+  "Create your clinic workspace. Your first month is on us.":
+    "আপনার ক্লিনিক কর্মক্ষেত্র তৈরি করুন। প্রথম মাস আমাদের পক্ষ থেকে।",
+  "Manage your clinic queue and appointments.":
+    "আপনার ক্লিনিকের সারি ও অ্যাপয়েন্টমেন্ট পরিচালনা করুন।",
+  "Create a strong password": "একটি শক্তিশালী পাসওয়ার্ড তৈরি করুন",
+  "Your password": "আপনার পাসওয়ার্ড",
+  "Create clinic account": "ক্লিনিক অ্যাকাউন্ট তৈরি করুন",
+  "Already set up?": "আগেই সেট আপ করেছেন?",
+  "New to QueueLess?": "QueueLess-এ নতুন?",
+  "Register your clinic": "আপনার ক্লিনিক নিবন্ধন করুন",
+  "Doctor availability": "ডাক্তারের উপলভ্যতা",
+  Scheduled: "নির্ধারিত",
+  "appointments booked": "অ্যাপয়েন্টমেন্ট বুক হয়েছে",
+  "Clinic schedule": "ক্লিনিকের সময়সূচি",
+  "Choose clinic schedule date": "ক্লিনিক সময়সূচির তারিখ বেছে নিন",
+});
+Object.assign(completeUiWords.ta, {
+  "Clinic name": "கிளினிக் பெயர்",
+  "Clinic address": "கிளினிக் முகவரி",
+  "Clinic phone": "கிளினிக் தொலைபேசி",
+  "GET STARTED": "தொடங்குங்கள்",
+  "WELCOME BACK": "மீண்டும் வரவேற்கிறோம்",
+  "Set up your clinic": "உங்கள் கிளினிக்கை அமைக்கவும்",
+  "Sign in to QueueLess": "QueueLess-இல் உள்நுழையவும்",
+  "Create your clinic workspace. Your first month is on us.":
+    "உங்கள் கிளினிக் பணியிடத்தை உருவாக்கவும். முதல் மாதம் இலவசம்।",
+  "Manage your clinic queue and appointments.":
+    "உங்கள் கிளினிக் வரிசை மற்றும் முன்பதிவுகளை நிர்வகிக்கவும்।",
+  "Create a strong password": "வலுவான கடவுச்சொல்லை உருவாக்கவும்",
+  "Your password": "உங்கள் கடவுச்சொல்",
+  "Create clinic account": "கிளினிக் கணக்கை உருவாக்கவும்",
+  "Already set up?": "ஏற்கனவே அமைத்துவிட்டீர்களா?",
+  "New to QueueLess?": "QueueLess-க்கு புதியவரா?",
+  "Register your clinic": "உங்கள் கிளினிக்கைப் பதிவு செய்யவும்",
+  "Doctor availability": "மருத்துவர் கிடைக்கும் நேரம்",
+  Scheduled: "திட்டமிடப்பட்டது",
+  "appointments booked": "முன்பதிவுகள் செய்யப்பட்டன",
+  "Clinic schedule": "கிளினிக் அட்டவணை",
+  "Choose clinic schedule date": "கிளினிக் அட்டவணை தேதியைத் தேர்ந்தெடுக்கவும்",
+});
+Object.assign(completeUiWords.te, {
+  "Clinic name": "క్లినిక్ పేరు",
+  "Clinic address": "క్లినిక్ చిరునామా",
+  "Clinic phone": "క్లినిక్ ఫోన్",
+  "GET STARTED": "ప్రారంభించండి",
+  "WELCOME BACK": "తిరిగి స్వాగతం",
+  "Set up your clinic": "మీ క్లినిక్‌ను సెట్ చేయండి",
+  "Sign in to QueueLess": "QueueLess కు సైన్ ఇన్ చేయండి",
+  "Create your clinic workspace. Your first month is on us.":
+    "మీ క్లినిక్ కార్యస్థలాన్ని సృష్టించండి. మొదటి నెల ఉచితం।",
+  "Manage your clinic queue and appointments.":
+    "మీ క్లినిక్ క్యూ మరియు అపాయింట్‌మెంట్‌లను నిర్వహించండి।",
+  "Create a strong password": "బలమైన పాస్‌వర్డ్ సృష్టించండి",
+  "Your password": "మీ పాస్‌వర్డ్",
+  "Create clinic account": "క్లినిక్ ఖాతా సృష్టించండి",
+  "Already set up?": "ఇప్పటికే సెట్ చేశారా?",
+  "New to QueueLess?": "QueueLess కు కొత్తా?",
+  "Register your clinic": "మీ క్లినిక్‌ను నమోదు చేయండి",
+  "Doctor availability": "వైద్యుడి లభ్యత",
+  Scheduled: "షెడ్యూల్ చేయబడింది",
+  "appointments booked": "అపాయింట్‌మెంట్‌లు బుక్ అయ్యాయి",
+  "Clinic schedule": "క్లినిక్ షెడ్యూల్",
+  "Choose clinic schedule date": "క్లినిక్ షెడ్యూల్ తేదీని ఎంచుకోండి",
+});
+Object.assign(completeUiWords.mr, {
+  "Clinic name": "क्लिनिकचे नाव",
+  "Clinic address": "क्लिनिकचा पत्ता",
+  "Clinic phone": "क्लिनिक फोन",
+  "GET STARTED": "सुरू करा",
+  "WELCOME BACK": "पुन्हा स्वागत आहे",
+  "Set up your clinic": "तुमचे क्लिनिक सेट करा",
+  "Sign in to QueueLess": "QueueLess मध्ये साइन इन करा",
+  "Create your clinic workspace. Your first month is on us.":
+    "तुमचे क्लिनिक कार्यक्षेत्र तयार करा. पहिला महिना विनामूल्य आहे।",
+  "Manage your clinic queue and appointments.":
+    "तुमची क्लिनिक रांग आणि अपॉइंटमेंट व्यवस्थापित करा।",
+  "Create a strong password": "मजबूत पासवर्ड तयार करा",
+  "Your password": "तुमचा पासवर्ड",
+  "Create clinic account": "क्लिनिक खाते तयार करा",
+  "Already set up?": "आधीच सेट केले आहे?",
+  "New to QueueLess?": "QueueLess वर नवीन आहात?",
+  "Register your clinic": "तुमचे क्लिनिक नोंदवा",
+  "Doctor availability": "डॉक्टरांची उपलब्धता",
+  Scheduled: "नियोजित",
+  "appointments booked": "अपॉइंटमेंट बुक झाल्या",
+  "Clinic schedule": "क्लिनिक वेळापत्रक",
+  "Choose clinic schedule date": "क्लिनिक वेळापत्रक तारीख निवडा",
+});
+
+Object.assign(completeUiWords.hi, {
+  "Rejoin at the end of the queue": "कतार के अंत में फिर से शामिल करें",
+  From: "से",
+  To: "तक",
+});
+Object.assign(completeUiWords.bn, {
+  "Rejoin at the end of the queue": "সারির শেষে আবার যোগ করুন",
+  From: "থেকে",
+  To: "পর্যন্ত",
+});
+Object.assign(completeUiWords.ta, {
+  "Rejoin at the end of the queue": "வரிசையின் முடிவில் மீண்டும் சேர்க்கவும்",
+  From: "முதல்",
+  To: "வரை",
+});
+Object.assign(completeUiWords.te, {
+  "Rejoin at the end of the queue": "క్యూ చివరలో మళ్లీ చేర్చండి",
+  From: "నుండి",
+  To: "వరకు",
+});
+Object.assign(completeUiWords.mr, {
+  "Rejoin at the end of the queue": "रांगेच्या शेवटी पुन्हा सामील करा",
+  From: "पासून",
+  To: "पर्यंत",
+});
+
+Object.assign(completeUiWords.hi, {
+  "Andhra Pradesh": "आंध्र प्रदेश",
+  "Arunachal Pradesh": "अरुणाचल प्रदेश",
+  Assam: "असम",
+  Bihar: "बिहार",
+  Chhattisgarh: "छत्तीसगढ़",
+  Goa: "गोवा",
+  Gujarat: "गुजरात",
+  Haryana: "हरियाणा",
+  "Himachal Pradesh": "हिमाचल प्रदेश",
+  Jharkhand: "झारखंड",
+  Karnataka: "कर्नाटक",
+  Kerala: "केरल",
+  "Madhya Pradesh": "मध्य प्रदेश",
+  Maharashtra: "महाराष्ट्र",
+  Manipur: "मणिपुर",
+  Meghalaya: "मेघालय",
+  Mizoram: "मिज़ोरम",
+  Nagaland: "नागालैंड",
+  Odisha: "ओडिशा",
+  Punjab: "पंजाब",
+  Rajasthan: "राजस्थान",
+  Sikkim: "सिक्किम",
+  "Tamil Nadu": "तमिलनाडु",
+  Telangana: "तेलंगाना",
+  Tripura: "त्रिपुरा",
+  "Uttar Pradesh": "उत्तर प्रदेश",
+  Uttarakhand: "उत्तराखंड",
+  "West Bengal": "पश्चिम बंगाल",
+  "Andaman and Nicobar Islands": "अंडमान और निकोबार द्वीपसमूह",
+  Chandigarh: "चंडीगढ़",
+  "Dadra and Nagar Haveli and Daman and Diu":
+    "दादरा और नगर हवेली तथा दमन और दीव",
+  Delhi: "दिल्ली",
+  "Jammu and Kashmir": "जम्मू और कश्मीर",
+  Ladakh: "लद्दाख",
+  Lakshadweep: "लक्षद्वीप",
+  Puducherry: "पुडुचेरी",
+});
+Object.assign(completeUiWords.bn, {
+  "Andhra Pradesh": "আন্ধ্র প্রদেশ",
+  "Arunachal Pradesh": "অরুণাচল প্রদেশ",
+  Assam: "অসম",
+  Bihar: "বিহার",
+  Chhattisgarh: "ছত্তীসগড়",
+  Goa: "গোয়া",
+  Gujarat: "গুজরাট",
+  Haryana: "হরিয়ানা",
+  "Himachal Pradesh": "হিমাচল প্রদেশ",
+  Jharkhand: "ঝাড়খণ্ড",
+  Karnataka: "কর্ণাটক",
+  Kerala: "কেরালা",
+  "Madhya Pradesh": "মধ্য প্রদেশ",
+  Maharashtra: "মহারাষ্ট্র",
+  Manipur: "মণিপুর",
+  Meghalaya: "মেঘালয়",
+  Mizoram: "মিজোরাম",
+  Nagaland: "নাগাল্যান্ড",
+  Odisha: "ওড়িশা",
+  Punjab: "পাঞ্জাব",
+  Rajasthan: "রাজস্থান",
+  Sikkim: "সিকিম",
+  "Tamil Nadu": "তামিলনাড়ু",
+  Telangana: "তেলেঙ্গানা",
+  Tripura: "ত্রিপুরা",
+  "Uttar Pradesh": "উত্তর প্রদেশ",
+  Uttarakhand: "উত্তরাখণ্ড",
+  "West Bengal": "পশ্চিমবঙ্গ",
+  "Andaman and Nicobar Islands": "আন্দামান ও নিকোবর দ্বীপপুঞ্জ",
+  Chandigarh: "চণ্ডীগড়",
+  "Dadra and Nagar Haveli and Daman and Diu":
+    "দাদরা ও নগর হাভেলি এবং দমন ও দিউ",
+  Delhi: "দিল্লি",
+  "Jammu and Kashmir": "জম্মু ও কাশ্মীর",
+  Ladakh: "লাদাখ",
+  Lakshadweep: "লক্ষদ্বীপ",
+  Puducherry: "পুদুচেরি",
+});
+Object.assign(completeUiWords.ta, {
+  "Andhra Pradesh": "ஆந்திரப் பிரதேசம்",
+  "Arunachal Pradesh": "அருணாச்சலப் பிரதேசம்",
+  Assam: "அசாம்",
+  Bihar: "பீகார்",
+  Chhattisgarh: "சத்தீஸ்கர்",
+  Goa: "கோவா",
+  Gujarat: "குஜராத்",
+  Haryana: "ஹரியானா",
+  "Himachal Pradesh": "இமாச்சலப் பிரதேசம்",
+  Jharkhand: "ஜார்கண்ட்",
+  Karnataka: "கர்நாடகா",
+  Kerala: "கேரளம்",
+  "Madhya Pradesh": "மத்தியப் பிரதேசம்",
+  Maharashtra: "மகாராஷ்டிரா",
+  Manipur: "மணிப்பூர்",
+  Meghalaya: "மேகாலயா",
+  Mizoram: "மிசோரம்",
+  Nagaland: "நாகாலாந்து",
+  Odisha: "ஒடிஷா",
+  Punjab: "பஞ்சாப்",
+  Rajasthan: "ராஜஸ்தான்",
+  Sikkim: "சிக்கிம்",
+  "Tamil Nadu": "தமிழ்நாடு",
+  Telangana: "தெலங்கானா",
+  Tripura: "திரிபுரா",
+  "Uttar Pradesh": "உத்தரப் பிரதேசம்",
+  Uttarakhand: "உத்தரகாண்ட்",
+  "West Bengal": "மேற்கு வங்காளம்",
+  "Andaman and Nicobar Islands": "அந்தமான் நிக்கோபார் தீவுகள்",
+  Chandigarh: "சண்டிகர்",
+  "Dadra and Nagar Haveli and Daman and Diu":
+    "தாத்ரா நகர் ஹவேலி மற்றும் தாமன் தியூ",
+  Delhi: "டெல்லி",
+  "Jammu and Kashmir": "ஜம்மு காஷ்மீர்",
+  Ladakh: "லடாக்",
+  Lakshadweep: "லட்சத்தீவுகள்",
+  Puducherry: "புதுச்சேரி",
+});
+Object.assign(completeUiWords.te, {
+  "Andhra Pradesh": "ఆంధ్ర ప్రదేశ్",
+  "Arunachal Pradesh": "అరుణాచల్ ప్రదేశ్",
+  Assam: "అస్సాం",
+  Bihar: "బీహార్",
+  Chhattisgarh: "ఛత్తీస్‌గఢ్",
+  Goa: "గోవా",
+  Gujarat: "గుజరాత్",
+  Haryana: "హర్యానా",
+  "Himachal Pradesh": "హిమాచల్ ప్రదేశ్",
+  Jharkhand: "జార్ఖండ్",
+  Karnataka: "కర్ణాటక",
+  Kerala: "కేరళ",
+  "Madhya Pradesh": "మధ్య ప్రదేశ్",
+  Maharashtra: "మహారాష్ట్ర",
+  Manipur: "మణిపూర్",
+  Meghalaya: "మేఘాలయ",
+  Mizoram: "మిజోరం",
+  Nagaland: "నాగాలాండ్",
+  Odisha: "ఒడిశా",
+  Punjab: "పంజాబ్",
+  Rajasthan: "రాజస్థాన్",
+  Sikkim: "సిక్కిం",
+  "Tamil Nadu": "తమిళనాడు",
+  Telangana: "తెలంగాణ",
+  Tripura: "త్రిపుర",
+  "Uttar Pradesh": "ఉత్తర ప్రదేశ్",
+  Uttarakhand: "ఉత్తరాఖండ్",
+  "West Bengal": "పశ్చిమ బెంగాల్",
+  "Andaman and Nicobar Islands": "అండమాన్ నికోబార్ దీవులు",
+  Chandigarh: "చండీగఢ్",
+  "Dadra and Nagar Haveli and Daman and Diu":
+    "దాద్రా నగర్ హవేలీ మరియు దమన్ దీవ్",
+  Delhi: "ఢిల్లీ",
+  "Jammu and Kashmir": "జమ్మూ కాశ్మీర్",
+  Ladakh: "లడఖ్",
+  Lakshadweep: "లక్షద్వీప్",
+  Puducherry: "పుదుచ్చేరి",
+});
+Object.assign(completeUiWords.mr, {
+  "Andhra Pradesh": "आंध्र प्रदेश",
+  "Arunachal Pradesh": "अरुणाचल प्रदेश",
+  Assam: "आसाम",
+  Bihar: "बिहार",
+  Chhattisgarh: "छत्तीसगड",
+  Goa: "गोवा",
+  Gujarat: "गुजरात",
+  Haryana: "हरियाणा",
+  "Himachal Pradesh": "हिमाचल प्रदेश",
+  Jharkhand: "झारखंड",
+  Karnataka: "कर्नाटक",
+  Kerala: "केरळ",
+  "Madhya Pradesh": "मध्य प्रदेश",
+  Maharashtra: "महाराष्ट्र",
+  Manipur: "मणिपूर",
+  Meghalaya: "मेघालय",
+  Mizoram: "मिझोरम",
+  Nagaland: "नागालँड",
+  Odisha: "ओडिशा",
+  Punjab: "पंजाब",
+  Rajasthan: "राजस्थान",
+  Sikkim: "सिक्कीम",
+  "Tamil Nadu": "तामिळनाडू",
+  Telangana: "तेलंगणा",
+  Tripura: "त्रिपुरा",
+  "Uttar Pradesh": "उत्तर प्रदेश",
+  Uttarakhand: "उत्तराखंड",
+  "West Bengal": "पश्चिम बंगाल",
+  "Andaman and Nicobar Islands": "अंदमान आणि निकोबार बेटे",
+  Chandigarh: "चंदीगड",
+  "Dadra and Nagar Haveli and Daman and Diu":
+    "दादरा आणि नगर हवेली आणि दमण व दीव",
+  Delhi: "दिल्ली",
+  "Jammu and Kashmir": "जम्मू आणि काश्मीर",
+  Ladakh: "लडाख",
+  Lakshadweep: "लक्षद्वीप",
+  Puducherry: "पुदुच्चेरी",
+});
+
+Object.assign(completeUiWords.hi, {
+  "Rejoin after eligible waiting patients":
+    "पात्र प्रतीक्षा कर रहे मरीज़ों के बाद फिर से शामिल करें",
+});
+Object.assign(completeUiWords.bn, {
+  "Rejoin after eligible waiting patients":
+    "যোগ্য অপেক্ষারত রোগীদের পরে আবার যোগ করুন",
+});
+Object.assign(completeUiWords.ta, {
+  "Rejoin after eligible waiting patients":
+    "தகுதியான காத்திருக்கும் நோயாளிகளுக்குப் பிறகு மீண்டும் சேர்க்கவும்",
+});
+Object.assign(completeUiWords.te, {
+  "Rejoin after eligible waiting patients":
+    "అర్హులైన వేచి ఉన్న రోగుల తర్వాత మళ్లీ చేర్చండి",
+});
+Object.assign(completeUiWords.mr, {
+  "Rejoin after eligible waiting patients":
+    "पात्र प्रतीक्षेत असलेल्या रुग्णांनंतर पुन्हा सामील करा",
+});
+
+Object.assign(completeUiWords.hi, {
+  DAY: "दिन",
+  "OPENING HOURS": "खुलने का समय",
+});
+Object.assign(completeUiWords.bn, {
+  DAY: "দিন",
+  "OPENING HOURS": "খোলার সময়",
+});
+Object.assign(completeUiWords.ta, {
+  DAY: "நாள்",
+  "OPENING HOURS": "திறக்கும் நேரம்",
+});
+Object.assign(completeUiWords.te, {
+  DAY: "రోజు",
+  "OPENING HOURS": "పని వేళలు",
+});
+Object.assign(completeUiWords.mr, {
+  DAY: "दिवस",
+  "OPENING HOURS": "कामकाजाची वेळ",
+});
+
+Object.assign(completeUiWords.hi, {
+  "Manage your appointment link": "अपना अपॉइंटमेंट लिंक प्रबंधित करें",
+  "Keep this link to reopen your visit details. You can change its settings below.":
+    "मुलाक़ात की जानकारी फिर खोलने के लिए यह लिंक सुरक्षित रखें। इसकी सेटिंग नीचे बदल सकते हैं।",
+  Sunday: "रविवार",
+  Monday: "सोमवार",
+  Tuesday: "मंगलवार",
+  Wednesday: "बुधवार",
+  Thursday: "गुरुवार",
+  Friday: "शुक्रवार",
+  Saturday: "शनिवार",
+  sunday: "रविवार",
+  monday: "सोमवार",
+  tuesday: "मंगलवार",
+  wednesday: "बुधवार",
+  thursday: "गुरुवार",
+  friday: "शुक्रवार",
+  saturday: "शनिवार",
+});
+Object.assign(completeUiWords.bn, {
+  "Manage your appointment link": "আপনার অ্যাপয়েন্টমেন্ট লিঙ্ক পরিচালনা করুন",
+  "Keep this link to reopen your visit details. You can change its settings below.":
+    "সাক্ষাতের তথ্য আবার খুলতে এই লিঙ্কটি রাখুন। নিচে এর সেটিংস বদলাতে পারেন।",
+  Sunday: "রবিবার",
+  Monday: "সোমবার",
+  Tuesday: "মঙ্গলবার",
+  Wednesday: "বুধবার",
+  Thursday: "বৃহস্পতিবার",
+  Friday: "শুক্রবার",
+  Saturday: "শনিবার",
+  sunday: "রবিবার",
+  monday: "সোমবার",
+  tuesday: "মঙ্গলবার",
+  wednesday: "বুধবার",
+  thursday: "বৃহস্পতিবার",
+  friday: "শুক্রবার",
+  saturday: "শনিবার",
+});
+Object.assign(completeUiWords.ta, {
+  "Manage your appointment link": "உங்கள் முன்பதிவு இணைப்பை நிர்வகிக்கவும்",
+  "Keep this link to reopen your visit details. You can change its settings below.":
+    "உங்கள் வருகை விவரங்களை மீண்டும் திறக்க இந்த இணைப்பை வைத்திருங்கள். கீழே அதன் அமைப்புகளை மாற்றலாம்।",
+  Sunday: "ஞாயிறு",
+  Monday: "திங்கள்",
+  Tuesday: "செவ்வாய்",
+  Wednesday: "புதன்",
+  Thursday: "வியாழன்",
+  Friday: "வெள்ளி",
+  Saturday: "சனி",
+  sunday: "ஞாயிறு",
+  monday: "திங்கள்",
+  tuesday: "செவ்வாய்",
+  wednesday: "புதன்",
+  thursday: "வியாழன்",
+  friday: "வெள்ளி",
+  saturday: "சனி",
+});
+Object.assign(completeUiWords.te, {
+  "Manage your appointment link": "మీ అపాయింట్‌మెంట్ లింక్‌ను నిర్వహించండి",
+  "Keep this link to reopen your visit details. You can change its settings below.":
+    "మీ సందర్శన వివరాలను మళ్లీ తెరవడానికి ఈ లింక్‌ను ఉంచుకోండి. దాని సెట్టింగ్‌లను దిగువన మార్చవచ్చు।",
+  Sunday: "ఆదివారం",
+  Monday: "సోమవారం",
+  Tuesday: "మంగళవారం",
+  Wednesday: "బుధవారం",
+  Thursday: "గురువారం",
+  Friday: "శుక్రవారం",
+  Saturday: "శనివారం",
+  sunday: "ఆదివారం",
+  monday: "సోమవారం",
+  tuesday: "మంగళవారం",
+  wednesday: "బుధవారం",
+  thursday: "గురువారం",
+  friday: "శుక్రవారం",
+  saturday: "శనివారం",
+});
+Object.assign(completeUiWords.mr, {
+  "Manage your appointment link": "तुमची अपॉइंटमेंट लिंक व्यवस्थापित करा",
+  "Keep this link to reopen your visit details. You can change its settings below.":
+    "भेटीची माहिती पुन्हा उघडण्यासाठी ही लिंक जतन करा. तिच्या सेटिंग्ज खाली बदलू शकता।",
+  Sunday: "रविवार",
+  Monday: "सोमवार",
+  Tuesday: "मंगळवार",
+  Wednesday: "बुधवार",
+  Thursday: "गुरुवार",
+  Friday: "शुक्रवार",
+  Saturday: "शनिवार",
+  sunday: "रविवार",
+  monday: "सोमवार",
+  tuesday: "मंगळवार",
+  wednesday: "बुधवार",
+  thursday: "गुरुवार",
+  friday: "शुक्रवार",
+  saturday: "शनिवार",
+});
+
+Object.assign(completeUiWords.hi, {
+  "CLINIC RECORDS": "क्लिनिक रिकॉर्ड",
+  "Historical visits and final outcomes.": "पिछली मुलाक़ातें और अंतिम परिणाम।",
+  "Clinic time zone:": "क्लिनिक समय क्षेत्र:",
+  "Optional · visible only to clinic staff":
+    "वैकल्पिक · केवल क्लिनिक स्टाफ को दिखेगा",
+  "Full-day closures let patients choose a genuinely available replacement slot.":
+    "पूरे दिन की अनुपलब्धता में मरीज़ सचमुच उपलब्ध वैकल्पिक स्लॉट चुन सकते हैं।",
+  "＋ Add doctor": "＋ डॉक्टर जोड़ें",
+  "opening time": "खुलने का समय",
+  "closing time": "बंद होने का समय",
+  to: "तक",
+  "Your private visit link is ready. Copy it somewhere safe to reopen the registration from another device, or check My Appointment with your mobile number.":
+    "आपका निजी मुलाक़ात लिंक तैयार है। इसे सुरक्षित जगह कॉपी करें ताकि दूसरे डिवाइस से पंजीकरण खोल सकें, या अपने मोबाइल नंबर से मेरी अपॉइंटमेंट देखें।",
+  "View My Appointment": "मेरी अपॉइंटमेंट देखें",
+  "APPOINTMENT STATUS": "अपॉइंटमेंट स्थिति",
+  "Turn WhatsApp updates off": "WhatsApp अपडेट बंद करें",
+  "Turn WhatsApp updates on": "WhatsApp अपडेट चालू करें",
+  "Find another clinic": "दूसरा क्लिनिक खोजें",
+  "Enter your registered mobile number. We’ll send a verification code if appointments are associated with it.":
+    "अपना पंजीकृत मोबाइल नंबर भरें। उससे अपॉइंटमेंट जुड़े होने पर हम सत्यापन कोड भेजेंगे।",
+  Continue: "जारी रखें",
+  "Return to QueueLess home": "QueueLess होम पर वापस",
+});
+Object.assign(completeUiWords.bn, {
+  "CLINIC RECORDS": "ক্লিনিক রেকর্ড",
+  "Historical visits and final outcomes.": "আগের সাক্ষাৎ ও চূড়ান্ত ফলাফল।",
+  "Clinic time zone:": "ক্লিনিক সময় অঞ্চল:",
+  "Optional · visible only to clinic staff":
+    "ঐচ্ছিক · শুধু ক্লিনিকের কর্মীরা দেখতে পাবেন",
+  "Full-day closures let patients choose a genuinely available replacement slot.":
+    "সারা দিনের বন্ধে রোগীরা সত্যিকারের উপলব্ধ বিকল্প স্লট বেছে নিতে পারেন।",
+  "＋ Add doctor": "＋ ডাক্তার যোগ করুন",
+  "opening time": "খোলার সময়",
+  "closing time": "বন্ধের সময়",
+  to: "থেকে",
+  "Your private visit link is ready. Copy it somewhere safe to reopen the registration from another device, or check My Appointment with your mobile number.":
+    "আপনার ব্যক্তিগত সাক্ষাৎ লিঙ্ক তৈরি। অন্য ডিভাইস থেকে নিবন্ধন খুলতে নিরাপদ স্থানে কপি করুন, বা মোবাইল নম্বর দিয়ে আমার অ্যাপয়েন্টমেন্ট দেখুন।",
+  "View My Appointment": "আমার অ্যাপয়েন্টমেন্ট দেখুন",
+  "APPOINTMENT STATUS": "অ্যাপয়েন্টমেন্টের অবস্থা",
+  "Turn WhatsApp updates off": "WhatsApp আপডেট বন্ধ করুন",
+  "Turn WhatsApp updates on": "WhatsApp আপডেট চালু করুন",
+  "Find another clinic": "অন্য ক্লিনিক খুঁজুন",
+  "Enter your registered mobile number. We’ll send a verification code if appointments are associated with it.":
+    "আপনার নিবন্ধিত মোবাইল নম্বর লিখুন। এর সঙ্গে অ্যাপয়েন্টমেন্ট থাকলে আমরা যাচাইকরণ কোড পাঠাব।",
+  Continue: "চালিয়ে যান",
+  "Return to QueueLess home": "QueueLess হোমে ফিরুন",
+});
+Object.assign(completeUiWords.ta, {
+  "CLINIC RECORDS": "கிளினிக் பதிவுகள்",
+  "Historical visits and final outcomes.":
+    "முந்தைய வருகைகள் மற்றும் இறுதி முடிவுகள்।",
+  "Clinic time zone:": "கிளினிக் நேர மண்டலம்:",
+  "Optional · visible only to clinic staff":
+    "விருப்பமானது · கிளினிக் பணியாளர்களுக்கு மட்டும் தெரியும்",
+  "Full-day closures let patients choose a genuinely available replacement slot.":
+    "முழுநாள் மூடல் நோயாளிகள் உண்மையில் கிடைக்கும் மாற்று நேரத்தைத் தேர்ந்தெடுக்க உதவுகிறது।",
+  "＋ Add doctor": "＋ மருத்துவரைச் சேர்க்கவும்",
+  "opening time": "திறக்கும் நேரம்",
+  "closing time": "மூடும் நேரம்",
+  to: "முதல்",
+  "Your private visit link is ready. Copy it somewhere safe to reopen the registration from another device, or check My Appointment with your mobile number.":
+    "உங்கள் தனிப்பட்ட வருகை இணைப்பு தயாராக உள்ளது. வேறு சாதனத்தில் பதிவைத் திறக்க பாதுகாப்பான இடத்தில் நகலெடுக்கவும் அல்லது உங்கள் மொபைல் எண்ணால் என் முன்பதிவைப் பார்க்கவும்।",
+  "View My Appointment": "என் முன்பதிவைப் பார்க்கவும்",
+  "APPOINTMENT STATUS": "முன்பதிவு நிலை",
+  "Turn WhatsApp updates off": "WhatsApp புதுப்பிப்புகளை நிறுத்தவும்",
+  "Turn WhatsApp updates on": "WhatsApp புதுப்பிப்புகளை இயக்கவும்",
+  "Find another clinic": "மற்றொரு கிளினிக்கைத் தேடவும்",
+  "Enter your registered mobile number. We’ll send a verification code if appointments are associated with it.":
+    "உங்கள் பதிவு செய்யப்பட்ட மொபைல் எண்ணை உள்ளிடவும். அதனுடன் முன்பதிவுகள் இருந்தால் சரிபார்ப்புக் குறியீட்டை அனுப்புவோம்।",
+  Continue: "தொடரவும்",
+  "Return to QueueLess home": "QueueLess முகப்பிற்குத் திரும்பவும்",
+});
+Object.assign(completeUiWords.te, {
+  "CLINIC RECORDS": "క్లినిక్ రికార్డులు",
+  "Historical visits and final outcomes.": "గత సందర్శనలు మరియు తుది ఫలితాలు।",
+  "Clinic time zone:": "క్లినిక్ సమయ మండలం:",
+  "Optional · visible only to clinic staff":
+    "ఐచ్ఛికం · క్లినిక్ సిబ్బందికి మాత్రమే కనిపిస్తుంది",
+  "Full-day closures let patients choose a genuinely available replacement slot.":
+    "పూర్తి రోజు మూసివేతలు రోగులు నిజంగా అందుబాటులో ఉన్న ప్రత్యామ్నాయ స్లాట్‌ను ఎంచుకునేలా చేస్తాయి।",
+  "＋ Add doctor": "＋ వైద్యుడిని జోడించండి",
+  "opening time": "తెరిచే సమయం",
+  "closing time": "మూసే సమయం",
+  to: "నుండి",
+  "Your private visit link is ready. Copy it somewhere safe to reopen the registration from another device, or check My Appointment with your mobile number.":
+    "మీ ప్రైవేట్ సందర్శన లింక్ సిద్ధంగా ఉంది. మరొక పరికరంలో నమోదును తెరవడానికి సురక్షితమైన చోట కాపీ చేయండి లేదా మీ మొబైల్ నంబర్‌తో నా అపాయింట్‌మెంట్‌ను చూడండి।",
+  "View My Appointment": "నా అపాయింట్‌మెంట్ చూడండి",
+  "APPOINTMENT STATUS": "అపాయింట్‌మెంట్ స్థితి",
+  "Turn WhatsApp updates off": "WhatsApp నవీకరణలను ఆపండి",
+  "Turn WhatsApp updates on": "WhatsApp నవీకరణలను ప్రారంభించండి",
+  "Find another clinic": "మరో క్లినిక్‌ను కనుగొనండి",
+  "Enter your registered mobile number. We’ll send a verification code if appointments are associated with it.":
+    "మీ నమోదు చేసిన మొబైల్ నంబర్‌ను నమోదు చేయండి. దానితో అపాయింట్‌మెంట్‌లు ఉంటే ధృవీకరణ కోడ్ పంపుతాము।",
+  Continue: "కొనసాగించండి",
+  "Return to QueueLess home": "QueueLess హోమ్‌కు తిరిగి వెళ్ళండి",
+});
+Object.assign(completeUiWords.mr, {
+  "CLINIC RECORDS": "क्लिनिक नोंदी",
+  "Historical visits and final outcomes.": "मागील भेटी आणि अंतिम परिणाम।",
+  "Clinic time zone:": "क्लिनिक वेळ क्षेत्र:",
+  "Optional · visible only to clinic staff":
+    "ऐच्छिक · फक्त क्लिनिक कर्मचाऱ्यांना दिसेल",
+  "Full-day closures let patients choose a genuinely available replacement slot.":
+    "पूर्ण दिवस बंद असल्यास रुग्ण खरोखर उपलब्ध पर्यायी स्लॉट निवडू शकतात।",
+  "＋ Add doctor": "＋ डॉक्टर जोडा",
+  "opening time": "उघडण्याची वेळ",
+  "closing time": "बंद होण्याची वेळ",
+  to: "ते",
+  "Your private visit link is ready. Copy it somewhere safe to reopen the registration from another device, or check My Appointment with your mobile number.":
+    "तुमची खाजगी भेट लिंक तयार आहे. दुसऱ्या डिव्हाइसवर नोंदणी उघडण्यासाठी ती सुरक्षित ठिकाणी कॉपी करा किंवा तुमच्या मोबाईल नंबरने माझी अपॉइंटमेंट तपासा।",
+  "View My Appointment": "माझी अपॉइंटमेंट पहा",
+  "APPOINTMENT STATUS": "अपॉइंटमेंट स्थिती",
+  "Turn WhatsApp updates off": "WhatsApp अपडेट बंद करा",
+  "Turn WhatsApp updates on": "WhatsApp अपडेट सुरू करा",
+  "Find another clinic": "दुसरे क्लिनिक शोधा",
+  "Enter your registered mobile number. We’ll send a verification code if appointments are associated with it.":
+    "तुमचा नोंदणीकृत मोबाईल नंबर भरा. त्याच्याशी अपॉइंटमेंट जोडल्या असल्यास आम्ही पडताळणी कोड पाठवू।",
+  Continue: "सुरू ठेवा",
+  "Return to QueueLess home": "QueueLess होमवर परत जा",
+});
+
+Object.assign(completeUiWords.hi, {
+  "Dismiss message": "संदेश बंद करें",
+  "Needs attention": "ध्यान आवश्यक",
+  "Needs rescheduling": "पुनर्निर्धारण आवश्यक",
+  "Checked in": "चेक-इन किया",
+  "Doctor availability updated.": "डॉक्टर की उपलब्धता अपडेट हो गई।",
+  "Doctor availability resumed.": "डॉक्टर की उपलब्धता फिर शुरू हो गई।",
+});
+Object.assign(completeUiWords.bn, {
+  "Dismiss message": "বার্তা বন্ধ করুন",
+  "Needs attention": "মনোযোগ প্রয়োজন",
+  "Needs rescheduling": "পুনঃনির্ধারণ প্রয়োজন",
+  "Checked in": "চেক-ইন হয়েছে",
+  "Doctor availability updated.": "ডাক্তারের উপলভ্যতা আপডেট হয়েছে।",
+  "Doctor availability resumed.": "ডাক্তারের উপলভ্যতা পুনরায় চালু হয়েছে।",
+});
+Object.assign(completeUiWords.ta, {
+  "Dismiss message": "செய்தியை மூடு",
+  "Needs attention": "கவனம் தேவை",
+  "Needs rescheduling": "மறுநேரம் தேவை",
+  "Checked in": "செக்-இன் செய்யப்பட்டது",
+  "Doctor availability updated.":
+    "மருத்துவர் கிடைக்கும் நேரம் புதுப்பிக்கப்பட்டது।",
+  "Doctor availability resumed.": "மருத்துவர் கிடைப்பை மீண்டும் தொடங்கினார்।",
+});
+Object.assign(completeUiWords.te, {
+  "Dismiss message": "సందేశాన్ని మూసివేయండి",
+  "Needs attention": "శ్రద్ధ అవసరం",
+  "Needs rescheduling": "పునఃషెడ్యూల్ అవసరం",
+  "Checked in": "చెక్-ఇన్ అయ్యారు",
+  "Doctor availability updated.": "వైద్యుడి లభ్యత నవీకరించబడింది।",
+  "Doctor availability resumed.": "వైద్యుడి లభ్యత మళ్లీ ప్రారంభమైంది।",
+});
+Object.assign(completeUiWords.mr, {
+  "Dismiss message": "संदेश बंद करा",
+  "Needs attention": "लक्ष आवश्यक",
+  "Needs rescheduling": "पुन्हा वेळ ठरवणे आवश्यक",
+  "Checked in": "हजेरी नोंदली",
+  "Doctor availability updated.": "डॉक्टरांची उपलब्धता अपडेट झाली।",
+  "Doctor availability resumed.": "डॉक्टरांची उपलब्धता पुन्हा सुरू झाली।",
+});
+
+Object.assign(completeUiWords.hi, {
+  "CLINIC SUBSCRIPTION": "क्लिनिक सदस्यता",
+  "Manage your QueueLess trial and renewal.":
+    "अपने QueueLess ट्रायल और नवीनीकरण को प्रबंधित करें।",
+  "per month": "प्रति माह",
+  active: "सक्रिय",
+  Expired: "समाप्त",
+  "days remaining": "दिन शेष",
+  "Trial ends": "ट्रायल समाप्ति",
+  "Renews on": "नवीनीकरण तिथि",
+  "Clinic records remain available": "क्लिनिक रिकॉर्ड उपलब्ध रहेंगे",
+  "₹500/month after your one-month trial. Payment is confirmed by the provider before the subscription is activated.":
+    "एक महीने के ट्रायल के बाद ₹500/माह। सदस्यता सक्रिय होने से पहले प्रदाता भुगतान की पुष्टि करता है।",
+  "Development payment simulator · ₹500": "डेवलपमेंट भुगतान सिम्युलेटर · ₹500",
+  "Starting…": "शुरू हो रहा है…",
+  DATE: "तारीख",
+  AMOUNT: "राशि",
+  STATUS: "स्थिति",
+  PROVIDER: "प्रदाता",
+  failed: "विफल",
+  captured: "प्राप्त",
+  pending: "लंबित",
+  simulator: "सिम्युलेटर",
+  "Loading subscription…": "सदस्यता लोड हो रही है…",
+});
+Object.assign(completeUiWords.bn, {
+  "CLINIC SUBSCRIPTION": "ক্লিনিক সাবস্ক্রিপশন",
+  "Manage your QueueLess trial and renewal.":
+    "আপনার QueueLess ট্রায়াল ও নবায়ন পরিচালনা করুন।",
+  "per month": "প্রতি মাসে",
+  active: "সক্রিয়",
+  Expired: "মেয়াদ শেষ",
+  "days remaining": "দিন বাকি",
+  "Trial ends": "ট্রায়াল শেষ",
+  "Renews on": "নবায়নের তারিখ",
+  "Clinic records remain available": "ক্লিনিক রেকর্ড উপলব্ধ থাকবে",
+  "₹500/month after your one-month trial. Payment is confirmed by the provider before the subscription is activated.":
+    "এক মাসের ট্রায়ালের পরে ₹500/মাস। সাবস্ক্রিপশন সক্রিয় হওয়ার আগে প্রদানকারী পেমেন্ট নিশ্চিত করে।",
+  "Development payment simulator · ₹500": "ডেভেলপমেন্ট পেমেন্ট সিমুলেটর · ₹500",
+  "Starting…": "শুরু হচ্ছে…",
+  DATE: "তারিখ",
+  AMOUNT: "পরিমাণ",
+  STATUS: "অবস্থা",
+  PROVIDER: "প্রদানকারী",
+  failed: "ব্যর্থ",
+  captured: "গৃহীত",
+  pending: "অপেক্ষমাণ",
+  simulator: "সিমুলেটর",
+  "Loading subscription…": "সাবস্ক্রিপশন লোড হচ্ছে…",
+});
+Object.assign(completeUiWords.ta, {
+  "CLINIC SUBSCRIPTION": "கிளினிக் சந்தா",
+  "Manage your QueueLess trial and renewal.":
+    "உங்கள் QueueLess சோதனை மற்றும் புதுப்பிப்பை நிர்வகிக்கவும்।",
+  "per month": "மாதத்திற்கு",
+  active: "செயலில்",
+  Expired: "காலாவதியானது",
+  "days remaining": "நாட்கள் மீதம்",
+  "Trial ends": "சோதனை முடிவு",
+  "Renews on": "புதுப்பிக்கும் தேதி",
+  "Clinic records remain available": "கிளினிக் பதிவுகள் கிடைக்கும்",
+  "₹500/month after your one-month trial. Payment is confirmed by the provider before the subscription is activated.":
+    "ஒரு மாத சோதனைக்குப் பிறகு ₹500/மாதம். சந்தா செயல்படுவதற்கு முன் வழங்குநர் பணம் செலுத்தியதை உறுதிப்படுத்துவார்।",
+  "Development payment simulator · ₹500": "மேம்பாட்டு கட்டண சிமுலேட்டர் · ₹500",
+  "Starting…": "தொடங்குகிறது…",
+  DATE: "தேதி",
+  AMOUNT: "தொகை",
+  STATUS: "நிலை",
+  PROVIDER: "வழங்குநர்",
+  failed: "தோல்வி",
+  captured: "பெறப்பட்டது",
+  pending: "நிலுவையில்",
+  simulator: "சிமுலேட்டர்",
+  "Loading subscription…": "சந்தா ஏற்றப்படுகிறது…",
+});
+Object.assign(completeUiWords.te, {
+  "CLINIC SUBSCRIPTION": "క్లినిక్ సబ్‌స్క్రిప్షన్",
+  "Manage your QueueLess trial and renewal.":
+    "మీ QueueLess ట్రయల్ మరియు పునరుద్ధరణను నిర్వహించండి।",
+  "per month": "నెలకు",
+  active: "సక్రియం",
+  Expired: "గడువు ముగిసింది",
+  "days remaining": "రోజులు మిగిలి ఉన్నాయి",
+  "Trial ends": "ట్రయల్ ముగింపు",
+  "Renews on": "పునరుద్ధరణ తేదీ",
+  "Clinic records remain available": "క్లినిక్ రికార్డులు అందుబాటులో ఉంటాయి",
+  "₹500/month after your one-month trial. Payment is confirmed by the provider before the subscription is activated.":
+    "ఒక నెల ట్రయల్ తర్వాత ₹500/నెల. సబ్‌స్క్రిప్షన్ సక్రియం కావడానికి ముందు ప్రొవైడర్ చెల్లింపును నిర్ధారిస్తారు।",
+  "Development payment simulator · ₹500":
+    "డెవలప్‌మెంట్ చెల్లింపు సిమ్యులేటర్ · ₹500",
+  "Starting…": "ప్రారంభమవుతోంది…",
+  DATE: "తేదీ",
+  AMOUNT: "మొత్తం",
+  STATUS: "స్థితి",
+  PROVIDER: "ప్రొవైడర్",
+  failed: "విఫలమైంది",
+  captured: "స్వీకరించబడింది",
+  pending: "పెండింగ్",
+  simulator: "సిమ్యులేటర్",
+  "Loading subscription…": "సబ్‌స్క్రిప్షన్ లోడ్ అవుతోంది…",
+});
+Object.assign(completeUiWords.mr, {
+  "CLINIC SUBSCRIPTION": "क्लिनिक सदस्यत्व",
+  "Manage your QueueLess trial and renewal.":
+    "तुमचे QueueLess ट्रायल आणि नूतनीकरण व्यवस्थापित करा।",
+  "per month": "दरमहा",
+  active: "सक्रिय",
+  Expired: "कालबाह्य",
+  "days remaining": "दिवस शिल्लक",
+  "Trial ends": "ट्रायल समाप्ती",
+  "Renews on": "नूतनीकरणाची तारीख",
+  "Clinic records remain available": "क्लिनिक नोंदी उपलब्ध राहतील",
+  "₹500/month after your one-month trial. Payment is confirmed by the provider before the subscription is activated.":
+    "एका महिन्याच्या ट्रायलनंतर ₹500/महिना. सदस्यत्व सक्रिय होण्यापूर्वी प्रदाता पेमेंटची पुष्टी करतो।",
+  "Development payment simulator · ₹500":
+    "डेव्हलपमेंट पेमेंट सिम्युलेटर · ₹500",
+  "Starting…": "सुरू होत आहे…",
+  DATE: "तारीख",
+  AMOUNT: "रक्कम",
+  STATUS: "स्थिती",
+  PROVIDER: "प्रदाता",
+  failed: "अयशस्वी",
+  captured: "प्राप्त",
+  pending: "प्रलंबित",
+  simulator: "सिम्युलेटर",
+  "Loading subscription…": "सदस्यत्व लोड होत आहे…",
+});
+
 const languageContext = createContext(null);
 
 export function LanguageProvider({ children }) {
@@ -2288,10 +3427,30 @@ function translated(value, language) {
     statusWords[language]?.[trimmed] ||
     screenWords[language]?.[trimmed] ||
     clinicUiWords[language]?.[trimmed] ||
+    completeUiWords[language]?.[trimmed] ||
     recentFeatureWords[language]?.[trimmed] ||
     landingWords[language]?.[trimmed] ||
     landingCoreWords[language]?.[trimmed];
-  if (!replacement) return value;
+  if (!replacement) {
+    const timeLabel = trimmed.match(
+      /^(monday|tuesday|wednesday|thursday|friday|saturday|sunday)\s+(opening|closing) time$/i,
+    );
+    if (!timeLabel) return value;
+    const [, day, boundary] = timeLabel;
+    const translatedDay = translated(day.toLowerCase(), language);
+    const translatedBoundary = translated(
+      `${boundary.toLowerCase()} time`,
+      language,
+    );
+    if (
+      translatedDay === day.toLowerCase() ||
+      translatedBoundary === `${boundary.toLowerCase()} time`
+    )
+      return value;
+    const start = value.match(/^\s*/)?.[0] || "";
+    const end = value.match(/\s*$/)?.[0] || "";
+    return `${start}${translatedDay} ${translatedBoundary}${end}`;
+  }
   const start = value.match(/^\s*/)?.[0] || "";
   const end = value.match(/\s*$/)?.[0] || "";
   return `${start}${replacement}${end}`;
@@ -2305,7 +3464,16 @@ function translateTree(node, language) {
   const props = { ...node.props };
   if (props.children !== undefined)
     props.children = translateTree(props.children, language);
-  for (const attribute of ["placeholder", "title", "aria-label", "alt"]) {
+  for (const attribute of [
+    "placeholder",
+    "title",
+    "aria-label",
+    "alt",
+    "label",
+    "description",
+    "confirmLabel",
+    "cancelLabel",
+  ]) {
     if (typeof props[attribute] === "string")
       props[attribute] = translated(props[attribute], language);
   }

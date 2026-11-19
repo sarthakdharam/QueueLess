@@ -2,7 +2,7 @@ import { useCallback, useEffect, useState } from "react";
 import { Navigate } from "react-router-dom";
 import { api } from "../api/client.js";
 import { connectClinicQueue } from "../api/realtime.js";
-import { Localized } from "../i18n.jsx";
+import { Localized, useAppLanguage } from "../i18n.jsx";
 import ClinicSidebar from "../components/ClinicSidebar.jsx";
 import ClinicLoading from "../components/ClinicLoading.jsx";
 import DropdownSelect from "../components/DropdownSelect.jsx";
@@ -23,6 +23,7 @@ const STATUS_OPTIONS = [
 const labelStatus = (status = "") => status.replaceAll("_", " ");
 
 export default function ClinicPatients({ mode }) {
+  const { locale } = useAppLanguage();
   const todayMode = mode === "today";
   const [setup, setSetup] = useState(null);
   const [records, setRecords] = useState([]);
@@ -150,7 +151,7 @@ export default function ClinicPatients({ mode }) {
   const dateTime = (record) => {
     const value = record.scheduled_at || record.registered_at;
     if (!value) return "—";
-    return new Date(value).toLocaleString(undefined, {
+    return new Date(value).toLocaleString(locale, {
       dateStyle: "medium",
       timeStyle: "short",
       timeZone: record.timeZone || setup?.clinic?.timeZone || "Asia/Kolkata",
@@ -188,7 +189,7 @@ export default function ClinicPatients({ mode }) {
                   <strong>
                     {new Date(
                       `${new Intl.DateTimeFormat("en-CA", { timeZone: setup.clinic.timeZone || "Asia/Kolkata", year: "numeric", month: "2-digit", day: "2-digit" }).format(new Date())}T12:00:00`,
-                    ).toLocaleDateString(undefined, { dateStyle: "full" })}
+                    ).toLocaleDateString(locale, { dateStyle: "full" })}
                   </strong>{" "}
                   <span>({setup.clinic.timeZone || "Asia/Kolkata"})</span>
                 </>
@@ -343,7 +344,7 @@ export default function ClinicPatients({ mode }) {
                           <td>
                             {record.completed_at
                               ? new Date(record.completed_at).toLocaleString(
-                                  undefined,
+                                  locale,
                                   {
                                     dateStyle: "medium",
                                     timeStyle: "short",

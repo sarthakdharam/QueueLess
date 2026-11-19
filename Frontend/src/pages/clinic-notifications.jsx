@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useState } from "react";
 import { Navigate } from "react-router-dom";
-import { Localized } from "../i18n.jsx";
+import { Localized, useAppLanguage } from "../i18n.jsx";
 import { api } from "../api/client.js";
 import ClinicPageHeader from "../components/ClinicPageHeader.jsx";
 import ClinicLoading from "../components/ClinicLoading.jsx";
@@ -13,6 +13,7 @@ import {
 } from "../utils/simulator-feedback.js";
 
 export default function ClinicNotifications() {
+  const { locale } = useAppLanguage();
   const [notifications, setNotifications] = useState([]);
   const [error, setError] = useState("");
   const [message, setMessage] = useState("");
@@ -156,7 +157,7 @@ export default function ClinicNotifications() {
                       {visibleNotifications.map((item) => (
                         <tr key={item.id}>
                           <td>
-                            {new Date(item.createdAt).toLocaleString("en-IN")}
+                            {new Date(item.createdAt).toLocaleString(locale)}
                           </td>
                           <td>{item.type}</td>
                           <td>{item.channel}</td>

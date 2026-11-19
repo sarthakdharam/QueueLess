@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useState } from "react";
 import { Navigate } from "react-router-dom";
 import { api } from "../api/client.js";
-import { Localized, useTranslate } from "../i18n.jsx";
+import { Localized, useAppLanguage, useTranslate } from "../i18n.jsx";
 import ClinicLoading from "../components/ClinicLoading.jsx";
 import ClinicSidebar from "../components/ClinicSidebar.jsx";
 
@@ -16,6 +16,7 @@ function formatHour(hour, locale) {
 
 export default function ClinicAnalytics() {
   const t = useTranslate();
+  const { locale } = useAppLanguage();
   const [analytics, setAnalytics] = useState(null);
   const [date, setDate] = useState("");
   const [error, setError] = useState("");
@@ -52,7 +53,6 @@ export default function ClinicAnalytics() {
     return <Navigate to="/login" replace />;
 
   const summary = analytics?.summary;
-  const locale = navigator.language || "en-IN";
   const busiestHours = analytics?.busiestHours || [];
   const busiestVisitTotal = busiestHours.reduce(
     (total, slot) => total + slot.visits,
