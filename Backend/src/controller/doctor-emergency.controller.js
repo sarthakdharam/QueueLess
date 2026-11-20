@@ -37,7 +37,10 @@ function safeEvent(event) {
 
 export async function getDoctorEmergencyBoard(req, res, next) {
   try {
-    const [doctors, events, affected] = await Promise.all([
+    const [clinic, doctors, events, affected] = await Promise.all([
+      AppDataSource.getRepository(Clinic).findOneBy({
+        id: req.auth.clinicId,
+      }),
       AppDataSource.getRepository(Doctor).find({
         where: { clinicId: req.auth.clinicId, status: "active" },
         order: { name: "ASC" },
@@ -56,6 +59,12 @@ export async function getDoctorEmergencyBoard(req, res, next) {
       affected.map((row) => [row.doctor_id, Number(row.count)]),
     );
     return res.json({
+      clinic: clinic
+        ? {
+            id: clinic.id,
+            name: clinic.name,
+          }
+        : null,
       doctors: doctors.map((doctor) => ({
         id: doctor.id,
         name: doctor.name,
@@ -92,13 +101,11 @@ export async function createDoctorEmergency(req, res, next) {
         .status(400)
         .json({ error: "Temporary unavailability requires an end time." });
     const event = await AppDataSource.transaction(async (manager) => {
-      const doctor = await manager
-        .getRepository(Doctor)
-        .findOneBy({
-          id: req.params.doctorId,
-          clinicId: req.auth.clinicId,
-          status: "active",
-        });
+      const doctor = await manager.getRepository(Doctor).findOneBy({
+        id: req.params.doctorId,
+        clinicId: req.auth.clinicId,
+        status: "active",
+      });
       if (!doctor)
         throw Object.assign(new Error("Doctor not found."), { status: 404 });
       if (mode === "full_day") {
@@ -117,24 +124,20 @@ export async function createDoctorEmergency(req, res, next) {
           clinic?.timeZone || "Asia/Kolkata",
         );
       }
-      const created = await manager
-        .getRepository(DoctorAvailabilityEvent)
-        .save(
-          manager
-            .getRepository(DoctorAvailabilityEvent)
-            .create({
-              clinicId: req.auth.clinicId,
-              doctorId: doctor.id,
-              mode,
-              startsAt: start,
-              endsAt: end,
-              expectedReturnAt: expectedReturnAt
-                ? new Date(expectedReturnAt)
-                : null,
-              note: note?.trim() || null,
-              createdBy: req.auth.sub,
-            }),
-        );
+      const created = await manager.getRepository(DoctorAvailabilityEvent).save(
+        manager.getRepository(DoctorAvailabilityEvent).create({
+          clinicId: req.auth.clinicId,
+          doctorId: doctor.id,
+          mode,
+          startsAt: start,
+          endsAt: end,
+          expectedReturnAt: expectedReturnAt
+            ? new Date(expectedReturnAt)
+            : null,
+          note: note?.trim() || null,
+          createdBy: req.auth.sub,
+        }),
+      );
       const appointmentStatus =
         mode === "full_day" ? "needs_rescheduling" : "needs_attention";
       const affected = await manager
@@ -172,25 +175,21 @@ export async function createDoctorEmergency(req, res, next) {
             ids: affected.map((row) => row.appointment_id),
           })
           .execute();
-      await manager
-        .getRepository(AuditLog)
-        .save(
-          manager
-            .getRepository(AuditLog)
-            .create({
-              clinicId: req.auth.clinicId,
-              actorId: req.auth.sub,
-              action: "doctor_emergency_recorded",
-              entityType: "doctor_availability_event",
-              entityId: created.id,
-              metadata: {
-                mode,
-                startsAt: start.toISOString(),
-                endsAt: end?.toISOString() || null,
-                affectedPatients: affected.length,
-              },
-            }),
-        );
+      await manager.getRepository(AuditLog).save(
+        manager.getRepository(AuditLog).create({
+          clinicId: req.auth.clinicId,
+          actorId: req.auth.sub,
+          action: "doctor_emergency_recorded",
+          entityType: "doctor_availability_event",
+          entityId: created.id,
+          metadata: {
+            mode,
+            startsAt: start.toISOString(),
+            endsAt: end?.toISOString() || null,
+            affectedPatients: affected.length,
+          },
+        }),
+      );
       return { created, doctor, affected, appointmentStatus };
     });
     for (const patient of event.affected.filter(
@@ -223,13 +222,11 @@ export async function createDoctorEmergency(req, res, next) {
         type: "appointment:availabilityChanged",
       });
     }
-    return res
-      .status(201)
-      .json({
-        event: safeEvent(event.created),
-        affectedPatients: event.affected.length,
-        appointmentStatus: event.appointmentStatus,
-      });
+    return res.status(201).json({
+      event: safeEvent(event.created),
+      affectedPatients: event.affected.length,
+      appointmentStatus: event.appointmentStatus,
+    });
   } catch (error) {
     if (error.status)
       return res.status(error.status).json({ error: error.message });
@@ -260,20 +257,16 @@ export async function resumeDoctorAvailability(req, res, next) {
         AND NOT EXISTS (SELECT 1 FROM doctor_availability_events e WHERE e.doctor_id = a.doctor_id AND e.status = 'active' AND e.starts_at < a.scheduled_at + (a.slot_minutes * interval '1 minute') AND (e.ends_at IS NULL OR e.ends_at > a.scheduled_at))`,
         [record.doctorId, record.startsAt],
       );
-      await manager
-        .getRepository(AuditLog)
-        .save(
-          manager
-            .getRepository(AuditLog)
-            .create({
-              clinicId: req.auth.clinicId,
-              actorId: req.auth.sub,
-              action: "doctor_availability_resumed",
-              entityType: "doctor_availability_event",
-              entityId: record.id,
-              metadata: {},
-            }),
-        );
+      await manager.getRepository(AuditLog).save(
+        manager.getRepository(AuditLog).create({
+          clinicId: req.auth.clinicId,
+          actorId: req.auth.sub,
+          action: "doctor_availability_resumed",
+          entityType: "doctor_availability_event",
+          entityId: record.id,
+          metadata: {},
+        }),
+      );
       return record;
     });
     return res.json({ event: safeEvent(event) });
