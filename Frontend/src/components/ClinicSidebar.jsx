@@ -1,6 +1,7 @@
 import { Link, useLocation } from "react-router-dom";
 import Brand from "./Brand.jsx";
 import { useTranslate } from "../i18n.jsx";
+import { logoutClinicSession } from "../api/client.js";
 
 export default function ClinicSidebar({ clinicName = "Clinic" }) {
   const { pathname } = useLocation();
@@ -48,8 +49,8 @@ export default function ClinicSidebar({ clinicName = "Clinic" }) {
           aria-label={t("Sign out")}
           title={t("Sign out")}
           className="sidebar-signout-button"
-          onClick={() => {
-            localStorage.removeItem("queueless.session");
+          onClick={async () => {
+            await logoutClinicSession();
             window.location.href = "/";
           }}
         >

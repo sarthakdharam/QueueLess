@@ -1,15 +1,16 @@
 import { io } from "socket.io-client";
 
-function queueSocket(auth) {
+function queueSocket(getAuth) {
   return io(window.location.origin, {
     path: "/socket.io",
-    auth,
+    auth: (callback) => callback(getAuth()),
     reconnection: true,
     reconnectionAttempts: Infinity,
     timeout: 8000,
   });
 }
 
-export const connectClinicQueue = (token) => queueSocket({ token });
+export const connectClinicQueue = () =>
+  queueSocket(() => ({ token: localStorage.getItem("queueless.session") }));
 export const connectPatientQueue = (accessToken) =>
-  queueSocket({ accessToken });
+  queueSocket(() => ({ accessToken }));

@@ -33,6 +33,8 @@ import { AppointmentReschedule } from "../entities/AppointmentReschedule.js";
 import { DoctorEmergencyAvailability1760000008000 } from "../migrations/1760000008000-DoctorEmergencyAvailability.js";
 import { AppointmentFeedback } from "../entities/AppointmentFeedback.js";
 import { AppointmentFeedback1760000009000 } from "../migrations/1760000009000-AppointmentFeedback.js";
+import { RefreshToken } from "../entities/RefreshToken.js";
+import { RefreshTokens1760000010000 } from "../migrations/1760000010000-RefreshTokens.js";
 
 const currentFile = fileURLToPath(import.meta.url);
 const currentDirectory = path.dirname(currentFile);
@@ -72,6 +74,7 @@ export const AppDataSource = new DataSource({
     DoctorAvailabilityEvent,
     AppointmentReschedule,
     AppointmentFeedback,
+    RefreshToken,
   ],
   migrations: [
     InitialFoundation1760000000000,
@@ -84,6 +87,7 @@ export const AppDataSource = new DataSource({
     ClinicNotificationReadState1760000007000,
     DoctorEmergencyAvailability1760000008000,
     AppointmentFeedback1760000009000,
+    RefreshTokens1760000010000,
   ],
   synchronize: false,
   logging: false,

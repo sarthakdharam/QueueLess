@@ -15,7 +15,11 @@ export function initializeSocketServer(server) {
     .map((origin) => origin.trim())
     .filter(Boolean);
   io = new Server(server, {
-    cors: { origin: allowedOrigins, methods: ["GET", "POST"] },
+    cors: {
+      origin: allowedOrigins,
+      methods: ["GET", "POST"],
+      credentials: true,
+    },
   });
 
   io.use(async (socket, next) => {

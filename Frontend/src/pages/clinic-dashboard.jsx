@@ -104,7 +104,7 @@ export default function ClinicDashboard() {
   useEffect(() => {
     const token = localStorage.getItem("queueless.session");
     if (!token) return undefined;
-    const socket = connectClinicQueue(token);
+    const socket = connectClinicQueue();
     const refresh = () => {
       socket.emit("clinic:joinQueue");
       socket.emit("queue:requestSnapshot");

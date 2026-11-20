@@ -6,6 +6,8 @@ import {
   registerClinic,
   loginClinic,
   getClinicSession,
+  refreshClinicSession,
+  logoutClinic,
 } from "../controller/auth.controller.js";
 import { INDIAN_REGIONS } from "../utils/indian-regions.js";
 import { isValidIndianMobile } from "../utils/normalize-mobile.js";
@@ -17,6 +19,15 @@ const authLimiter = rateLimit({
   standardHeaders: "draft-8",
   legacyHeaders: false,
   message: { error: "Too many account requests. Please try again later." },
+});
+const refreshLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000,
+  limit: 120,
+  standardHeaders: "draft-8",
+  legacyHeaders: false,
+  message: {
+    error: "Too many session refresh requests. Please sign in again.",
+  },
 });
 const emailRule = body("email")
   .trim()
@@ -91,4 +102,6 @@ authRouter.post(
   loginClinic,
 );
 
+authRouter.post("/refresh", refreshLimiter, refreshClinicSession);
+authRouter.post("/logout", logoutClinic);
 authRouter.get("/me", requireAuth, getClinicSession);

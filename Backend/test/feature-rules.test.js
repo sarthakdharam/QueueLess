@@ -37,6 +37,12 @@ import {
   isNoShowDue,
   NO_SHOW_GRACE_MINUTES,
 } from "../src/services/appointments/no-show-recovery.js";
+import {
+  createRefreshSecret,
+  isRefreshTokenActive,
+  parseCookies,
+  refreshTokenHash,
+} from "../src/services/auth/refresh-tokens.js";
 
 test("return policy places a returning patient after the configured number", () => {
   const queue = [1000, 2000, 3000, 4000, 5000, 6000].map(
@@ -227,6 +233,52 @@ test("Indian mobile validation accepts exactly ten mobile digits with an optiona
   assert.equal(isValidIndianMobile("987654321"), false);
   assert.equal(isValidIndianMobile("98765432101"), false);
   assert.equal(isValidIndianMobile("+1 9876543210"), false);
+});
+
+test("refresh secrets are random, one-way hashed, and usable only before expiry", () => {
+  const first = createRefreshSecret();
+  const second = createRefreshSecret();
+  assert.notEqual(first, second);
+  assert.equal(first.length >= 60, true);
+  assert.notEqual(refreshTokenHash(first), first);
+  assert.equal(
+    isRefreshTokenActive(
+      {
+        expiresAt: "2026-12-01T00:00:00.000Z",
+        revokedAt: null,
+      },
+      new Date("2026-11-20T00:00:00.000Z"),
+    ),
+    true,
+  );
+  assert.equal(
+    isRefreshTokenActive(
+      {
+        expiresAt: "2026-11-19T00:00:00.000Z",
+        revokedAt: null,
+      },
+      new Date("2026-11-20T00:00:00.000Z"),
+    ),
+    false,
+  );
+  assert.equal(
+    isRefreshTokenActive(
+      {
+        expiresAt: "2026-12-01T00:00:00.000Z",
+        revokedAt: "2026-11-20T00:00:00.000Z",
+      },
+      new Date("2026-11-20T00:00:00.000Z"),
+    ),
+    false,
+  );
+});
+
+test("refresh cookie parsing reads only its encoded cookie value", () => {
+  assert.equal(
+    parseCookies("theme=dark; queueless_refresh=token%2Fvalue; other=1")
+      .queueless_refresh,
+    "token/value",
+  );
 });
 
 test("queue transitions enforce the full allowed status flow", () => {

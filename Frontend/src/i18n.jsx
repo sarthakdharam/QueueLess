@@ -3390,6 +3390,105 @@ Object.assign(completeUiWords.mr, {
   "Loading subscription…": "सदस्यत्व लोड होत आहे…",
 });
 
+Object.assign(completeUiWords.hi, {
+  Subscription: "सदस्यता",
+  "Full name": "पूरा नाम",
+  "Any available doctor": "कोई भी उपलब्ध डॉक्टर",
+  "Brief note for the clinic team": "क्लिनिक टीम के लिए संक्षिप्त नोट",
+});
+Object.assign(completeUiWords.bn, {
+  Subscription: "সাবস্ক্রিপশন",
+  "Full name": "পুরো নাম",
+  "Any available doctor": "যে কোনও উপলভ্য ডাক্তার",
+  "Brief note for the clinic team": "ক্লিনিক দলের জন্য সংক্ষিপ্ত নোট",
+});
+Object.assign(completeUiWords.ta, {
+  Subscription: "சந்தா",
+  "Full name": "முழுப் பெயர்",
+  "Any available doctor": "கிடைக்கும் எந்த மருத்துவரும்",
+  "Brief note for the clinic team": "கிளினிக் குழுவுக்கான சுருக்கக் குறிப்பு",
+});
+Object.assign(completeUiWords.te, {
+  Subscription: "సబ్‌స్క్రిప్షన్",
+  "Full name": "పూర్తి పేరు",
+  "Any available doctor": "అందుబాటులో ఉన్న ఏ వైద్యుడైనా",
+  "Brief note for the clinic team": "క్లినిక్ బృందం కోసం సంక్షిప్త గమనిక",
+});
+Object.assign(completeUiWords.mr, {
+  Subscription: "सदस्यत्व",
+  "Full name": "पूर्ण नाव",
+  "Any available doctor": "कोणताही उपलब्ध डॉक्टर",
+  "Brief note for the clinic team": "क्लिनिक टीमसाठी थोडक्यात नोंद",
+});
+
+Object.assign(completeUiWords.hi, {
+  Reason: "कारण",
+  "At least 5 characters": "कम से कम 5 अक्षर",
+  "Eligible patients to keep ahead": "आगे रखने वाले योग्य मरीज़",
+  "AM or PM": "AM या PM",
+  "e.g. General physician": "जैसे, सामान्य चिकित्सक",
+  "No eligible times are available on this date. The doctor may be unavailable; choose another date or doctor.":
+    "इस तारीख पर कोई उपयुक्त समय उपलब्ध नहीं है। डॉक्टर उपलब्ध नहीं हो सकते हैं; दूसरी तारीख या डॉक्टर चुनें।",
+});
+Object.assign(completeUiWords.bn, {
+  Reason: "কারণ",
+  "At least 5 characters": "কমপক্ষে ৫ অক্ষর",
+  "Eligible patients to keep ahead": "সামনে রাখার যোগ্য রোগী",
+  "AM or PM": "AM বা PM",
+  "e.g. General physician": "যেমন, সাধারণ চিকিৎসক",
+  "No eligible times are available on this date. The doctor may be unavailable; choose another date or doctor.":
+    "এই তারিখে কোনও উপযুক্ত সময় নেই। ডাক্তার অনুপলব্ধ থাকতে পারেন; অন্য তারিখ বা ডাক্তার বেছে নিন।",
+});
+Object.assign(completeUiWords.ta, {
+  Reason: "காரணம்",
+  "At least 5 characters": "குறைந்தது 5 எழுத்துகள்",
+  "Eligible patients to keep ahead":
+    "முன்னால் வைத்திருக்க வேண்டிய தகுதியான நோயாளிகள்",
+  "AM or PM": "AM அல்லது PM",
+  "e.g. General physician": "எ.கா., பொது மருத்துவர்",
+  "No eligible times are available on this date. The doctor may be unavailable; choose another date or doctor.":
+    "இந்தத் தேதியில் தகுதியான நேரங்கள் இல்லை. மருத்துவர் கிடைக்காமல் இருக்கலாம்; வேறு தேதி அல்லது மருத்துவரைத் தேர்ந்தெடுக்கவும்।",
+});
+Object.assign(completeUiWords.te, {
+  Reason: "కారణం",
+  "At least 5 characters": "కనీసం 5 అక్షరాలు",
+  "Eligible patients to keep ahead": "ముందు ఉంచాల్సిన అర్హులైన రోగులు",
+  "AM or PM": "AM లేదా PM",
+  "e.g. General physician": "ఉదా., సాధారణ వైద్యుడు",
+  "No eligible times are available on this date. The doctor may be unavailable; choose another date or doctor.":
+    "ఈ తేదీలో అర్హమైన సమయాలు అందుబాటులో లేవు. వైద్యుడు అందుబాటులో లేకపోవచ్చు; వేరొక తేదీ లేదా వైద్యుడిని ఎంచుకోండి।",
+});
+Object.assign(completeUiWords.mr, {
+  Reason: "कारण",
+  "At least 5 characters": "किमान 5 अक्षरे",
+  "Eligible patients to keep ahead": "पुढे ठेवायचे पात्र रुग्ण",
+  "AM or PM": "AM किंवा PM",
+  "e.g. General physician": "उदा., सामान्य वैद्य",
+  "No eligible times are available on this date. The doctor may be unavailable; choose another date or doctor.":
+    "या तारखेस पात्र वेळा उपलब्ध नाहीत. डॉक्टर अनुपलब्ध असू शकतात; दुसरी तारीख किंवा डॉक्टर निवडा।",
+});
+
+Object.assign(completeUiWords.hi, {
+  "Adding patient…": "मरीज़ जोड़ा जा रहा है…",
+  left: "शेष",
+});
+Object.assign(completeUiWords.bn, {
+  "Adding patient…": "রোগী যোগ করা হচ্ছে…",
+  left: "বাকি",
+});
+Object.assign(completeUiWords.ta, {
+  "Adding patient…": "நோயாளர் சேர்க்கப்படுகிறார்…",
+  left: "மீதம்",
+});
+Object.assign(completeUiWords.te, {
+  "Adding patient…": "రోగిని జోడిస్తున్నారు…",
+  left: "మిగిలి ఉన్నాయి",
+});
+Object.assign(completeUiWords.mr, {
+  "Adding patient…": "रुग्ण जोडला जात आहे…",
+  left: "शिल्लक",
+});
+
 const languageContext = createContext(null);
 
 export function LanguageProvider({ children }) {

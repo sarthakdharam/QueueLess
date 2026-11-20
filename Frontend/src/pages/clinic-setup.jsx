@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from "react";
 import { Navigate, useLocation, useNavigate } from "react-router-dom";
 import { Localized } from "../i18n.jsx";
-import { api } from "../api/client.js";
+import { api, logoutClinicSession } from "../api/client.js";
 import Brand from "../components/Brand.jsx";
 import StateSelect from "../components/StateSelect.jsx";
 import { FieldError } from "../components/FieldError.jsx";
@@ -400,7 +400,10 @@ export default function ClinicSetup() {
             <span>{data.clinic.name}</span>
             <button
               className="header-signout-button"
-              onClick={() => requestNavigation("/")}
+              onClick={async () => {
+                await logoutClinicSession();
+                requestNavigation("/");
+              }}
             >
               <svg viewBox="0 0 24 24" aria-hidden="true">
                 <path d="M10 17l5-5-5-5m5 5H3" />
