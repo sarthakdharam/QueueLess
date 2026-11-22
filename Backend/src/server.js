@@ -37,12 +37,24 @@ async function startServer() {
 
   try {
     await AppDataSource.initialize();
+    const [{ exists }] = await AppDataSource.query(
+      "SELECT to_regclass('migrations') IS NOT NULL AS exists",
+    );
+    if (!exists || (await AppDataSource.showMigrations())) {
+      throw new Error("Pending database migrations. Run npm run migration:run from Backend.");
+    }
     console.log("PostgreSQL connected successfully.");
   } catch (error) {
     console.error(
       "Failed to initialize database connection:",
       process.env.NODE_ENV === "production" ? error.name : error.message,
     );
+    if (process.env.NODE_ENV !== "production" && error.code === "28P01") {
+      console.error(
+        "Check that POSTGRES_USER exists on the configured PostgreSQL server and that POSTGRES_PASSWORD in .env matches that role.",
+      );
+    }
+    if (AppDataSource.isInitialized) await AppDataSource.destroy();
     process.exitCode = 1;
     return;
   }

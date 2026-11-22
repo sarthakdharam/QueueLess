@@ -6,7 +6,7 @@ QueueLess runs directly on Ubuntu: PostgreSQL stores application data, Express s
 
 - Ubuntu 24.04
 - Node.js 24 and npm
-- PostgreSQL and pgAdmin 4
+- PostgreSQL 13 or later and pgAdmin 4
 
 Install PostgreSQL if needed:
 
@@ -37,6 +37,16 @@ test -f .env || cp .env.example .env
 Set `DB_HOST`, `DB_PORT`, `POSTGRES_DB`, `POSTGRES_USER`, and `POSTGRES_PASSWORD` in `.env` to your local PostgreSQL connection details. The defaults for native development are `localhost` and `5432`. Keep `.env` private; it is excluded by `.gitignore`. `.env.example` contains placeholders only.
 
 The backend resolves the root `.env` relative to its own source file, so it loads the same settings regardless of the directory used to launch it.
+
+### Windows workspace database
+
+If your workspace was provisioned with a dedicated PostgreSQL instance under `Database/.local-postgres`, it uses `127.0.0.1:5433` and stores its data in the Git-ignored `data` subdirectory. To start it again after a Windows restart, run this from the project root in PowerShell:
+
+```powershell
+& 'C:/Program Files/PostgreSQL/17/bin/pg_ctl.exe' start -D 'Database/.local-postgres/data' -l 'Database/.local-postgres/postgres.log' -w
+```
+
+From `Backend/`, run `node src/config/test-connection.js` to check the connection and `npm.cmd run migration:run` to apply any new schema migrations. Use `npm.cmd run dev` in each application directory to start the API and frontend on Windows.
 
 ## Install dependencies
 

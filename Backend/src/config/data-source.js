@@ -48,6 +48,9 @@ const databasePort = Number(process.env.DB_PORT || 5432);
 
 export const AppDataSource = new DataSource({
   type: "postgres",
+  // Migrations use PostgreSQL's built-in gen_random_uuid() (PostgreSQL 13+).
+  uuidExtension: "pgcrypto",
+  installExtensions: false,
   host: databaseHost,
   port: databasePort,
   username: process.env.POSTGRES_USER,

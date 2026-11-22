@@ -234,7 +234,11 @@ export async function receiveWhatsAppWebhook(req, res) {
       if (!["sent", "delivered", "read", "failed"].includes(deliveryStatus))
         continue;
       await AppDataSource.query(
-        `UPDATE notifications SET delivery_status = $1, delivered_at = CASE WHEN $1 IN ('delivered','read') THEN now() ELSE delivered_at END, failure_reason = $2 WHERE provider_reference = $3`,
+        `UPDATE notifications
+         SET delivery_status = $1::text,
+             delivered_at = CASE WHEN $1::text IN ('delivered', 'read') THEN now() ELSE delivered_at END,
+             failure_reason = $2
+         WHERE provider_reference = $3`,
         [
           deliveryStatus,
           status.errors?.[0]?.title || status.errors?.[0]?.message || null,

@@ -1,3 +1,4 @@
+import { lazy, Suspense } from "react";
 import { Navigate, Route, Routes } from "react-router-dom";
 import "./App.css";
 import "./patient.css";
@@ -5,21 +6,23 @@ import "./experience.css";
 import "./theme.css";
 import { LanguageProvider, LanguageSwitcher } from "./i18n.jsx";
 import Landing from "./pages/landing.jsx";
-import AuthPage from "./pages/auth-page.jsx";
-import ClinicHome from "./pages/clinic-home.jsx";
-import ClinicSetup from "./pages/clinic-setup.jsx";
-import ClinicDashboard from "./pages/clinic-dashboard.jsx";
-import ClinicFinder from "./pages/clinic-finder.jsx";
-import ClinicBooking from "./pages/clinic-booking.jsx";
-import PatientRegistration from "./pages/patient-registration.jsx";
-import PatientRecovery from "./pages/patient-recovery.jsx";
-import ClinicBilling from "./pages/clinic-billing.jsx";
-import ClinicNotifications from "./pages/clinic-notifications.jsx";
-import ClinicPatients from "./pages/clinic-patients.jsx";
-import ClinicDoctorAvailability from "./pages/clinic-doctor-availability.jsx";
-import ClinicAnalytics from "./pages/clinic-analytics.jsx";
+import ClinicLoading from "./components/ClinicLoading.jsx";
 import ToastViewport from "./components/ToastViewport.jsx";
 import ThemeToggle from "./components/ThemeToggle.jsx";
+
+const AuthPage = lazy(() => import("./pages/auth-page.jsx"));
+const ClinicHome = lazy(() => import("./pages/clinic-home.jsx"));
+const ClinicSetup = lazy(() => import("./pages/clinic-setup.jsx"));
+const ClinicDashboard = lazy(() => import("./pages/clinic-dashboard.jsx"));
+const ClinicFinder = lazy(() => import("./pages/clinic-finder.jsx"));
+const ClinicBooking = lazy(() => import("./pages/clinic-booking.jsx"));
+const PatientRegistration = lazy(() => import("./pages/patient-registration.jsx"));
+const PatientRecovery = lazy(() => import("./pages/patient-recovery.jsx"));
+const ClinicBilling = lazy(() => import("./pages/clinic-billing.jsx"));
+const ClinicNotifications = lazy(() => import("./pages/clinic-notifications.jsx"));
+const ClinicPatients = lazy(() => import("./pages/clinic-patients.jsx"));
+const ClinicDoctorAvailability = lazy(() => import("./pages/clinic-doctor-availability.jsx"));
+const ClinicAnalytics = lazy(() => import("./pages/clinic-analytics.jsx"));
 
 export default function App() {
   return (
@@ -27,34 +30,36 @@ export default function App() {
       <LanguageSwitcher />
       <ThemeToggle />
       <ToastViewport />
-      <Routes>
-        <Route path="/" element={<Landing />} />
-        <Route path="/register" element={<AuthPage mode="register" />} />
-        <Route path="/login" element={<AuthPage mode="login" />} />
-        <Route path="/clinics" element={<ClinicFinder />} />
-        <Route path="/clinic/:clinicId/book" element={<ClinicBooking />} />
-        <Route path="/patient/registration" element={<PatientRegistration />} />
-        <Route path="/patient/recover" element={<PatientRecovery />} />
-        <Route path="/clinic" element={<ClinicHome />} />
-        <Route path="/clinic/setup" element={<ClinicSetup />} />
-        <Route path="/clinic/queue" element={<ClinicDashboard />} />
-        <Route
-          path="/clinic/patients/today"
-          element={<ClinicPatients mode="today" />}
-        />
-        <Route
-          path="/clinic/patients/history"
-          element={<ClinicPatients mode="history" />}
-        />
-        <Route
-          path="/clinic/doctor-availability"
-          element={<ClinicDoctorAvailability />}
-        />
-        <Route path="/clinic/analytics" element={<ClinicAnalytics />} />
-        <Route path="/clinic/billing" element={<ClinicBilling />} />
-        <Route path="/clinic/notifications" element={<ClinicNotifications />} />
-        <Route path="*" element={<Navigate to="/" replace />} />
-      </Routes>
+      <Suspense fallback={<ClinicLoading>Loading…</ClinicLoading>}>
+        <Routes>
+          <Route path="/" element={<Landing />} />
+          <Route path="/register" element={<AuthPage mode="register" />} />
+          <Route path="/login" element={<AuthPage mode="login" />} />
+          <Route path="/clinics" element={<ClinicFinder />} />
+          <Route path="/clinic/:clinicId/book" element={<ClinicBooking />} />
+          <Route path="/patient/registration" element={<PatientRegistration />} />
+          <Route path="/patient/recover" element={<PatientRecovery />} />
+          <Route path="/clinic" element={<ClinicHome />} />
+          <Route path="/clinic/setup" element={<ClinicSetup />} />
+          <Route path="/clinic/queue" element={<ClinicDashboard />} />
+          <Route
+            path="/clinic/patients/today"
+            element={<ClinicPatients mode="today" />}
+          />
+          <Route
+            path="/clinic/patients/history"
+            element={<ClinicPatients mode="history" />}
+          />
+          <Route
+            path="/clinic/doctor-availability"
+            element={<ClinicDoctorAvailability />}
+          />
+          <Route path="/clinic/analytics" element={<ClinicAnalytics />} />
+          <Route path="/clinic/billing" element={<ClinicBilling />} />
+          <Route path="/clinic/notifications" element={<ClinicNotifications />} />
+          <Route path="*" element={<Navigate to="/" replace />} />
+        </Routes>
+      </Suspense>
     </LanguageProvider>
   );
 }

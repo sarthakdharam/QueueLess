@@ -22,6 +22,7 @@ npm-debug.log*
 coverage/
 
 # Local database and temporary files
+/Database/.local-postgres/
 *.sqlite
 *.db
 
