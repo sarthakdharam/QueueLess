@@ -1,6 +1,7 @@
 import { AppDataSource } from "./config/data-source.js";
 import app from "./app.js";
 import { createServer } from "node:http";
+import { once } from "node:events";
 import { initializeSocketServer } from "./sockets/socket-server.js";
 import { retryFailedNotifications } from "./services/notifications/dispatch.js";
 import {
@@ -60,6 +61,27 @@ async function startServer() {
   }
 
   server = createServer(app);
+  try {
+    const listening = once(server, "listening");
+    server.listen(PORT, "127.0.0.1");
+    await listening;
+  } catch (error) {
+    if (error.code === "EADDRINUSE") {
+      console.error(
+        `Port ${PORT} is already in use. Stop the existing backend before starting another instance.`,
+      );
+    } else {
+      console.error(
+        "Failed to start the backend:",
+        process.env.NODE_ENV === "production" ? error.name : error.message,
+      );
+    }
+    server = undefined;
+    await AppDataSource.destroy();
+    process.exitCode = 1;
+    return;
+  }
+
   initializeSocketServer(server);
   notificationWorker = setInterval(() => {
     void retryFailedNotifications().catch((error) =>
@@ -71,9 +93,7 @@ async function startServer() {
   }, 30000);
   runNoShowRecovery();
   noShowWorker = setInterval(runNoShowRecovery, 5 * 60 * 1000);
-  server.listen(PORT, "127.0.0.1", () => {
-    console.log(`QueueLess backend running on port ${PORT}`);
-  });
+  console.log(`QueueLess backend running on port ${PORT}`);
 }
 
 async function shutdown(signal) {

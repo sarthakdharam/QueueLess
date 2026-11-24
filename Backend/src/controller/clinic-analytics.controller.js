@@ -3,6 +3,10 @@ import { Clinic } from "../entities/Clinic.js";
 import { clinicToday } from "../services/clinic/time.js";
 import { validDate } from "../services/patient/clinic-availability.js";
 
+const clinicDaySessions = `q.session_id = ANY(ARRAY(
+  SELECT id FROM queue_sessions WHERE clinic_id = $1 AND session_date = $2
+))`;
+
 export async function getClinicAnalytics(req, res, next) {
   try {
     const clinic = await AppDataSource.getRepository(Clinic).findOneBy({
@@ -20,19 +24,18 @@ export async function getClinicAnalytics(req, res, next) {
               count(*) FILTER (WHERE q.status = 'waiting')::int AS waiting,
               count(*) FILTER (WHERE q.status = 'missed')::int AS missed,
               round(avg(extract(epoch FROM (q.consultation_started_at - q.checked_in_at)) / 60)
-                FILTER (WHERE q.checked_in_at IS NOT NULL AND q.consultation_started_at IS NOT NULL))::int AS average_wait_minutes
+                FILTER (WHERE q.status = 'completed'
+                  AND q.checked_in_at IS NOT NULL AND q.consultation_started_at IS NOT NULL))::int AS average_wait_minutes
          FROM queue_entries q
          JOIN registrations r ON r.id = q.registration_id
-         JOIN queue_sessions s ON s.id = q.session_id
-        WHERE r.clinic_id = $1 AND s.session_date = $2`,
+        WHERE r.clinic_id = $1 AND ${clinicDaySessions}`,
       [req.auth.clinicId, date],
     );
     const [feedback] = await AppDataSource.query(
       `SELECT count(*)::int AS count, round(avg(f.rating)::numeric, 1) AS average_rating
          FROM appointment_feedback f
          JOIN queue_entries q ON q.registration_id = f.registration_id
-         JOIN queue_sessions s ON s.id = q.session_id
-        WHERE f.clinic_id = $1 AND s.session_date = $2`,
+        WHERE f.clinic_id = $1 AND ${clinicDaySessions}`,
       [req.auth.clinicId, date],
     );
     const busiestHours = await AppDataSource.query(
@@ -40,9 +43,8 @@ export async function getClinicAnalytics(req, res, next) {
               count(*)::int AS visits
          FROM queue_entries q
          JOIN registrations r ON r.id = q.registration_id
-         JOIN queue_sessions s ON s.id = q.session_id
-         LEFT JOIN appointments a ON a.registration_id = r.id
-        WHERE r.clinic_id = $1 AND s.session_date = $2
+         LEFT JOIN appointments a ON a.registration_id = r.id AND a.clinic_id = $1
+        WHERE r.clinic_id = $1 AND ${clinicDaySessions}
         GROUP BY hour
         ORDER BY visits DESC, hour ASC
         LIMIT 3`,

@@ -21,6 +21,7 @@ router.post(
       .withMessage("Enter a valid 10-digit Indian mobile number."),
     body("doctorId").optional({ values: "falsy" }).isUUID(),
     body("notes").optional({ values: "falsy" }).trim().isLength({ max: 500 }),
+    body("consentToContact").optional().isBoolean().toBoolean(),
     validateRequest,
   ],
   registerWalkIn,

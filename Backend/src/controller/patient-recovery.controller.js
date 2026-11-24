@@ -22,58 +22,62 @@ export async function requestRecoveryCode(req, res, next) {
     const candidates = mobileLookupCandidates(mobile);
     const patient = await AppDataSource.getRepository(Patient)
       .createQueryBuilder("p")
+      .innerJoin("registrations", "r", "r.patient_id = p.id")
       .where("p.mobile IN (:...candidates)", { candidates })
       .getOne();
-    let developmentCode;
-    if (patient) {
-      const code = String(randomInt(100000, 1000000));
-      const id = randomUUID();
-      const created = await AppDataSource.transaction(async (manager) => {
-        await manager.query("SELECT pg_advisory_xact_lock(hashtext($1))", [
-          `patient-otp:${mobile}`,
-        ]);
-        const recent = await manager
-          .getRepository(OtpChallenge)
-          .createQueryBuilder("o")
-          .where(
-            "o.mobile = :mobile AND o.created_at > now() - interval '60 seconds'",
-            { mobile },
-          )
-          .getOne();
-        if (recent) return false;
-        const repository = manager.getRepository(OtpChallenge);
-        await repository
-          .createQueryBuilder()
-          .update(OtpChallenge)
-          .set({ consumedAt: new Date() })
-          .where('"mobile" = :mobile AND "consumed_at" IS NULL', { mobile })
-          .execute();
-        await repository.save(
-          repository.create({
-            id,
-            mobile,
-            challengeHash: otpHash(id, code),
-            expiresAt: new Date(Date.now() + 10 * 60 * 1000),
-          }),
-        );
-        return true;
+    if (!patient) {
+      return res.status(404).json({
+        code: "MOBILE_NOT_REGISTERED",
+        error: "Please enter the mobile number you registered with.",
       });
-      if (created) {
-        void sendRecoveryOtp({ mobile, challengeId: id, code }).catch(() =>
-          console.error("Recovery OTP delivery failed."),
-        );
-        if (
-          process.env.NODE_ENV !== "production" &&
-          process.env.OTP_DEV_ECHO === "true"
+    }
+    let developmentCode;
+    const code = String(randomInt(100000, 1000000));
+    const id = randomUUID();
+    const created = await AppDataSource.transaction(async (manager) => {
+      await manager.query("SELECT pg_advisory_xact_lock(hashtext($1))", [
+        `patient-otp:${mobile}`,
+      ]);
+      const recent = await manager
+        .getRepository(OtpChallenge)
+        .createQueryBuilder("o")
+        .where(
+          "o.mobile = :mobile AND o.created_at > now() - interval '60 seconds'",
+          { mobile },
         )
-          developmentCode = code;
-      }
+        .getOne();
+      if (recent) return false;
+      const repository = manager.getRepository(OtpChallenge);
+      await repository
+        .createQueryBuilder()
+        .update(OtpChallenge)
+        .set({ consumedAt: new Date() })
+        .where('"mobile" = :mobile AND "consumed_at" IS NULL', { mobile })
+        .execute();
+      await repository.save(
+        repository.create({
+          id,
+          mobile,
+          challengeHash: otpHash(id, code),
+          expiresAt: new Date(Date.now() + 10 * 60 * 1000),
+        }),
+      );
+      return true;
+    });
+    if (created) {
+      void sendRecoveryOtp({ mobile, challengeId: id, code }).catch(() =>
+        console.error("Recovery OTP delivery failed."),
+      );
+      if (
+        process.env.NODE_ENV !== "production" &&
+        process.env.OTP_DEV_ECHO === "true"
+      )
+        developmentCode = code;
     }
     return res
       .status(202)
       .json({
-        message:
-          "If appointments exist for that mobile number, a verification code has been sent.",
+        message: "Verification code requested.",
         ...(developmentCode ? { developmentCode } : {}),
       });
   } catch (error) {
@@ -246,20 +250,28 @@ export async function revokeMyAppointmentSession(req, res, next) {
 
 export async function replaceAppointmentAccessLink(req, res, next) {
   try {
-    const registration = await AppDataSource.getRepository(Registration)
+    const forFeedback = req.body?.purpose === "feedback";
+    const query = AppDataSource.getRepository(Registration)
       .createQueryBuilder("r")
       .innerJoin("patients", "p", "p.id = r.patient_id")
       .where("p.mobile IN (:...candidates) AND r.reference = :reference", {
         candidates: mobileLookupCandidates(req.patientLookup.mobile),
         reference: String(req.params.reference).toUpperCase(),
-      })
-      .getOne();
+      });
+    if (forFeedback) {
+      query.innerJoin("queue_entries", "q", "q.registration_id = r.id")
+        .andWhere("q.status = 'completed'");
+    }
+    const registration = await query.getOne();
     if (!registration)
       return res.status(404).json({ error: "Appointment not found." });
     const access = await AppDataSource.transaction((manager) =>
-      createAccess(manager, registration.id),
+      createAccess(manager, registration.id, { rotateExisting: !forFeedback }),
     );
-    return res.json({ accessUrl: access.url });
+    if (!forFeedback) return res.json({ accessUrl: access.url });
+    const feedbackUrl = new URL(access.url);
+    feedbackUrl.searchParams.set("feedback", "1");
+    return res.json({ accessUrl: feedbackUrl.toString() });
   } catch (error) {
     return next(error);
   }

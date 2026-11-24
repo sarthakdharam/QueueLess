@@ -19,7 +19,8 @@ import {
   OPEN_STATUSES,
 } from "../services/patient/clinic-availability.js";
 import { emitQueueChange } from "../sockets/socket-server.js";
-import { notifyRegistrationConfirmation } from "../services/notifications/dispatch.js";
+import { recordClinicNotification } from "../services/notifications/clinic-notifications.js";
+import { notifyMockRegistration } from "../services/notifications/dispatch.js";
 import { Subscription } from "../entities/Subscription.js";
 import { hasSubscriptionAccess } from "../services/subscriptions/access-policy.js";
 import { activeEmergencyForSlot } from "../services/clinic/doctor-emergencies.js";
@@ -243,6 +244,11 @@ export async function createPatientRegistration(req, res, next) {
           );
       }
       const access = await createAccess(manager, registration.id);
+      await recordClinicNotification(manager, {
+        registrationId: registration.id,
+        type: "registration_confirmation",
+        eventKey: `registration:${registration.id}`,
+      });
       return { registration, queueEntry, access };
     });
     emitQueueChange({
@@ -251,10 +257,8 @@ export async function createPatientRegistration(req, res, next) {
       status: "registered",
       type: "registration:confirmed",
     });
-    void notifyRegistrationConfirmation(
-      created.registration.id,
-      created.access.url,
-    ).catch(() => console.error("Registration notification failed."));
+    void notifyMockRegistration(clinicId, created.registration.id)
+      .catch(() => console.error("Mock registration notification failed."));
     return res.status(201).json({
       registration: {
         id: created.registration.id,

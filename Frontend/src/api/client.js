@@ -3,44 +3,66 @@ import { showToast } from "../utils/toast.js";
 
 export const api = axios.create({ baseURL: "/api/v1", withCredentials: true });
 let refreshPromise;
+const clinicSessionKey = "queueless.session";
 
 function clearClinicSession() {
-  localStorage.removeItem("queueless.session");
+  localStorage.removeItem(clinicSessionKey);
 }
 
-async function refreshClinicAccessToken() {
+function isClinicRequest(url = "") {
+  const path = url.split("?")[0];
+  return path === "/auth/me" ||
+    path.startsWith("/clinic/") ||
+    path === "/dev/notifications" ||
+    path.startsWith("/dev/notifications/");
+}
+
+function withClinicSessionLock(work) {
+  return globalThis.navigator?.locks
+    ? navigator.locks.request("queueless.clinic-session", work)
+    : work();
+}
+
+async function refreshClinicAccessToken(rejectedToken) {
   if (!refreshPromise) {
-    refreshPromise = api
-      .post("/auth/refresh", undefined, {
+    refreshPromise = withClinicSessionLock(async () => {
+      const current = localStorage.getItem(clinicSessionKey);
+      if (current !== rejectedToken) return current;
+      const { data } = await api.post("/auth/refresh", undefined, {
         skipAuthRefresh: true,
         successToast: false,
-      })
-      .then(({ data }) => {
-        localStorage.setItem("queueless.session", data.token);
-        return data.token;
-      })
-      .finally(() => {
-        refreshPromise = undefined;
       });
+      if (localStorage.getItem(clinicSessionKey) !== rejectedToken)
+        return localStorage.getItem(clinicSessionKey);
+      localStorage.setItem(clinicSessionKey, data.token);
+      return data.token;
+    }).finally(() => {
+      refreshPromise = undefined;
+    });
   }
   return refreshPromise;
 }
 
 export async function logoutClinicSession() {
-  try {
-    await api.post("/auth/logout", undefined, {
-      skipAuthRefresh: true,
-      successToast: false,
-    });
-  } finally {
-    clearClinicSession();
-  }
+  return withClinicSessionLock(async () => {
+    try {
+      await api.post("/auth/logout", undefined, {
+        skipAuthRefresh: true,
+        successToast: false,
+      });
+    } finally {
+      clearClinicSession();
+    }
+  });
 }
 
 api.interceptors.request.use((config) => {
-  const token = localStorage.getItem("queueless.session");
-  if (token && !config.headers.Authorization)
-    config.headers.Authorization = `Bearer ${token}`;
+  if (!isClinicRequest(config.url)) return config;
+  const token = localStorage.getItem(clinicSessionKey);
+  if (token && !config.headers.has("Authorization")) {
+    config.headers.set("Authorization", `Bearer ${token}`);
+    config.clinicAccessToken = token;
+  }
   return config;
 });
 
@@ -61,28 +83,32 @@ api.interceptors.response.use(
   },
   async (error) => {
     const request = error.config;
-    const hasClinicSession = Boolean(localStorage.getItem("queueless.session"));
     if (
       error.response?.status !== 401 ||
       !request ||
       request.skipAuthRefresh ||
       request._retriedAfterRefresh ||
-      ["/auth/login", "/auth/register", "/auth/logout"].includes(request.url) ||
-      !hasClinicSession
+      !request.clinicAccessToken
     ) {
       return Promise.reject(error);
     }
 
     try {
-      const token = await refreshClinicAccessToken();
+      const token = await refreshClinicAccessToken(request.clinicAccessToken);
+      if (!token) return Promise.reject(error);
       request._retriedAfterRefresh = true;
       request.headers = request.headers || {};
       request.headers.Authorization = `Bearer ${token}`;
       return api(request);
     } catch (refreshError) {
-      clearClinicSession();
-      if (window.location.pathname.startsWith("/clinic"))
-        window.location.assign("/login");
+      if (
+        refreshError.response?.status === 401 &&
+        localStorage.getItem(clinicSessionKey) === request.clinicAccessToken
+      ) {
+        clearClinicSession();
+        if (/^\/(clinic|dev)(\/|$)/.test(window.location.pathname))
+          window.location.assign("/login");
+      }
       return Promise.reject(refreshError);
     }
   },

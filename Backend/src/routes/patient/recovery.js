@@ -52,7 +52,11 @@ router.post(
   "/recovery/appointments/:reference/access",
   lookupReadLimiter,
   requirePatientLookup,
-  [param("reference").matches(/^QL[A-F0-9]{14}$/i), validateRequest],
+  [
+    param("reference").matches(/^QL[A-F0-9]{14}$/i),
+    body("purpose").optional().equals("feedback"),
+    validateRequest,
+  ],
   replaceAppointmentAccessLink,
 );
 router.delete(

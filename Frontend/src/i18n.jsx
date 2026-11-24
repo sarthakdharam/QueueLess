@@ -1,4 +1,5 @@
 /* eslint react-refresh/only-export-components: off */
+import { appointmentTranslations } from "./appointment-translations.js";
 import {
   Children,
   cloneElement,
@@ -3528,6 +3529,7 @@ function translated(value, language) {
     clinicUiWords[language]?.[trimmed] ||
     completeUiWords[language]?.[trimmed] ||
     recentFeatureWords[language]?.[trimmed] ||
+    appointmentTranslations[language]?.[trimmed] ||
     landingWords[language]?.[trimmed] ||
     landingCoreWords[language]?.[trimmed];
   if (!replacement) {

@@ -8,6 +8,7 @@ import {
   clinicHoursForDate,
 } from "../patient/clinic-availability.js";
 import { dispatchNotification } from "../notifications/dispatch.js";
+import { recordClinicNotification } from "../notifications/clinic-notifications.js";
 import { emitQueueChange } from "../../sockets/socket-server.js";
 
 export const NO_SHOW_GRACE_MINUTES = 30;
@@ -164,11 +165,18 @@ async function markAppointmentMissed(candidate, now) {
       .getRepository(QueueEntry)
       .update({ id: queueEntry.id }, { status: "missed" });
 
+    const eventKey = `no-show:${appointment.id}:${appointment.scheduledAt.toISOString()}`;
+    await recordClinicNotification(manager, {
+      registrationId: registration.id,
+      type: "missed_appointment_reschedule",
+      eventKey,
+    });
     return {
       appointmentId: appointment.id,
       clinicId: appointment.clinicId,
       registrationId: registration.id,
       markedAt: now.toISOString(),
+      eventKey,
     };
   });
 }
@@ -218,7 +226,7 @@ export async function recoverOverdueAppointments({ now = new Date() } = {}) {
       clinicId: result.clinicId,
       registrationId: result.registrationId,
       type: "missed_appointment_reschedule",
-      idempotencyKey: `no-show:${result.appointmentId}:${new Date(candidate.scheduled_at).toISOString()}`,
+      idempotencyKey: result.eventKey,
       recipient: candidate.mobile,
       templateName: "queueless_missed_appointment_reschedule",
       variables: ["Open your private appointment link to choose a new time."],

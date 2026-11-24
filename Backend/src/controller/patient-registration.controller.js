@@ -1,4 +1,5 @@
 import { AppDataSource } from "../config/data-source.js";
+import { recordClinicNotification } from "../services/notifications/clinic-notifications.js";
 import { ClinicSettings } from "../entities/ClinicSettings.js";
 import { Registration } from "../entities/Registration.js";
 import { PatientAccessToken } from "../entities/PatientAccessToken.js";
@@ -7,7 +8,10 @@ import { AppointmentReschedule } from "../entities/AppointmentReschedule.js";
 import { QueueSession } from "../entities/QueueSession.js";
 import { QueueEntry } from "../entities/QueueEntry.js";
 import { createAccess } from "../services/patient/access-links.js";
-import { disconnectPatientSockets } from "../sockets/socket-server.js";
+import {
+  disconnectPatientSockets,
+  emitQueueChange,
+} from "../sockets/socket-server.js";
 import {
   addDays,
   availableSlots,
@@ -18,10 +22,25 @@ import {
 } from "../services/patient/clinic-availability.js";
 import { activeEmergencyForSlot } from "../services/clinic/doctor-emergencies.js";
 import { dispatchNotification } from "../services/notifications/dispatch.js";
+import { estimateQueueWait } from "../services/queue/wait-estimate.js";
 import {
   RESCHEDULABLE_APPOINTMENT_STATUSES,
   rescheduleMode,
 } from "../services/patient/appointment-rescheduling.js";
+
+function canCancelAppointment(appointmentStatus, queueStatus, registrationStatus) {
+  return (
+    queueStatus === registrationStatus &&
+    [
+      "booked",
+      "confirmed",
+      "needs_attention",
+      "needs_rescheduling",
+      "checked_in",
+    ].includes(appointmentStatus) &&
+    ["registered", "waiting"].includes(queueStatus)
+  );
+}
 
 export async function getPatientRegistration(req, res, next) {
   try {
@@ -100,35 +119,13 @@ export async function getPatientRegistration(req, res, next) {
           sessionId: session.id,
           status: "in_consultation",
         }));
-      const consultationElapsed = consulting?.consultationStartedAt
-        ? Math.max(
-            0,
-            Math.floor(
-              (Date.now() -
-                new Date(consulting.consultationStartedAt).getTime()) /
-                60000,
-            ),
-          )
-        : 0;
-      const activeRemaining = consulting
-        ? Math.max(0, duration - consultationElapsed)
-        : 0;
-      const baseMinimum = Math.max(
-        0,
-        (position - 1) * duration + activeRemaining,
-      );
-      const appointmentDelay = raw.scheduled_at
-        ? Math.max(
-            0,
-            Math.ceil(
-              (new Date(raw.scheduled_at).getTime() - Date.now()) / 60000,
-            ),
-          )
-        : 0;
-      const minimumMinutes = Math.max(baseMinimum, appointmentDelay);
       estimate = {
-        minimumMinutes,
-        maximumMinutes: minimumMinutes + duration + 10,
+        ...estimateQueueWait({
+          patientsAhead: position - 1,
+          slotMinutes: duration,
+          consultationStartedAt: consulting?.consultationStartedAt,
+          scheduledAt: raw.scheduled_at,
+        }),
         disclaimer:
           "This is an estimate based on queue position and configured slot length; delays may change it.",
       };
@@ -168,6 +165,11 @@ export async function getPatientRegistration(req, res, next) {
             scheduledAt: timeToAppointment,
             slotMinutes: raw.slot_minutes,
             status: raw.appointment_status,
+            canCancel: canCancelAppointment(
+              raw.appointment_status,
+              raw.queue_status,
+              raw.status,
+            ),
           }
         : null,
       arrivalInstructions:
@@ -293,6 +295,103 @@ export async function updateNotificationPreference(req, res, next) {
   }
 }
 
+export async function cancelPatientAppointment(req, res, next) {
+  const { registrationId } = req.patientAccess;
+  const expectedScheduledAt = new Date(req.body.expectedScheduledAt).getTime();
+  try {
+    const cancelled = await AppDataSource.transaction(async (manager) => {
+      const visit = await manager
+        .getRepository(Appointment)
+        .createQueryBuilder("a")
+        .innerJoin("queue_entries", "q", "q.registration_id = a.registration_id")
+        .innerJoin("registrations", "r", "r.id = a.registration_id")
+        .innerJoin("patients", "p", "p.id = r.patient_id")
+        .where("a.registration_id = :registrationId", { registrationId })
+        .select([
+          "a.id AS appointment_id",
+          "a.clinic_id AS clinic_id",
+          "a.scheduled_at AS scheduled_at",
+          "a.status AS appointment_status",
+          "q.id AS queue_id",
+          "q.status AS queue_status",
+          "r.status AS registration_status",
+          "r.reference AS reference",
+          "CASE WHEN r.consent_to_contact THEN p.mobile END AS recipient",
+        ])
+        .setLock("pessimistic_write", undefined, ["a", "q", "r"])
+        .setOnLocked("nowait")
+        .getRawOne();
+      if (!visit)
+        throw Object.assign(new Error("Appointment not found."), { status: 404 });
+      if (visit.appointment_status === "cancelled") return null;
+      if (new Date(visit.scheduled_at).getTime() !== expectedScheduledAt) {
+        throw Object.assign(
+          new Error("The appointment time has changed. Refresh before cancelling."),
+          { status: 409 },
+        );
+      }
+      if (
+        !canCancelAppointment(
+          visit.appointment_status,
+          visit.queue_status,
+          visit.registration_status,
+        )
+      ) {
+        throw Object.assign(
+          new Error(
+            "This appointment can no longer be cancelled online. Contact the clinic for help.",
+          ),
+          { status: 409 },
+        );
+      }
+      const status = { status: "cancelled" };
+      await manager
+        .getRepository(Appointment)
+        .update(visit.appointment_id, status);
+      await manager.getRepository(Registration).update(registrationId, status);
+      await manager.getRepository(QueueEntry).update(visit.queue_id, status);
+      const eventKey = `cancellation:${visit.appointment_id}`;
+      await recordClinicNotification(manager, {
+        registrationId,
+        type: "appointment_cancellation",
+        eventKey,
+      });
+      return { ...visit, eventKey };
+    });
+    if (cancelled) {
+      emitQueueChange({
+        clinicId: cancelled.clinic_id,
+        registrationId,
+        status: "cancelled",
+      });
+      if (cancelled.recipient) {
+        void dispatchNotification({
+          clinicId: cancelled.clinic_id,
+          registrationId,
+          type: "appointment_cancellation",
+          idempotencyKey: cancelled.eventKey,
+          recipient: cancelled.recipient,
+          templateName:
+            process.env.WHATSAPP_CANCELLATION_TEMPLATE ||
+            "queueless_appointment_cancellation",
+          variables: [cancelled.reference],
+        }).catch(() =>
+          console.error("Appointment cancellation notification failed."),
+        );
+      }
+    }
+    return res.json({ status: "cancelled" });
+  } catch (error) {
+    if (error.code === "55P03")
+      return res.status(409).json({
+        error: "The clinic is updating this appointment. Please try again.",
+      });
+    if (error.status)
+      return res.status(error.status).json({ error: error.message });
+    return next(error);
+  }
+}
+
 export async function getRescheduleOptions(req, res, next) {
   try {
     const appointment = await AppDataSource.getRepository(
@@ -371,7 +470,7 @@ export async function reschedulePatientAppointment(req, res, next) {
         error:
           "That replacement slot is no longer available. Choose another time.",
       });
-    const result = await AppDataSource.transaction(async (manager) => {
+    const rescheduleResult = await AppDataSource.transaction(async (manager) => {
       await manager.query("SELECT pg_advisory_xact_lock(hashtext($1))", [
         `appointment:${appointment.clinicId}:${appointment.doctorId}:${slot.toISOString()}`,
       ]);
@@ -476,7 +575,7 @@ export async function reschedulePatientAppointment(req, res, next) {
       await manager
         .getRepository(Registration)
         .update({ id: current.registrationId }, { status: "registered" });
-      await manager.getRepository(AppointmentReschedule).save(
+      const reschedule = await manager.getRepository(AppointmentReschedule).save(
         manager.getRepository(AppointmentReschedule).create({
           appointmentId: current.id,
           previousScheduledAt: oldTime,
@@ -484,8 +583,15 @@ export async function reschedulePatientAppointment(req, res, next) {
           changedBy: mode,
         }),
       );
-      return current;
+      const eventKey = `reschedule:${reschedule.id}`;
+      await recordClinicNotification(manager, {
+        registrationId: current.registrationId,
+        type: "reschedule_confirmation",
+        eventKey,
+      });
+      return { appointment: current, eventKey };
     });
+    const { appointment: result, eventKey } = rescheduleResult;
     const registrationRows = await AppDataSource.query(
       `SELECT r.clinic_id, r.consent_to_contact, p.mobile FROM registrations r JOIN patients p ON p.id = r.patient_id WHERE r.id = $1`,
       [result.registrationId],
@@ -495,7 +601,7 @@ export async function reschedulePatientAppointment(req, res, next) {
         clinicId: result.clinicId,
         registrationId: result.registrationId,
         type: "reschedule_confirmation",
-        idempotencyKey: `reschedule:${result.id}:${result.scheduledAt.toISOString()}`,
+        idempotencyKey: eventKey,
         recipient: registrationRows[0].mobile,
         templateName: "queueless_reschedule_confirmation",
         variables: [doctor.name, date, slotTime],

@@ -10,7 +10,8 @@ import { AuditLog } from "../entities/AuditLog.js";
 import { getSettings } from "../services/clinic/settings.js";
 import { clinicIsOpen, clinicToday } from "../services/clinic/time.js";
 import { emitQueueChange } from "../sockets/socket-server.js";
-import { notifyApproachingPatients } from "../services/notifications/dispatch.js";
+import { notifyApproachingPatients, notifyMockRegistration } from "../services/notifications/dispatch.js";
+import { recordClinicNotification } from "../services/notifications/clinic-notifications.js";
 import { normalizeMobile } from "../services/patient/mobile.js";
 import { activeEmergencyForSlot } from "../services/clinic/doctor-emergencies.js";
 
@@ -111,6 +112,7 @@ export async function registerWalkIn(req, res, next) {
               patientId: patientRows[0].id,
               visitType: "walk_in",
               notes: req.body.notes?.trim() || null,
+              consentToContact: req.body.consentToContact === true,
               status: "waiting",
             }),
         );
@@ -142,6 +144,11 @@ export async function registerWalkIn(req, res, next) {
               metadata: { tokenNumber },
             }),
         );
+      await recordClinicNotification(manager, {
+        registrationId: registration.id,
+        type: "registration_confirmation",
+        eventKey: `registration:${registration.id}`,
+      });
       return { registration, queueEntry, tokenNumber, sessionId: session.id };
     });
     emitQueueChange({
@@ -149,7 +156,9 @@ export async function registerWalkIn(req, res, next) {
       registrationId: result.registration.id,
       status: "waiting",
     });
-    void notifyApproachingPatients(clinicId, result.sessionId).catch((error) =>
+    void notifyMockRegistration(clinicId, result.registration.id)
+      .catch(() => console.error("Mock registration notification failed."));
+    void notifyApproachingPatients(clinicId, result.sessionId, result.registration.id).catch((error) =>
       console.error(
         "Turn reminder failed:",
         process.env.NODE_ENV === "production" ? error.name : error.message,

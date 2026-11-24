@@ -29,12 +29,14 @@ export async function getDashboard(req, res, next) {
       .innerJoin("registrations", "r", "r.id = q.registration_id")
       .innerJoin("patients", "p", "p.id = r.patient_id")
       .leftJoin("doctors", "d", "d.id = r.doctor_id")
-      .leftJoin("appointments", "a", "a.registration_id = r.id")
-      .innerJoin("queue_sessions", "s", "s.id = q.session_id")
-      .where("r.clinic_id = :clinicId AND s.session_date = :day", {
+      .leftJoin("appointments", "a", "a.registration_id = r.id AND a.clinic_id = :clinicId")
+      .where("r.clinic_id = :clinicId", {
         clinicId: req.auth.clinicId,
         day,
       })
+      .andWhere(`q.session_id = ANY(ARRAY(
+        SELECT id FROM queue_sessions WHERE clinic_id = :clinicId AND session_date = :day
+      ))`)
       .select([
         "q.id AS queue_id",
         "q.token_number AS token_number",
@@ -46,6 +48,7 @@ export async function getDashboard(req, res, next) {
         "r.reference AS reference",
         "r.status AS status",
         "r.visit_type AS visit_type",
+        "r.consent_to_contact AS consent_to_contact",
         "p.name AS patient_name",
         "p.mobile AS patient_mobile",
         "d.name AS doctor_name",

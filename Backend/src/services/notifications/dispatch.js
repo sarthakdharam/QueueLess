@@ -1,10 +1,36 @@
 import { AppDataSource } from "../../config/data-source.js";
-import { IsNull } from "typeorm";
 import { Notification } from "../../entities/Notification.js";
 import { sendSimulatedMessage } from "./providers/simulator.js";
 import { sendWhatsAppTemplate } from "./providers/whatsapp-cloud.js";
 import { approachingPatients } from "./notification-policy.js";
 import { mobileLookupCandidates } from "../patient/mobile-lookup.js";
+import { renderMockMessage } from "./mock-templates.js";
+import { availableDoctor, callableAppointment, queuePriority } from "../queue/queue-order.js";
+import { estimateQueueWait } from "../queue/wait-estimate.js";
+
+function configuredProvider() {
+  return process.env.NOTIFICATION_PROVIDER ||
+    (process.env.NODE_ENV === "production" ? "disabled" : "simulator");
+}
+
+export function mockInboxEnabled() {
+  return process.env.NODE_ENV === "development" &&
+    process.env.DEV_MOCK_INBOX === "true" && configuredProvider() === "simulator";
+}
+
+async function mockRegistrationContext(registrationId, manager = AppDataSource) {
+  const [context] = await manager.query(
+    `SELECT p.name, p.mobile, c.name AS clinic, d.name AS doctor,
+            q.token_number AS token, q.called_at, q.checked_in_at, q.status AS queue_status,
+            q.session_id, r.clinic_id, r.consent_to_contact
+       FROM registrations r JOIN patients p ON p.id = r.patient_id
+       JOIN clinics c ON c.id = r.clinic_id
+       LEFT JOIN doctors d ON d.id = r.doctor_id
+       LEFT JOIN queue_entries q ON q.registration_id = r.id
+      WHERE r.id = $1`, [registrationId],
+  );
+  return context;
+}
 
 export async function dispatchNotification(
   {
@@ -18,13 +44,15 @@ export async function dispatchNotification(
     recordVariables = variables,
     simulateFailure,
     forceSimulator = false,
+    mockContext,
+    mockMessage,
+    milestone,
+    manualTest = false,
   },
   adapters = {},
 ) {
-  const repository = AppDataSource.getRepository(Notification);
-  const configuredMode =
-    process.env.NOTIFICATION_PROVIDER ||
-    (process.env.NODE_ENV === "production" ? "disabled" : "simulator");
+  const repository = (adapters.manager || AppDataSource).getRepository(Notification);
+  const configuredMode = configuredProvider();
   const useSimulator = forceSimulator || configuredMode === "simulator";
   const channel = useSimulator
     ? "simulator"
@@ -32,6 +60,13 @@ export async function dispatchNotification(
       ? "whatsapp"
       : "disabled";
   let record;
+  const capture = useSimulator && mockInboxEnabled();
+  const context = capture && !mockContext && registrationId &&
+    type !== "otp_recovery" ? await mockRegistrationContext(registrationId) : mockContext;
+  const message = capture
+    ? (type === "otp_recovery" ? renderMockMessage(type) : mockMessage ||
+        renderMockMessage(type, { ...context, doctor: context?.doctor || undefined }, recordVariables))
+    : null;
   try {
     record = await repository.save(
       repository.create({
@@ -41,7 +76,13 @@ export async function dispatchNotification(
         idempotencyKey,
         channel,
         deliveryStatus: "pending",
-        payload: { templateName, variables: recordVariables },
+        payload: {
+          templateName,
+          variables: recordVariables,
+          ...(milestone === undefined ? {} : { milestone }),
+          ...(manualTest ? { manualTest: true } : {}),
+        },
+        ...(capture ? { message } : {}),
       }),
     );
   } catch (error) {
@@ -63,6 +104,10 @@ export async function dispatchNotification(
           templateName,
           variables,
           simulateFailure,
+          message,
+          recipient,
+          type,
+          clinicId,
         })
       : await (adapters.sendWhatsApp || sendWhatsAppTemplate)({
           recipient,
@@ -83,68 +128,13 @@ export async function dispatchNotification(
   return repository.save(record);
 }
 
-export async function notifyRegistrationConfirmation(
-  registrationId,
-  accessUrl,
-) {
-  const registration = await AppDataSource.query(
-    `SELECT r.id, r.clinic_id, r.reference, r.consent_to_contact, r.visit_type, p.mobile,
-            c.name AS clinic_name, c.time_zone, d.name AS doctor_name, a.scheduled_at, q.token_number
-       FROM registrations r JOIN patients p ON p.id = r.patient_id JOIN clinics c ON c.id = r.clinic_id
-       LEFT JOIN doctors d ON d.id = r.doctor_id LEFT JOIN appointments a ON a.registration_id = r.id
-       LEFT JOIN queue_entries q ON q.registration_id = r.id WHERE r.id = $1`,
-    [registrationId],
-  ).then((rows) => rows[0]);
-  if (!registration?.consent_to_contact || !accessUrl) return null;
-  const zone = registration.time_zone || "Asia/Kolkata";
-  const scheduled = registration.scheduled_at
-    ? new Date(registration.scheduled_at)
-    : null;
-  const date = scheduled
-    ? new Intl.DateTimeFormat("en-IN", {
-        dateStyle: "medium",
-        timeZone: zone,
-      }).format(scheduled)
-    : "Walk-in registration";
-  const time = scheduled
-    ? new Intl.DateTimeFormat("en-IN", {
-        timeStyle: "short",
-        timeZone: zone,
-      }).format(scheduled)
-    : "Check with reception";
-  const variables = [
-    registration.clinic_name,
-    registration.doctor_name || "Any available doctor",
-    date,
-    time,
-    String(registration.token_number),
-    accessUrl,
-  ];
-  const recordVariables = [
-    ...variables.slice(0, -1),
-    "[PRIVATE_LINK_REDACTED]",
-  ];
-  return dispatchNotification({
-    clinicId: registration.clinic_id,
-    registrationId,
-    type: "registration_confirmation",
-    idempotencyKey: `registration:${registrationId}:confirmation:v1`,
-    recipient: registration.mobile,
-    templateName:
-      process.env.WHATSAPP_CONFIRMATION_TEMPLATE ||
-      "queueless_registration_confirmation",
-    variables,
-    recordVariables,
-  });
-}
-
 export async function sendRecoveryOtp({ mobile, challengeId, code }) {
   const rows = await AppDataSource.query(
     `SELECT r.id AS registration_id, r.clinic_id FROM registrations r JOIN patients p ON p.id = r.patient_id WHERE p.mobile = ANY($1::varchar[]) ORDER BY r.created_at DESC LIMIT 1`,
     [mobileLookupCandidates(mobile)],
   );
   if (!rows[0]) return null;
-  return dispatchNotification({
+  const notification = await dispatchNotification({
     clinicId: rows[0].clinic_id,
     registrationId: rows[0].registration_id,
     type: "otp_recovery",
@@ -154,9 +144,18 @@ export async function sendRecoveryOtp({ mobile, challengeId, code }) {
     variables: [code],
     recordVariables: ["[REDACTED]"],
   });
+  if (
+    process.env.NODE_ENV !== "production" &&
+    process.env.OTP_DEV_LOG === "true" &&
+    notification?.deliveryStatus === "simulated"
+  ) {
+    console.info(`[QueueLess development] Recovery OTP: ${code}`);
+  }
+  return notification;
 }
 
-export async function notifyApproachingPatients(clinicId, sessionId) {
+export async function notifyApproachingPatients(clinicId, sessionId, checkedInRegistrationId = null) {
+  if (mockInboxEnabled()) return notifyMockQueue(clinicId, sessionId, checkedInRegistrationId);
   const settingsRows = await AppDataSource.query(
     `SELECT "notify_at_patients_ahead" AS threshold FROM "clinic_settings" WHERE "clinic_id" = $1`,
     [clinicId],
@@ -181,6 +180,136 @@ export async function notifyApproachingPatients(clinicId, sessionId) {
       variables: [patient.name, String(patient.position), patient.reference],
     });
   }
+}
+
+export async function notifyMockRegistration(clinicId, registrationId) {
+  if (!mockInboxEnabled()) return;
+  const context = await mockRegistrationContext(registrationId);
+  if (!context) return;
+  return dispatchNotification({
+    clinicId, registrationId, type: "registration_confirmation",
+    idempotencyKey: `mock-registration:${registrationId}`,
+    recipient: context.mobile, templateName: "mock_registration_confirmation",
+    mockContext: context, forceSimulator: true,
+  });
+}
+
+export async function notifyVisitCompleted(clinicId, registrationId) {
+  const [visit] = await AppDataSource.query(
+    `SELECT r.reference, p.mobile FROM registrations r
+       JOIN patients p ON p.id = r.patient_id
+      WHERE r.id = $1 AND r.clinic_id = $2 AND r.status = 'completed'
+        AND r.consent_to_contact`,
+    [registrationId, clinicId],
+  );
+  if (!visit) return;
+  const feedbackUrl = new URL(
+    "/patient/recover",
+    process.env.APP_BASE_URL || "http://localhost:5173",
+  );
+  feedbackUrl.searchParams.set("feedback", visit.reference);
+  return dispatchNotification({
+    clinicId,
+    registrationId,
+    type: "visit_completed",
+    idempotencyKey: `visit-completed:${registrationId}`,
+    recipient: visit.mobile,
+    templateName:
+      process.env.WHATSAPP_VISIT_COMPLETED_TEMPLATE || "queueless_visit_completed",
+    variables: [feedbackUrl.toString()],
+  });
+}
+
+export async function notifyMockTurn(clinicId, registrationId, sessionId) {
+  if (!mockInboxEnabled()) return;
+  const context = await mockRegistrationContext(registrationId);
+  if (!context?.consent_to_contact || !context.called_at) return;
+  return dispatchNotification({
+    clinicId, registrationId, type: "your_turn",
+    idempotencyKey: `mock-your-turn:${sessionId}:${registrationId}:${context.called_at.toISOString()}`,
+    recipient: context.mobile, templateName: "mock_your_turn",
+    mockContext: context, forceSimulator: true,
+  });
+}
+
+async function notifyMockQueue(clinicId, sessionId, checkedInRegistrationId) {
+  // Serialize snapshots of this queue so an earlier milestone cannot follow a later one.
+  return AppDataSource.transaction(async (manager) => {
+    await manager.query("SELECT pg_advisory_xact_lock(hashtext($1))", [`mock-milestones:${sessionId}`]);
+    const [timing] = await manager.query(
+      `SELECT coalesce(s.slot_duration_minutes, 15) AS slot_minutes,
+              (SELECT max(q.consultation_started_at) FROM queue_entries q
+                WHERE q.session_id = $1 AND q.status = 'in_consultation') AS consultation_started_at
+         FROM clinics c LEFT JOIN clinic_settings s ON s.clinic_id = c.id
+        WHERE c.id = $2`, [sessionId, clinicId],
+    );
+    if (!timing) return;
+    const rows = await manager.query(
+      `WITH ranked AS (
+       SELECT r.id AS registration_id, r.consent_to_contact, p.name, p.mobile,
+              q.token_number AS token, q.checked_in_at, a.scheduled_at, progress.closest_ahead,
+              (row_number() OVER (ORDER BY ${queuePriority}, a.scheduled_at ASC NULLS LAST, q.queue_order ASC) - 1)::int AS ahead
+         FROM queue_entries q JOIN registrations r ON r.id = q.registration_id
+         JOIN patients p ON p.id = r.patient_id
+         LEFT JOIN appointments a ON a.registration_id = r.id
+         LEFT JOIN mock_queue_progress progress
+           ON progress.session_id = q.session_id AND progress.registration_id = r.id
+        WHERE q.session_id = $1 AND r.clinic_id = $2 AND q.status = 'waiting'
+          AND ${callableAppointment} AND ${availableDoctor}
+       )
+       SELECT * FROM ranked WHERE ahead <= 5 OR registration_id = $3
+       ORDER BY ahead`,
+      [sessionId, clinicId, checkedInRegistrationId],
+    );
+    const now = Date.now();
+    const estimate = ({ ahead, scheduled_at }) => estimateQueueWait({
+      patientsAhead: ahead, slotMinutes: timing.slot_minutes,
+      consultationStartedAt: timing.consultation_started_at,
+      scheduledAt: scheduled_at, now,
+    });
+    if (checkedInRegistrationId) {
+      const ranked = rows.find((row) => row.registration_id === checkedInRegistrationId);
+      const patient = ranked || await mockRegistrationContext(checkedInRegistrationId, manager);
+      if (patient?.consent_to_contact && patient.checked_in_at &&
+          (ranked || (patient.queue_status === "waiting" &&
+            patient.clinic_id === clinicId && patient.session_id === sessionId))) {
+        const idempotencyKey = `mock-check-in:${checkedInRegistrationId}:${patient.checked_in_at.toISOString()}`;
+        if (!(await manager.getRepository(Notification).existsBy({ idempotencyKey }))) {
+          await dispatchNotification({
+            clinicId, registrationId: checkedInRegistrationId, type: "patient_checked_in",
+            idempotencyKey, recipient: patient.mobile, templateName: "mock_patient_checked_in",
+            mockContext: { ...patient, estimate: ranked ? estimate(ranked) : undefined },
+            forceSimulator: true,
+          }, { manager });
+        }
+      }
+    }
+    for (const patient of rows) {
+      const { ahead } = patient;
+      if (ahead > 5) continue;
+      if (patient.closest_ahead !== null && patient.closest_ahead <= ahead) continue;
+      await manager.query(
+        `INSERT INTO mock_queue_progress (session_id, registration_id, closest_ahead)
+         VALUES ($1, $2, $3)
+         ON CONFLICT (session_id, registration_id) DO UPDATE SET closest_ahead = EXCLUDED.closest_ahead`,
+        [sessionId, patient.registration_id, ahead],
+      );
+      if (!patient.consent_to_contact || ![1, 3, 5].includes(ahead)) continue;
+      const idempotencyKey = `mock-milestone:${sessionId}:${patient.registration_id}:${ahead}`;
+      if (await manager.getRepository(Notification).existsBy({ idempotencyKey })) continue;
+      await dispatchNotification({
+        clinicId,
+        registrationId: patient.registration_id,
+        type: ahead === 5 ? "queue_progress" : "turn_approaching",
+        idempotencyKey,
+        recipient: patient.mobile,
+        templateName: "mock_queue_milestone",
+        mockContext: { ...patient, estimate: estimate(patient) },
+        milestone: ahead,
+        forceSimulator: true,
+      }, { manager });
+    }
+  });
 }
 
 export async function simulateNotification({ clinicId, actorId, outcome }) {
@@ -211,23 +340,19 @@ export async function simulateNotification({ clinicId, actorId, outcome }) {
   return { ...notification, simulationMode: true, realMessageSent: false };
 }
 
-export async function listClinicNotifications(
-  clinicId,
-  { unreadOnly = false } = {},
-) {
-  return AppDataSource.getRepository(Notification).find({
-    where: unreadOnly ? { clinicId, readAt: IsNull() } : { clinicId },
-    order: { createdAt: "DESC" },
-    take: 100,
-  });
-}
-
 export async function retryFailedNotifications() {
+  const channel = configuredProvider();
+  if (channel !== "simulator" && channel !== "whatsapp") return;
   const repository = AppDataSource.getRepository(Notification);
   const records = await repository
     .createQueryBuilder("n")
     .where(
-      "n.delivery_status = 'failed' AND n.retry_count < 3 AND n.type NOT IN ('otp_recovery', 'registration_confirmation') AND n.created_at <= now() - interval '30 seconds'",
+      `n.delivery_status = 'failed' AND n.channel = :channel
+       AND (n.channel <> 'simulator' OR n.message IS NULL)
+       AND n.payload->>'manualTest' IS DISTINCT FROM 'true'
+       AND n.retry_count < 3 AND n.type NOT IN ('otp_recovery', 'registration_confirmation')
+       AND n.created_at <= now() - interval '30 seconds'`,
+      { channel },
     )
     .orderBy("n.created_at", "ASC")
     .take(20)

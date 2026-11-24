@@ -23,6 +23,7 @@ const ClinicNotifications = lazy(() => import("./pages/clinic-notifications.jsx"
 const ClinicPatients = lazy(() => import("./pages/clinic-patients.jsx"));
 const ClinicDoctorAvailability = lazy(() => import("./pages/clinic-doctor-availability.jsx"));
 const ClinicAnalytics = lazy(() => import("./pages/clinic-analytics.jsx"));
+const MockNotifications = lazy(() => import("./pages/mock-notifications.jsx"));
 
 export default function App() {
   return (
@@ -57,6 +58,9 @@ export default function App() {
           <Route path="/clinic/analytics" element={<ClinicAnalytics />} />
           <Route path="/clinic/billing" element={<ClinicBilling />} />
           <Route path="/clinic/notifications" element={<ClinicNotifications />} />
+          {import.meta.env.DEV && (
+            <Route path="/dev/notifications" element={<MockNotifications />} />
+          )}
           <Route path="*" element={<Navigate to="/" replace />} />
         </Routes>
       </Suspense>

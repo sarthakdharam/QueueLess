@@ -35,6 +35,8 @@ import { AppointmentFeedback } from "../entities/AppointmentFeedback.js";
 import { AppointmentFeedback1760000009000 } from "../migrations/1760000009000-AppointmentFeedback.js";
 import { RefreshToken } from "../entities/RefreshToken.js";
 import { RefreshTokens1760000010000 } from "../migrations/1760000010000-RefreshTokens.js";
+import { MockNotificationMessages1760000011000 } from "../migrations/1760000011000-MockNotificationMessages.js";
+import { MockQueueProgress1760000012000 } from "../migrations/1760000012000-MockQueueProgress.js";
 
 const currentFile = fileURLToPath(import.meta.url);
 const currentDirectory = path.dirname(currentFile);
@@ -91,6 +93,8 @@ export const AppDataSource = new DataSource({
     DoctorEmergencyAvailability1760000008000,
     AppointmentFeedback1760000009000,
     RefreshTokens1760000010000,
+    MockNotificationMessages1760000011000,
+    MockQueueProgress1760000012000,
   ],
   synchronize: false,
   logging: false,

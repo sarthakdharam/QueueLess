@@ -7,7 +7,7 @@ export default function ClinicSidebar({ clinicName = "Clinic" }) {
   const { pathname } = useLocation();
   const t = useTranslate();
   const links = [
-    ["/clinic/queue", "▦", t("Queue dashboard")],
+    ["/clinic/queue", "▦", t("Dashboard")],
     ["/clinic/patients/today", "◷", t("Today's Patients")],
     ["/clinic/patients/history", "▤", t("Patient History")],
     ["/clinic/analytics", "◫", t("Analytics")],

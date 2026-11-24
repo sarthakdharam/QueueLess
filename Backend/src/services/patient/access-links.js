@@ -14,19 +14,21 @@ function accessUrl(secret) {
   return `${process.env.APP_BASE_URL || "http://localhost:5173"}/patient/registration#${secret}`;
 }
 
-export async function createAccess(manager, registrationId) {
+export async function createAccess(manager, registrationId, { rotateExisting = true } = {}) {
   const repository = manager.getRepository(PatientAccessToken);
   const secret = accessSecret();
   const now = new Date();
-  await repository
-    .createQueryBuilder()
-    .update(PatientAccessToken)
-    .set({ revokedAt: now })
-    .where('"registration_id" = :registrationId AND "revoked_at" IS NULL', {
-      registrationId,
-    })
-    .execute();
-  await disconnectPatientSockets(registrationId);
+  if (rotateExisting) {
+    await repository
+      .createQueryBuilder()
+      .update(PatientAccessToken)
+      .set({ revokedAt: now })
+      .where('"registration_id" = :registrationId AND "revoked_at" IS NULL', {
+        registrationId,
+      })
+      .execute();
+    await disconnectPatientSockets(registrationId);
+  }
   const configuredDays = Number(process.env.PATIENT_ACCESS_TTL_DAYS || 180);
   const ttlDays =
     Number.isInteger(configuredDays) &&
@@ -38,7 +40,7 @@ export async function createAccess(manager, registrationId) {
     repository.create({
       registrationId,
       tokenHash: accessHash(secret),
-      expiresAt: new Date(now.getTime() + ttlDays * 24 * 60 * 60 * 1000),
+      expiresAt: new Date(now.getTime() + (rotateExisting ? ttlDays : 1) * 24 * 60 * 60 * 1000),
     }),
   );
   return { secret, url: accessUrl(secret) };

@@ -9,15 +9,38 @@ const visitDateSql =
 const visitStatusSql =
   "CASE WHEN q.status = 'waiting' AND rr.queue_entry_id IS NOT NULL THEN 'returned' ELSE q.status END";
 
-function queueVisits(clinicId, timeZone) {
-  return AppDataSource.getRepository(QueueEntry)
+function queueVisits(clinicId, timeZone, { day, details = true, search, status } = {}) {
+  // Resolve the clinic's session IDs first so the queue-entry index can
+  // restrict the scan before the other visit tables are joined.
+  const sessionDateFilter = day ? "AND scope.session_date = :day" : "";
+  const query = AppDataSource.getRepository(QueueEntry)
     .createQueryBuilder("q")
     .innerJoin("registrations", "r", "r.id = q.registration_id")
-    .innerJoin("patients", "p", "p.id = r.patient_id")
-    .innerJoin("queue_sessions", "s", "s.id = q.session_id")
-    .leftJoin("doctors", "d", "d.id = r.doctor_id")
-    .leftJoin("appointments", "a", "a.registration_id = r.id")
+    .innerJoin(
+      "queue_sessions",
+      "s",
+      "s.id = q.session_id AND s.clinic_id = :clinicId",
+    )
     .leftJoin(
+      "appointments",
+      "a",
+      "a.registration_id = r.id AND a.clinic_id = :clinicId",
+    )
+    .where("r.clinic_id = :clinicId", { clinicId })
+    .andWhere(
+      `q.session_id = ANY(ARRAY(
+        SELECT scope.id FROM queue_sessions scope
+        WHERE scope.clinic_id = :clinicId ${sessionDateFilter}
+      ))`,
+      day ? { day } : undefined,
+    )
+    .setParameter("timeZone", timeZone);
+  if (details || search)
+    query.innerJoin("patients", "p", "p.id = r.patient_id");
+  if (details)
+    query.leftJoin("doctors", "d", "d.id = r.doctor_id");
+  if (details || status)
+    query.leftJoin(
       (subQuery) =>
         subQuery
           .select("return_event.queue_entry_id", "queue_entry_id")
@@ -27,9 +50,8 @@ function queueVisits(clinicId, timeZone) {
           .addOrderBy("return_event.created_at", "DESC"),
       "rr",
       "rr.queue_entry_id = q.id",
-    )
-    .where("r.clinic_id = :clinicId", { clinicId })
-    .setParameter("timeZone", timeZone);
+    );
+  return query;
 }
 
 function patientColumns(query) {
@@ -63,8 +85,7 @@ export async function getTodaysPatients(req, res, next) {
     if (!clinic) return res.status(404).json({ error: "Clinic not found." });
     const timeZone = clinic.timeZone || "Asia/Kolkata";
     const day = clinicToday(timeZone);
-    const query = patientColumns(queueVisits(req.auth.clinicId, timeZone))
-      .andWhere("s.session_date = :day", { day })
+    const query = patientColumns(queueVisits(req.auth.clinicId, timeZone, { day }))
       .orderBy("s.id", "ASC")
       .addOrderBy(
         "CASE WHEN a.status IN ('booked', 'checked_in') AND a.scheduled_at <= now() THEN 0 WHEN a.scheduled_at IS NULL OR a.status = 'returned' THEN 1 ELSE 2 END",
@@ -100,6 +121,21 @@ export async function getTodaysPatients(req, res, next) {
   }
 }
 
+function filterHistory(query, { from, to, status, q }, today) {
+  query.andWhere(
+    `(${visitDateSql} < :today OR q.status NOT IN (:...activeStatuses))`,
+    { today, activeStatuses: HISTORY_EXCLUDED_TODAY },
+  );
+  if (from) query.andWhere(`${visitDateSql} >= :fromDate`, { fromDate: from });
+  if (to) query.andWhere(`${visitDateSql} <= :toDate`, { toDate: to });
+  if (status) query.andWhere(`${visitStatusSql} = :status`, { status });
+  if (q)
+    query.andWhere("(p.name ILIKE :search OR r.reference ILIKE :search)", {
+      search: `%${q}%`,
+    });
+  return query;
+}
+
 export async function getPatientHistory(req, res, next) {
   try {
     const clinic = await AppDataSource.getRepository(Clinic).findOneBy({
@@ -110,32 +146,23 @@ export async function getPatientHistory(req, res, next) {
     const today = clinicToday(timeZone);
     const page = Number(req.query.page || 1);
     const limit = Number(req.query.limit || 25);
-    const query = patientColumns(queueVisits(req.auth.clinicId, timeZone))
-      .andWhere(
-        `(${visitDateSql} < :today OR q.status NOT IN (:...activeStatuses))`,
-        { today, activeStatuses: HISTORY_EXCLUDED_TODAY },
-      )
+    const query = filterHistory(
+      patientColumns(queueVisits(req.auth.clinicId, timeZone)), req.query, today,
+    )
       .orderBy(visitDateSql, "DESC")
       .addOrderBy(
         "COALESCE(q.completed_at, r.completed_at, a.scheduled_at, r.created_at)",
         "DESC",
       )
       .addOrderBy("q.id", "DESC");
-    if (req.query.from)
-      query.andWhere(`${visitDateSql} >= :fromDate`, {
-        fromDate: req.query.from,
-      });
-    if (req.query.to)
-      query.andWhere(`${visitDateSql} <= :toDate`, { toDate: req.query.to });
-    if (req.query.status)
-      query.andWhere(`${visitStatusSql} = :status`, {
-        status: req.query.status,
-      });
-    if (req.query.q)
-      query.andWhere("(p.name ILIKE :search OR r.reference ILIKE :search)", {
-        search: `%${req.query.q}%`,
-      });
-    const total = await query.clone().getCount();
+    const countQuery = queueVisits(req.auth.clinicId, timeZone, {
+      details: false, search: req.query.q, status: req.query.status,
+    });
+    // Each join yields at most one row per queue entry.
+    const result = await filterHistory(countQuery, req.query, today)
+      .select("COUNT(*)", "total")
+      .getRawOne();
+    const total = Number(result.total);
     const records = await query
       .offset((page - 1) * limit)
       .limit(limit)

@@ -58,7 +58,7 @@ export default function ClinicAnalytics() {
     (total, slot) => total + slot.visits,
     0,
   );
-  const chartColors = ["#765ce0", "#da7b98", "#42a0c8"];
+  const chartColors = ["#9700df", "#e46996", "#42a0c8"];
   const chartSegments = busiestHours.reduce(
     ({ offset, segments }, slot, index) => {
       const portion = (slot.visits / busiestVisitTotal) * 100;
@@ -80,25 +80,27 @@ export default function ClinicAnalytics() {
   const donutBackground = `conic-gradient(${chartSegments
     .map((segment) => `${segment.color} ${segment.start}% ${segment.end}%`)
     .join(", ")})`;
+  const formatNumber = new Intl.NumberFormat(locale);
+  const number = (value) => formatNumber.format(value);
   const metrics = [
-    ["Registered", summary?.registrations || 0, "visits booked or added"],
-    ["Completed", summary?.completed || 0, "consultations finished"],
-    ["Waiting", summary?.waiting || 0, "patients still in queue"],
-    ["Missed", summary?.missed || 0, "patients not seen"],
+    ["Registered", number(summary?.registrations ?? 0), "visits booked or added"],
+    ["Completed", number(summary?.completed ?? 0), "consultations finished"],
+    ["Waiting", number(summary?.waiting ?? 0), "patients still in queue"],
+    ["Missed", number(summary?.missed ?? 0), "patients not seen"],
     [
       "Visit rating",
       summary?.averageRating === null || !summary
         ? "—"
-        : `${summary.averageRating}/5`,
+        : `${number(summary.averageRating)}/${number(5)}`,
       summary?.feedbackCount
-        ? `${summary.feedbackCount} feedback responses`
+        ? `${number(summary.feedbackCount)} ${t("feedback responses")}`
         : "no feedback responses yet",
     ],
     [
       "Average wait",
       summary?.averageWaitMinutes === null || !summary
         ? "—"
-        : `${summary.averageWaitMinutes} ${t("min")}`,
+        : `${number(summary.averageWaitMinutes)} ${t("min")}`,
       "from checked-in completed visits",
     ],
   ];
@@ -136,7 +138,7 @@ export default function ClinicAnalytics() {
           {error && <p className="portal-alert">{error}</p>}
           {loading ? (
             <ClinicLoading>Loading clinic analytics…</ClinicLoading>
-          ) : (
+          ) : analytics && (
             <>
               <p className="patient-date-note">
                 Clinic date: <strong>{analytics.date}</strong>{" "}
@@ -169,7 +171,7 @@ export default function ClinicAnalytics() {
                       style={{ "--donut-segments": donutBackground }}
                     >
                       <div>
-                        <strong>{busiestVisitTotal}</strong>
+                        <strong>{number(busiestVisitTotal)}</strong>
                         <span>visits</span>
                       </div>
                     </div>
@@ -178,7 +180,7 @@ export default function ClinicAnalytics() {
                         <div key={segment.hour}>
                           <i style={{ background: segment.color }} />
                           <span>{formatHour(segment.hour, locale)}</span>
-                          <b>{segment.visits} visits</b>
+                          <b>{number(segment.visits)} {t("visits")}</b>
                         </div>
                       ))}
                     </div>

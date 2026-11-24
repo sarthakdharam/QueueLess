@@ -10,8 +10,15 @@ import { clinicToday } from "../services/clinic/time.js";
 import { emitQueueChange } from "../sockets/socket-server.js";
 import { ReturnEvent } from "../entities/ReturnEvent.js";
 import { calculateReturnPlacement } from "../services/queue/return-policy.js";
-import { notifyApproachingPatients } from "../services/notifications/dispatch.js";
+import {
+  dispatchNotification,
+  notifyApproachingPatients,
+  notifyMockTurn,
+  notifyVisitCompleted,
+} from "../services/notifications/dispatch.js";
+import { recordClinicNotification } from "../services/notifications/clinic-notifications.js";
 import { transitionFor } from "../services/queue/transitions.js";
+import { availableDoctor, callableAppointment, queuePriority } from "../services/queue/queue-order.js";
 
 export async function callNextPatient(req, res, next) {
   const clinicId = req.auth.clinicId;
@@ -35,22 +42,15 @@ export async function callNextPatient(req, res, next) {
           "r.clinic_id = :clinicId AND s.session_date = :day AND q.status = 'waiting'",
           { clinicId, day },
         )
-        .andWhere(
-          "(a.id IS NULL OR a.status NOT IN ('needs_attention', 'needs_rescheduling'))",
-        )
-        .andWhere(
-          "NOT EXISTS (SELECT 1 FROM doctor_availability_events e WHERE e.doctor_id = r.doctor_id AND e.status = 'active' AND e.starts_at <= now() AND (e.ends_at IS NULL OR e.ends_at > now()))",
-        )
+        .andWhere(callableAppointment)
+        .andWhere(availableDoctor)
         .select([
           "q.id AS id",
           "q.registration_id AS registration_id",
           "q.session_id AS session_id",
           "q.token_number AS token_number",
         ])
-        .orderBy(
-          "CASE WHEN a.status IN ('booked', 'checked_in') AND a.scheduled_at <= now() THEN 0 WHEN a.scheduled_at IS NULL OR a.status = 'returned' THEN 1 ELSE 2 END",
-          "ASC",
-        )
+        .orderBy(queuePriority, "ASC")
         .addOrderBy("a.scheduled_at", "ASC", "NULLS LAST")
         .addOrderBy("q.queue_order", "ASC")
         .limit(1)
@@ -104,6 +104,8 @@ export async function callNextPatient(req, res, next) {
       registrationId: called.registrationId,
       status: "called",
     });
+    void notifyMockTurn(clinicId, called.registrationId, called.sessionId)
+      .catch(() => console.error("Mock turn notification failed."));
     void notifyApproachingPatients(clinicId, called.sessionId).catch((error) =>
       console.error(
         "Turn reminder failed:",
@@ -145,7 +147,7 @@ export async function transitionQueueEntry(req, res, next) {
         });
   }
   try {
-    const changed = await AppDataSource.transaction(async (manager) => {
+    const { changed, missedNotification } = await AppDataSource.transaction(async (manager) => {
       const entry = await manager
         .getRepository(QueueEntry)
         .createQueryBuilder("q")
@@ -360,13 +362,33 @@ export async function transitionQueueEntry(req, res, next) {
             { registrationId: entry.registration_id, status: "booked" },
             { status: "checked_in" },
           );
-      if (req.params.action === "miss")
-        await manager
-          .getRepository(Appointment)
-          .update(
-            { registrationId: entry.registration_id, status: "checked_in" },
+      let missedNotification;
+      if (req.params.action === "miss" && entry.appointment_status === "checked_in") {
+        const appointment = await manager.getRepository(Appointment).findOneBy({
+          registrationId: entry.registration_id,
+          status: "checked_in",
+        });
+        if (appointment) {
+          const response = await manager.getRepository(Appointment).update(
+            { id: appointment.id, status: "checked_in" },
             { status: "missed" },
           );
+          if (response.affected) {
+            const eventKey = `no-show:${appointment.id}:${appointment.scheduledAt.toISOString()}`;
+            await recordClinicNotification(manager, {
+              registrationId: entry.registration_id,
+              type: "missed_appointment_reschedule",
+              eventKey,
+            });
+            const [patient] = await manager.query(
+              `SELECT p.mobile FROM registrations r JOIN patients p ON p.id = r.patient_id
+               WHERE r.id = $1 AND r.consent_to_contact`,
+              [entry.registration_id],
+            );
+            if (patient) missedNotification = { eventKey, mobile: patient.mobile };
+          }
+        }
+      }
       if (req.params.action === "return")
         await manager
           .getRepository(Appointment)
@@ -389,19 +411,45 @@ export async function transitionQueueEntry(req, res, next) {
             }),
         );
       return {
-        id: entry.id,
-        registrationId: entry.registration_id,
-        sessionId: entry.session_id,
-        tokenNumber: entry.token_number,
-        status: transition.to,
+        changed: {
+          id: entry.id,
+          registrationId: entry.registration_id,
+          sessionId: entry.session_id,
+          tokenNumber: entry.token_number,
+          status: transition.to,
+        },
+        missedNotification,
       };
     });
+    if (missedNotification) {
+      void dispatchNotification({
+        clinicId: req.auth.clinicId,
+        registrationId: changed.registrationId,
+        type: "missed_appointment_reschedule",
+        idempotencyKey: missedNotification.eventKey,
+        recipient: missedNotification.mobile,
+        templateName: "queueless_missed_appointment_reschedule",
+        variables: ["Open your private appointment link to choose a new time."],
+      }).catch(() => console.error("Missed appointment notification failed."));
+    }
     emitQueueChange({
       clinicId: req.auth.clinicId,
       registrationId: changed.registrationId,
       status: changed.status,
     });
-    void notifyApproachingPatients(req.auth.clinicId, changed.sessionId).catch(
+    if (changed.status === "called") {
+      void notifyMockTurn(req.auth.clinicId, changed.registrationId, changed.sessionId)
+        .catch(() => console.error("Mock turn notification failed."));
+    }
+    if (changed.status === "completed") {
+      void notifyVisitCompleted(req.auth.clinicId, changed.registrationId)
+        .catch(() => console.error("Visit completion notification failed."));
+    }
+    void notifyApproachingPatients(
+      req.auth.clinicId,
+      changed.sessionId,
+      req.params.action === "check-in" ? changed.registrationId : null,
+    ).catch(
       (error) =>
         console.error(
           "Turn reminder failed:",

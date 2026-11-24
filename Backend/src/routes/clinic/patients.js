@@ -1,6 +1,7 @@
 import { Router } from "express";
 import { query } from "express-validator";
 import { validateRequest } from "../../middleware/validate-request.js";
+import { limitReportLoad } from "../../middleware/limit-report-load.js";
 import {
   getPatientHistory,
   getTodaysPatients,
@@ -56,7 +57,7 @@ router.get(
     query("limit").optional().isInt({ min: 1, max: 100 }).toInt(),
     validateRequest,
   ],
-  getPatientHistory,
+  limitReportLoad(getPatientHistory),
 );
 
 export default router;

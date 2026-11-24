@@ -1,5 +1,5 @@
-import { useEffect, useState } from "react";
-import { Link, Navigate } from "react-router-dom";
+import { useEffect, useRef, useState } from "react";
+import { Link, Navigate, useSearchParams } from "react-router-dom";
 import { useAppLanguage, useTranslate } from "../i18n.jsx";
 import PatientShell from "../components/PatientShell.jsx";
 import { api } from "../api/client.js";
@@ -9,6 +9,9 @@ import ConfirmDialog from "../components/ConfirmDialog.jsx";
 export default function PatientRegistration() {
   const { locale } = useAppLanguage();
   const t = useTranslate();
+  const [searchParams] = useSearchParams();
+  const focusFeedback = searchParams.get("feedback") === "1";
+  const feedbackPanel = useRef(null);
   const [secret] = useState(
     () =>
       window.location.hash.slice(1) ||
@@ -21,6 +24,8 @@ export default function PatientRegistration() {
   const [copyMessage, setCopyMessage] = useState("");
   const [showRevokeDialog, setShowRevokeDialog] = useState(false);
   const [revokeError, setRevokeError] = useState("");
+  const [cancelScheduledAt, setCancelScheduledAt] = useState(null);
+  const [cancelError, setCancelError] = useState("");
   const [actionBusy, setActionBusy] = useState(false);
   const [rescheduleOptions, setRescheduleOptions] = useState(null);
   const [selectedDate, setSelectedDate] = useState("");
@@ -57,6 +62,7 @@ export default function PatientRegistration() {
       needs_rescheduling: "Needs rescheduling",
       missed: "Missed appointment",
       checked_in: "Checked in",
+      cancelled: "Cancelled",
     })[status] || status;
   const appointmentRescheduleMode = (appointment, referenceTime) => {
     if (!appointment) return null;
@@ -111,6 +117,11 @@ export default function PatientRegistration() {
     return () => socket.disconnect();
   }, [secret]);
 
+  const feedbackEligible = Boolean(data?.feedback?.eligible);
+  useEffect(() => {
+    if (focusFeedback && feedbackEligible) feedbackPanel.current?.focus();
+  }, [focusFeedback, feedbackEligible]);
+
   if (!secret) return <Navigate to="/patient/recover" replace />;
   const estimateWindow =
     data?.estimate && estimateReferenceTime
@@ -123,6 +134,44 @@ export default function PatientRegistration() {
     data?.appointment,
     estimateReferenceTime || 0,
   );
+  const appointmentCancelled = data?.appointment?.status === "cancelled";
+
+  const cancelAppointment = async () => {
+    if (actionBusy || !cancelScheduledAt) return;
+    setActionBusy(true);
+    setCancelError("");
+    try {
+      await api.post(
+        "/patient/cancel",
+        { expectedScheduledAt: cancelScheduledAt },
+        { headers: { Authorization: `Bearer ${secret}` }, successToast: false },
+      );
+      setData((current) => ({
+        ...current,
+        appointment: {
+          ...current.appointment,
+          status: "cancelled",
+          canCancel: false,
+        },
+        registration: {
+          ...current.registration,
+          status: "cancelled",
+          queueStatus: "cancelled",
+          queuePosition: null,
+        },
+        estimate: null,
+      }));
+      setCancelScheduledAt(null);
+      setRescheduleOptions(null);
+    } catch (requestError) {
+      setCancelError(
+        requestError.response?.data?.error ||
+          "Could not cancel your appointment. Please try again.",
+      );
+    } finally {
+      setActionBusy(false);
+    }
+  };
 
   const updateNotifications = async () => {
     if (actionBusy) return;
@@ -347,13 +396,32 @@ export default function PatientRegistration() {
                       choose a new available time below.
                     </p>
                   )}
-                  <div className="patient-time-estimate">
-                    <span>Your appointment</span>
-                    <b>{formatClinicTime(data.appointment.scheduledAt)}</b>
-                    <small>
-                      Please arrive about 10 minutes early to check in.
-                    </small>
-                  </div>
+                  {appointmentCancelled ? (
+                    <p className="patient-cancellation-notice" role="status">
+                      Your appointment has been cancelled.
+                    </p>
+                  ) : (
+                    <div className="patient-time-estimate">
+                      <span>Your appointment</span>
+                      <b>{formatClinicTime(data.appointment.scheduledAt)}</b>
+                      <small>
+                        Please arrive about 10 minutes early to check in.
+                      </small>
+                    </div>
+                  )}
+                  {data.appointment.canCancel && (
+                    <button
+                      type="button"
+                      className="button patient-cancel-button"
+                      disabled={actionBusy}
+                      onClick={() => {
+                        setCancelError("");
+                        setCancelScheduledAt(data.appointment.scheduledAt);
+                      }}
+                    >
+                      Cancel appointment
+                    </button>
+                  )}
                 </>
               )}
               {data.registration.queuePosition && (
@@ -361,7 +429,7 @@ export default function PatientRegistration() {
                   Current live queue position: {data.registration.queuePosition}
                 </p>
               )}
-              <p>{data.arrivalInstructions}</p>
+              {!appointmentCancelled && <p>{data.arrivalInstructions}</p>}
               {data.estimate && estimateWindow && (
                 <div className="patient-time-estimate live-estimate">
                   <span>Estimated time until your turn</span>
@@ -380,6 +448,8 @@ export default function PatientRegistration() {
             </div>
             {data.feedback?.eligible && (
               <section
+                ref={feedbackPanel}
+                tabIndex={-1}
                 className="patient-feedback-panel"
                 aria-labelledby="feedback-title"
               >
@@ -608,16 +678,18 @@ export default function PatientRegistration() {
                     ? "Turn WhatsApp updates off"
                     : "Turn WhatsApp updates on"}
                 </button>
-                <button
-                  type="button"
-                  className="text-button"
-                  disabled={actionBusy}
-                  onClick={rotateAccess}
-                >
-                  {actionBusy
-                    ? "Updating private link…"
-                    : "Create a new private link"}
-                </button>
+                {!appointmentCancelled && (
+                  <button
+                    type="button"
+                    className="text-button"
+                    disabled={actionBusy}
+                    onClick={rotateAccess}
+                  >
+                    {actionBusy
+                      ? "Updating private link…"
+                      : "Create a new private link"}
+                  </button>
+                )}
                 <button
                   type="button"
                   className="text-button danger-text"
@@ -652,6 +724,21 @@ export default function PatientRegistration() {
               }
             }}
             onConfirm={revokeAccess}
+          />
+        )}
+        {cancelScheduledAt && (
+          <ConfirmDialog
+            title="Cancel appointment?"
+            description={t(
+              "Your appointment on {date} will be cancelled and the slot will become available to other patients.",
+            ).replace("{date}", formatClinicTime(cancelScheduledAt))}
+            confirmLabel="Cancel appointment"
+            cancelLabel="Keep appointment"
+            destructive
+            busy={actionBusy}
+            error={cancelError}
+            onClose={() => setCancelScheduledAt(null)}
+            onConfirm={cancelAppointment}
           />
         )}
       </section>

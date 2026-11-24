@@ -1,6 +1,9 @@
 import { findPublicClinicDetails } from "../../repositories/clinic.repository.js";
 import { countOpenAppointmentsByTime } from "../../repositories/appointment.repository.js";
-import { activeEmergencyForSlot } from "../clinic/doctor-emergencies.js";
+import {
+  activeEmergenciesForWindow,
+  emergencyAffectsSlot,
+} from "../clinic/doctor-emergencies.js";
 
 const DAY_NAMES = [
   "sunday",
@@ -51,11 +54,11 @@ export function weekdayForDate(date) {
 }
 
 export function zonedTimeToUtc(date, time, timeZone) {
-  const [year, month, day] = date.split("-").map(Number);
-  const [hour, minute] = time.split(":").map(Number);
-  const wanted = Date.UTC(year, month - 1, day, hour, minute);
-  let result = wanted;
-  const formatter = new Intl.DateTimeFormat("en-GB", {
+  return localTimeToUtc(date, time, createLocalTimeFormatter(timeZone));
+}
+
+function createLocalTimeFormatter(timeZone) {
+  return new Intl.DateTimeFormat("en-GB", {
     timeZone,
     year: "numeric",
     month: "2-digit",
@@ -65,6 +68,13 @@ export function zonedTimeToUtc(date, time, timeZone) {
     second: "2-digit",
     hourCycle: "h23",
   });
+}
+
+function localTimeToUtc(date, time, formatter) {
+  const [year, month, day] = date.split("-").map(Number);
+  const [hour, minute] = time.split(":").map(Number);
+  const wanted = Date.UTC(year, month - 1, day, hour, minute);
+  let result = wanted;
   for (let attempt = 0; attempt < 3; attempt += 1) {
     const parts = Object.fromEntries(
       formatter
@@ -130,18 +140,12 @@ export async function availableSlots({ clinic, settings, doctor, date }) {
   const duration = settings.slotDurationMinutes;
   const open = hoursCloseToMinutes(dayHours.open);
   const close = hoursCloseToMinutes(dayHours.close);
-  const clinicToday = dateInZone(new Date(), clinic.timeZone || "Asia/Kolkata");
+  const timeZone = clinic.timeZone || "Asia/Kolkata";
+  const formatter = createLocalTimeFormatter(timeZone);
+  const clinicToday = dateInZone(new Date(), timeZone);
   const now = Date.now();
-  const dayStart = zonedTimeToUtc(
-    date,
-    "00:00",
-    clinic.timeZone || "Asia/Kolkata",
-  );
-  const dayEnd = zonedTimeToUtc(
-    addDays(date, 1),
-    "00:00",
-    clinic.timeZone || "Asia/Kolkata",
-  );
+  const dayStart = localTimeToUtc(date, "00:00", formatter);
+  const dayEnd = localTimeToUtc(addDays(date, 1), "00:00", formatter);
   const booked = await countOpenAppointmentsByTime({
     clinicId: clinic.id,
     doctorId: doctor.id,
@@ -155,26 +159,36 @@ export async function availableSlots({ clinic, settings, doctor, date }) {
       Number(row.count),
     ]),
   );
-  const slots = [];
+  const candidates = [];
   for (let start = open; start + duration <= close; start += duration) {
     const hhmm = `${String(Math.floor(start / 60)).padStart(2, "0")}:${String(start % 60).padStart(2, "0")}`;
     if (!isSlotOpen(hhmm, duration, dayHours, settings.breaks)) continue;
-    const startsAt = zonedTimeToUtc(
-      date,
-      hhmm,
-      clinic.timeZone || "Asia/Kolkata",
-    );
+    const startsAt = localTimeToUtc(date, hhmm, formatter);
     if (date === clinicToday && startsAt.getTime() <= now) continue;
     const endsAt = new Date(startsAt.getTime() + duration * 60000);
-    if (await activeEmergencyForSlot({ doctorId: doctor.id, startsAt, endsAt }))
-      continue;
     const bookedCount = counts.get(startsAt.toISOString()) || 0;
     if (bookedCount >= settings.appointmentCapacity) continue;
-    slots.push({
+    candidates.push({
       time: hhmm,
-      startsAt: startsAt.toISOString(),
+      startsAt,
+      endsAt,
       remaining: settings.appointmentCapacity - bookedCount,
     });
   }
-  return slots;
+  if (!candidates.length) return [];
+  const emergencies = await activeEmergenciesForWindow({
+    doctorId: doctor.id,
+    startsAt: new Date(Math.min(...candidates.map((slot) => slot.startsAt.getTime()))),
+    endsAt: new Date(Math.max(...candidates.map((slot) => slot.endsAt.getTime()))),
+  });
+  return candidates
+    .filter(
+      ({ startsAt, endsAt }) =>
+        !emergencies.some((event) => emergencyAffectsSlot(event, startsAt, endsAt)),
+    )
+    .map(({ time, startsAt, remaining }) => ({
+      time,
+      startsAt: startsAt.toISOString(),
+      remaining,
+    }));
 }

@@ -60,11 +60,8 @@ class QueryStub {
   from() {
     return this;
   }
-  clone() {
-    return this;
-  }
-  async getCount() {
-    return this.state.total ?? 0;
+  async getRawOne() {
+    return { total: String(this.state.total ?? 0) };
   }
   async getRawMany() {
     return this.state.rows || [];
@@ -124,7 +121,9 @@ test("today's patients scopes the query to the authenticated clinic and clinic-l
   assert.ok(
     query.state.conditions.some(
       ([sql, params]) =>
-        sql === "s.session_date = :day" && params.day === res.body.date,
+        sql.includes("scope.clinic_id = :clinicId") &&
+        sql.includes("scope.session_date = :day") &&
+        params.day === res.body.date,
     ),
   );
   assert.equal(res.body.patients[0].position, 1);

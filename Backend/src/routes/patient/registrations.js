@@ -5,6 +5,7 @@ import {
   rotatePatientAccess,
   revokePatientAccess,
   updateNotificationPreference,
+  cancelPatientAppointment,
   getRescheduleOptions,
   reschedulePatientAppointment,
   submitAppointmentFeedback,
@@ -26,6 +27,12 @@ router.put(
   updateNotificationPreference,
 );
 router.get("/reschedule/options", requirePatientAccess, getRescheduleOptions);
+router.post(
+  "/cancel",
+  requirePatientAccess,
+  [body("expectedScheduledAt").isISO8601({ strict: true }), validateRequest],
+  cancelPatientAppointment,
+);
 router.post(
   "/reschedule",
   requirePatientAccess,

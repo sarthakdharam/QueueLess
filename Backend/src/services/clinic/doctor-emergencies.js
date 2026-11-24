@@ -3,14 +3,21 @@ import { DoctorAvailabilityEvent } from "../../entities/DoctorAvailabilityEvent.
 
 export const EMERGENCY_MODES = ["temporary", "full_day", "until_notice"];
 
-export async function activeEmergencyForSlot({ doctorId, startsAt, endsAt }) {
+function activeEmergencyQuery({ doctorId, startsAt, endsAt }) {
   return AppDataSource.getRepository(DoctorAvailabilityEvent)
     .createQueryBuilder("e")
     .where("e.doctor_id = :doctorId AND e.status = 'active'", { doctorId })
     .andWhere("e.starts_at < :endsAt", { endsAt })
     .andWhere("(e.ends_at IS NULL OR e.ends_at > :startsAt)", { startsAt })
-    .orderBy("e.starts_at", "DESC")
-    .getOne();
+    .orderBy("e.starts_at", "DESC");
+}
+
+export function activeEmergencyForSlot(window) {
+  return activeEmergencyQuery(window).getOne();
+}
+
+export function activeEmergenciesForWindow(window) {
+  return activeEmergencyQuery(window).getMany();
 }
 
 export function emergencyAffectsSlot(event, startsAt, endsAt) {

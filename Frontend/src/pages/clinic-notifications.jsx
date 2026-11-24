@@ -12,6 +12,13 @@ import {
   simulatorSuccessMessage,
 } from "../utils/simulator-feedback.js";
 
+const notificationNames = {
+  registration_confirmation: "Registration confirmation",
+  reschedule_confirmation: "Reschedule confirmation",
+  missed_appointment_reschedule: "Missed appointment",
+  appointment_cancellation: "Appointment cancelled",
+};
+
 export default function ClinicNotifications() {
   const { locale } = useAppLanguage();
   const [notifications, setNotifications] = useState([]);
@@ -90,12 +97,10 @@ export default function ClinicNotifications() {
         <main className="clinic-welcome billing-page notifications-page">
           <header className="dashboard-header notifications-header">
             <div>
-              <div className="eyebrow">PATIENT MESSAGING</div>
+              <div className="eyebrow">CLINIC WORKSPACE</div>
               <h1>Notifications</h1>
               <p>
-                WhatsApp messages are sent only when contact consent is
-                recorded. Local development uses a simulator; simulated success
-                is not proof of phone delivery.
+                Registration confirmations, reschedules, missed appointments, and cancellations.
               </p>
             </div>
             <button
@@ -147,10 +152,7 @@ export default function ClinicNotifications() {
                       <tr>
                         <th>WHEN</th>
                         <th>TYPE</th>
-                        <th>CHANNEL</th>
-                        <th>STATUS</th>
-                        <th>RETRIES</th>
-                        <th>DETAILS</th>
+                        <th>REGISTRATION REFERENCE</th>
                       </tr>
                     </thead>
                     <tbody>
@@ -159,16 +161,8 @@ export default function ClinicNotifications() {
                           <td>
                             {new Date(item.createdAt).toLocaleString(locale)}
                           </td>
-                          <td>{item.type}</td>
-                          <td>{item.channel}</td>
-                          <td>{item.deliveryStatus}</td>
-                          <td>{item.retryCount}</td>
-                          <td>
-                            {item.failureReason ||
-                              item.providerReference ||
-                              item.payload?.templateName ||
-                              "—"}
-                          </td>
+                          <td>{notificationNames[item.type] ?? item.type}</td>
+                          <td>{item.payload?.reference || "—"}</td>
                         </tr>
                       ))}
                     </tbody>

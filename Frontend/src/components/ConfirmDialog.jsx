@@ -1,4 +1,5 @@
 import { useEffect, useId, useRef } from "react";
+import { useTranslate } from "../i18n.jsx";
 
 const FOCUSABLE =
   'button:not(:disabled), input:not(:disabled), select:not(:disabled), textarea:not(:disabled), a[href], [tabindex]:not([tabindex="-1"])';
@@ -15,6 +16,7 @@ export default function ConfirmDialog({
   onClose,
   children,
 }) {
+  const t = useTranslate();
   const titleId = useId();
   const descriptionId = useId();
   const dialogRef = useRef(null);
@@ -89,7 +91,7 @@ export default function ConfirmDialog({
         {children && <div className="app-dialog-content">{children}</div>}
         {error && (
           <p className="app-dialog-error" role="alert">
-            {error}
+            {t(error)}
           </p>
         )}
         <div className="app-dialog-actions">
@@ -108,7 +110,7 @@ export default function ConfirmDialog({
             disabled={busy}
             onClick={onConfirm}
           >
-            {busy ? "Please wait…" : confirmLabel}
+            {busy ? t("Please wait…") : confirmLabel}
           </button>
         </div>
       </section>

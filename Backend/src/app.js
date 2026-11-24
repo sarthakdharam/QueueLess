@@ -1,4 +1,5 @@
 import express from "express";
+import devNotifications from "./routes/dev-notifications.js";
 import { authRouter } from "./routes/auth.js";
 import { clinicRouter } from "./routes/clinic/index.js";
 import { patientRouter } from "./routes/patient/index.js";
@@ -53,6 +54,7 @@ app.post(
   receiveWhatsAppWebhook,
 );
 app.use(express.json({ limit: "20kb" }));
+app.use("/api/v1/dev/notifications", devNotifications);
 app.use("/api/v1/auth", authRouter);
 app.use("/api/v1/clinic", clinicRouter);
 app.use("/api/v1/public", publicRouter);

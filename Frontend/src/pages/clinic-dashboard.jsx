@@ -30,6 +30,7 @@ export default function ClinicDashboard() {
     mobile: "",
     doctorId: "",
     notes: "",
+    consentToContact: false,
   });
   const [error, setError] = useState("");
   const [walkInError, setWalkInError] = useState("");
@@ -130,7 +131,7 @@ export default function ClinicDashboard() {
       const { data } = await api.post("/clinic/walk-ins", form, {
         successToast: false,
       });
-      setForm({ name: "", mobile: "", doctorId: "", notes: "" });
+      setForm({ name: "", mobile: "", doctorId: "", notes: "", consentToContact: false });
       setFieldErrors({});
       setToast(
         `Token ${data.registration.tokenNumber} added · ${data.registration.reference}`,
@@ -307,7 +308,7 @@ export default function ClinicDashboard() {
     [
       isViewingToday ? "Registered today" : "Scheduled",
       dashboard.summary.registrations,
-      isViewingToday ? "people checked in" : "appointments booked",
+      isViewingToday ? "visits booked or added" : "appointments booked",
     ],
     ["Waiting now", dashboard.summary.waiting, "in the queue"],
     ["In consultation", dashboard.summary.consulting, "with a doctor"],
@@ -492,6 +493,9 @@ export default function ClinicDashboard() {
                             <td>
                               <b>{row.patient_name}</b>
                               <small>{row.patient_mobile}</small>
+                              {row.consent_to_contact === false && (
+                                <small className="queue-contact-off">Messaging off</small>
+                              )}
                             </td>
                             <td>{row.doctor_name || "Any doctor"}</td>
                             <td>
@@ -675,6 +679,19 @@ export default function ClinicDashboard() {
                     rows="3"
                   />
                 </label>
+                <div className="walkin-contact-preference">
+                  <label>
+                    <input
+                      type="checkbox"
+                      checked={form.consentToContact}
+                      onChange={(event) => setForm((current) => ({
+                        ...current,
+                        consentToContact: event.target.checked,
+                      }))}
+                    />
+                    <span>The patient agrees to receive WhatsApp updates for this visit.</span>
+                  </label>
+                </div>
                 {walkInError && (
                   <p className="form-error" role="alert">
                     {walkInError}

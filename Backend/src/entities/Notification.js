@@ -30,6 +30,8 @@ export const Notification = new EntitySchema({
     failureReason: { name: "failure_reason", type: "text", nullable: true },
     retryCount: { name: "retry_count", type: "int", default: 0 },
     payload: { type: "jsonb", default: () => "'{}'::jsonb" },
+    message: { type: "text", nullable: true },
+    updatedAt: { name: "updated_at", type: "timestamptz", updateDate: true },
     createdAt: { name: "created_at", type: "timestamptz", createDate: true },
     deliveredAt: { name: "delivered_at", type: "timestamptz", nullable: true },
     readAt: { name: "read_at", type: "timestamptz", nullable: true },

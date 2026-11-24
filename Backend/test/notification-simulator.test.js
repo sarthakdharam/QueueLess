@@ -4,6 +4,7 @@ import { AppDataSource } from "../src/config/data-source.js";
 import { createNotificationSimulation } from "../src/controller/notification.controller.js";
 import {
   dispatchNotification,
+  sendRecoveryOtp,
   simulateNotification,
 } from "../src/services/notifications/dispatch.js";
 import { sendSimulatedMessage } from "../src/services/notifications/providers/simulator.js";
@@ -183,6 +184,43 @@ test("OTP-style values are sent to the simulator but redacted from persisted not
   assert.ok(
     writes.some((item) => JSON.stringify(item.payload).includes("[REDACTED]")),
   );
+});
+
+test("recovery OTP is logged only after an opted-in development simulation", async (t) => {
+  setSimulatorEnvironment(t, { mode: "simulator", forcedFailure: "false" });
+  const original = process.env.OTP_DEV_LOG;
+  t.after(() => {
+    if (original === undefined) delete process.env.OTP_DEV_LOG;
+    else process.env.OTP_DEV_LOG = original;
+  });
+  const writes = mockNotificationRepository(t);
+  t.mock.method(AppDataSource, "query", async () => [
+    { registration_id: "registration-test", clinic_id: "clinic-test" },
+  ]);
+  const terminal = t.mock.method(console, "info", () => {});
+  const request = {
+    mobile: "+919000000002",
+    challengeId: "test-challenge",
+    code: "654321",
+  };
+
+  process.env.OTP_DEV_LOG = "false";
+  await sendRecoveryOtp(request);
+  assert.equal(terminal.mock.callCount(), 0);
+
+  process.env.OTP_DEV_LOG = "true";
+  const simulated = await sendRecoveryOtp(request);
+  assert.equal(simulated.deliveryStatus, "simulated");
+  assert.deepEqual(terminal.mock.calls[0].arguments, [
+    "[QueueLess development] Recovery OTP: 654321",
+  ]);
+  assert.ok(writes.every(({ payload }) => payload.variables[0] === "[REDACTED]"));
+
+  process.env.SIMULATOR_FORCE_FAILURE = "true";
+  assert.equal((await sendRecoveryOtp(request)).deliveryStatus, "failed");
+  process.env.NODE_ENV = "production";
+  assert.equal((await sendRecoveryOtp(request)).deliveryStatus, "failed");
+  assert.equal(terminal.mock.callCount(), 1);
 });
 
 test("force-failure environment switch is deterministic and simulation is disabled in production", async (t) => {

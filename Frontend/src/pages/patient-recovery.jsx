@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
-import { Link } from "react-router-dom";
+import { Link, useSearchParams } from "react-router-dom";
 import PatientShell from "../components/PatientShell.jsx";
-import { useAppLanguage } from "../i18n.jsx";
+import { useAppLanguage, useTranslate } from "../i18n.jsx";
 import { api } from "../api/client.js";
 import { FieldError } from "../components/FieldError.jsx";
 import {
@@ -17,9 +17,25 @@ const ACTIVE = new Set([
   "in_consultation",
   "missed",
 ]);
+const VISIT_STATUS_LABELS = {
+  booked: "Booked",
+  cancelled: "Cancelled",
+  checked_in: "Checked in",
+  completed: "Completed",
+  in_consultation: "In consultation",
+  missed: "Missed appointment",
+  needs_attention: "Doctor delayed",
+  needs_rescheduling: "Needs rescheduling",
+};
 
 export default function PatientRecovery() {
   const { locale } = useAppLanguage();
+  const t = useTranslate();
+  const [searchParams] = useSearchParams();
+  const requestedReference = searchParams.get("feedback") || "";
+  const feedbackReference = /^QL[A-F0-9]{14}$/i.test(requestedReference)
+    ? requestedReference
+    : null;
   const [mobile, setMobile] = useState("+91 ");
   const [code, setCode] = useState("");
   const [developmentCode, setDevelopmentCode] = useState("");
@@ -29,6 +45,7 @@ export default function PatientRecovery() {
   const [selectedReference, setSelectedReference] = useState("");
   const [step, setStep] = useState("request");
   const [error, setError] = useState("");
+  const [feedbackLinkError, setFeedbackLinkError] = useState(false);
   const [fieldErrors, setFieldErrors] = useState({});
   const [busy, setBusy] = useState(false);
   const [loadingAppointments, setLoadingAppointments] = useState(false);
@@ -113,6 +130,16 @@ export default function PatientRecovery() {
     setFieldErrors((old) => ({ ...old, code: nextError }));
   };
 
+  const showCodeRequestError = (requestError, fallback) => {
+    const response = requestError.response?.data;
+    if (response?.code === "MOBILE_NOT_REGISTERED") {
+      setStep("request");
+      setFieldErrors({ mobile: response.error });
+    } else {
+      setError(response?.error || fallback);
+    }
+  };
+
   const requestCode = async (event) => {
     event.preventDefault();
     setError("");
@@ -130,10 +157,7 @@ export default function PatientRecovery() {
       setStep("verify");
       setCooldown(60);
     } catch (requestError) {
-      setError(
-        requestError.response?.data?.error ||
-          "Could not request a verification code.",
-      );
+      showCodeRequestError(requestError, "Could not request a verification code.");
     } finally {
       setBusy(false);
     }
@@ -162,12 +186,27 @@ export default function PatientRecovery() {
         mobile,
         code,
       });
+      if (feedbackReference) {
+        try {
+          const { data: link } = await api.post(
+            `/patient/recovery/appointments/${feedbackReference}/access`,
+            { purpose: "feedback" },
+            { headers: { Authorization: `Bearer ${data.lookupToken}` }, successToast: false },
+          );
+          window.location.assign(link.accessUrl);
+          return;
+        } catch {
+          setFeedbackLinkError(true);
+        }
+      }
       setLookupToken(data.lookupToken);
       setLoadingAppointments(true);
       setStep("appointments");
     } catch (requestError) {
       setError(
-        requestError.response?.data?.error || "The code could not be verified.",
+        requestError.response?.status === 400
+          ? "The code is invalid or expired. Please enter the mobile number you registered with and request a new code."
+          : requestError.response?.data?.error || "The code could not be verified.",
       );
     } finally {
       setBusy(false);
@@ -184,28 +223,9 @@ export default function PatientRecovery() {
       setCooldown(60);
       setCode("");
     } catch (requestError) {
-      setError(
-        requestError.response?.data?.error || "Could not resend the code.",
-      );
+      showCodeRequestError(requestError, "Could not resend the code.");
     } finally {
       setBusy(false);
-    }
-  };
-
-  const logout = async () => {
-    if (!lookupToken) return;
-    setBusy(true);
-    try {
-      await api.delete("/patient/recovery/session", {
-        headers: { Authorization: `Bearer ${lookupToken}` },
-      });
-    } finally {
-      setBusy(false);
-      setLookupToken("");
-      setAppointments([]);
-      setPrivateLinks({});
-      setSelectedReference("");
-      setStep("request");
     }
   };
 
@@ -233,11 +253,15 @@ export default function PatientRecovery() {
   const activeAppointments = useMemo(
     () =>
       appointments.filter(
-        (item) =>
-          ACTIVE.has(item.registrationStatus) ||
-          (item.appointment &&
-            !["cancelled", "rescheduled"].includes(item.appointment.status) &&
-            new Date(item.appointment.scheduledAt) >= new Date()),
+        (item) => {
+          const status = item.appointment?.status;
+          if (
+            ["cancelled", "completed"].includes(item.registrationStatus) ||
+            ["cancelled", "completed", "rescheduled"].includes(status)
+          ) return false;
+          return ACTIVE.has(item.registrationStatus) ||
+            (item.appointment && new Date(item.appointment.scheduledAt) >= new Date());
+        },
       ),
     [appointments],
   );
@@ -255,14 +279,20 @@ export default function PatientRecovery() {
       : "Walk-in";
   const appointmentCard = (item) => {
     const expanded = selectedReference === item.reference;
+    const status = ["cancelled", "completed", "missed"].includes(item.registrationStatus)
+      ? item.registrationStatus
+      : item.appointment?.status || item.registrationStatus;
+    const cancelled = status === "cancelled";
+    const showArrival = !cancelled && ACTIVE.has(item.registrationStatus) && status !== "missed";
+    const detailsId = `visit-details-${item.reference}`;
     return (
       <article
         className="clinic-result my-appointment-card"
         key={item.reference}
       >
         <div className="my-appointment-summary">
-          <span className="appointment-status">
-            {item.appointment?.status || item.registrationStatus}
+          <span className="appointment-status" data-status={status}>
+            {VISIT_STATUS_LABELS[status] || status}
           </span>
           <h2>{item.clinic.name}</h2>
           <p>
@@ -280,36 +310,33 @@ export default function PatientRecovery() {
           type="button"
           className="button button-light"
           aria-expanded={expanded}
+          aria-controls={expanded ? detailsId : undefined}
           onClick={() => setSelectedReference(expanded ? "" : item.reference)}
         >
           {expanded ? "Hide details" : "View details"}
         </button>
         {expanded && (
-          <div className="my-appointment-details">
-            <p>
-              <strong>Reference:</strong> {item.reference}
-            </p>
-            <p>
-              <strong>Visit type:</strong>{" "}
-              {item.visitType === "walk_in" ? "Walk-in" : "Appointment"}
-            </p>
-            <p>
-              <strong>Registration:</strong> {item.registrationStatus}
-              {item.queueStatus ? ` · ${item.queueStatus}` : ""}
-            </p>
-            <p>
-              <strong>Physical arrival:</strong> {item.arrivalStatus}
-            </p>
-            <p>
-              <strong>Clinic:</strong> {item.clinic.address}, {item.clinic.city}
-              {item.clinic.state ? `, ${item.clinic.state}` : ""}
-            </p>
-            {item.appointment && (
-              <p>
-                <strong>Scheduled appointment:</strong> {formatTime(item)}. This
-                is the scheduled time, not a live queue position.
-              </p>
-            )}
+          <div className="my-appointment-details" id={detailsId}>
+            <dl className="appointment-details-grid">
+              <div>
+                <dt>Reference</dt>
+                <dd>{item.reference}</dd>
+              </div>
+              <div>
+                <dt>Visit type</dt>
+                <dd>{item.visitType === "walk_in" ? "Walk-in" : "Appointment"}</dd>
+              </div>
+              <div>
+                <dt>Clinic address</dt>
+                <dd>{[item.clinic.address, item.clinic.city, item.clinic.state].filter(Boolean).join(", ")}</dd>
+              </div>
+              {showArrival && (
+                <div>
+                  <dt>Check-in</dt>
+                  <dd>{item.arrivalStatus}</dd>
+                </div>
+              )}
+            </dl>
             {item.queuePosition && (
               <p>
                 <strong>Current live queue position:</strong>{" "}
@@ -323,18 +350,19 @@ export default function PatientRecovery() {
                 {item.estimate.disclaimer}
               </p>
             )}
-            <p>{item.arrivalInstructions}</p>
-            {privateLinks[item.reference] ? (
+            {showArrival && <p>{item.arrivalInstructions}</p>}
+            {!cancelled && privateLinks[item.reference] && (
               <a
                 className="button button-light"
                 href={privateLinks[item.reference]}
               >
                 Open private appointment link ↗
               </a>
-            ) : (
+            )}
+            {!cancelled && !privateLinks[item.reference] && (
               <button
                 type="button"
-                className="text-button"
+                className="button button-light"
                 disabled={busy}
                 onClick={() => replacePrivateLink(item.reference)}
               >
@@ -351,7 +379,7 @@ export default function PatientRecovery() {
 
   return (
     <PatientShell>
-      <section className="patient-content">
+      <section className="patient-content patient-recovery">
         <div className="eyebrow">PATIENT PORTAL</div>
         <h1>
           {step === "appointments" ? "My appointments" : "My Appointment"}
@@ -359,8 +387,9 @@ export default function PatientRecovery() {
         {step === "request" && (
           <>
             <p className="patient-intro">
-              Enter your registered mobile number. We’ll send a verification
-              code if appointments are associated with it.
+              {feedbackReference
+                ? "Verify the mobile number you registered with to leave feedback."
+                : "Please enter the mobile number you registered with."}
             </p>
             <form noValidate className="patient-form" onSubmit={requestCode}>
               <label className={fieldErrors.mobile ? "has-field-error" : ""}>
@@ -371,11 +400,13 @@ export default function PatientRecovery() {
                   inputMode="tel"
                   autoComplete="tel"
                   value={mobile}
+                  disabled={busy}
                   aria-invalid={!!fieldErrors.mobile}
+                  aria-describedby={fieldErrors.mobile ? "recovery-mobile-error" : undefined}
                   onChange={(event) => updateMobile(event.target.value)}
                   placeholder="+91 98765 43210"
                 />
-                <FieldError>{fieldErrors.mobile}</FieldError>
+                <FieldError id="recovery-mobile-error">{fieldErrors.mobile}</FieldError>
               </label>
               {error && (
                 <p className="form-error" role="alert">
@@ -394,24 +425,30 @@ export default function PatientRecovery() {
         {step === "verify" && (
           <>
             <p className="patient-intro">
-              Enter the six-digit code sent to your registered mobile number. If
-              no appointment matches, the response remains private.
+              Enter the six-digit code. If you didn’t receive it, check that you
+              entered the mobile number you registered with.
             </p>
-            <form noValidate className="patient-form" onSubmit={verify}>
-              <label className={fieldErrors.code ? "has-field-error" : ""}>
-                Verification code<span className="required-mark"> *</span>
+            <form
+              noValidate
+              className="patient-form recovery-verification"
+              onSubmit={verify}
+            >
+              <div className={fieldErrors.code ? "has-field-error" : ""}>
+                <label htmlFor="recovery-code">Verification code</label>
                 <input
+                  id="recovery-code"
                   required
                   inputMode="numeric"
                   pattern="[0-9]{6}"
                   maxLength="6"
                   autoComplete="one-time-code"
+                  placeholder="000000"
                   value={code}
                   aria-invalid={!!fieldErrors.code}
                   onChange={(event) => updateCode(event.target.value)}
                 />
                 <FieldError>{fieldErrors.code}</FieldError>
-              </label>
+              </div>
               {developmentCode && (
                 <p className="dev-code">
                   Local development simulator code:{" "}
@@ -429,34 +466,46 @@ export default function PatientRecovery() {
               >
                 {busy ? "Verifying…" : "Verify and continue"}
               </button>
+              <div className="recovery-code-actions">
+                <button
+                  type="button"
+                  className="text-button"
+                  disabled={busy || cooldown > 0}
+                  onClick={resend}
+                >
+                  {cooldown
+                    ? t("Resend code in {seconds}s").replace(
+                        "{seconds}",
+                        new Intl.NumberFormat(locale).format(cooldown),
+                      )
+                    : "Resend code"}
+                </button>
+                <button
+                  type="button"
+                  className="text-button"
+                  disabled={busy}
+                  onClick={() => {
+                    setStep("request");
+                    setError("");
+                    setCode("");
+                  }}
+                >
+                  Change mobile number
+                </button>
+              </div>
             </form>
-            <button
-              type="button"
-              className="text-button"
-              disabled={busy || cooldown > 0}
-              onClick={resend}
-            >
-              {cooldown ? `Resend code in ${cooldown}s` : "Resend code"}
-            </button>
-            <button
-              type="button"
-              className="text-button"
-              onClick={() => {
-                setStep("request");
-                setError("");
-                setCode("");
-              }}
-            >
-              ← Change mobile number
-            </button>
           </>
         )}
         {step === "appointments" && (
           <>
             <p className="patient-intro">
-              Your appointment details are refreshed from the clinic system
-              every 30 seconds. Queue position and waiting estimates can change.
+              View upcoming appointments and recent visits.
             </p>
+            {feedbackLinkError && (
+              <p className="form-error" role="alert">
+                This feedback link could not be opened. You can still view your appointments here.
+              </p>
+            )}
             {loadingAppointments ? (
               <p className="muted" role="status">
                 Loading your appointments…
@@ -482,8 +531,11 @@ export default function PatientRecovery() {
                     {activeAppointments.map(appointmentCard)}
                   </div>
                 ) : (
-                  <div className="patient-empty">
+                  <div className="patient-empty appointment-empty">
                     <p>No upcoming or active visits.</p>
+                    <Link className="button button-light" to="/clinics">
+                      Book an appointment
+                    </Link>
                   </div>
                 )}
                 {pastAppointments.length > 0 && (
@@ -503,19 +555,13 @@ export default function PatientRecovery() {
                 {error}
               </p>
             )}
-            <button
-              type="button"
-              className="text-button"
-              disabled={busy}
-              onClick={logout}
-            >
-              {busy ? "Signing out…" : "Sign out of appointment lookup"}
-            </button>
           </>
         )}
-        <Link className="patient-home-link" to="/">
-          Return to QueueLess home
-        </Link>
+        <div className="recovery-footer">
+          <Link className="patient-home-link" to="/">
+            Return to QueueLess home
+          </Link>
+        </div>
       </section>
     </PatientShell>
   );
