@@ -8,6 +8,7 @@ import DropdownSelect from "../components/DropdownSelect.jsx";
 import ConfirmDialog from "../components/ConfirmDialog.jsx";
 import ClinicLoading from "../components/ClinicLoading.jsx";
 import ClinicSidebar from "../components/ClinicSidebar.jsx";
+import { filterQueue } from "../utils/queue-search.js";
 import TablePagination, {
   TABLE_PAGE_SIZE,
 } from "../components/TablePagination.jsx";
@@ -39,10 +40,13 @@ export default function ClinicDashboard() {
   const [fieldErrors, setFieldErrors] = useState({});
   const [dialogAction, setDialogAction] = useState(null);
   const [dialogError, setDialogError] = useState("");
+  const [consultationDoctor, setConsultationDoctor] = useState("");
   const [overrideReason, setOverrideReason] = useState("");
   const [patientsAhead, setPatientsAhead] = useState("0");
   const [pendingQueueId, setPendingQueueId] = useState("");
   const [queuePage, setQueuePage] = useState(1);
+  const [queueSearch, setQueueSearch] = useState("");
+  const [queueStatus, setQueueStatus] = useState("all");
   const [selectedDate, setSelectedDate] = useState("");
   const actionPendingRef = useRef(false);
   const load = useCallback(async () => {
@@ -185,14 +189,13 @@ export default function ClinicDashboard() {
         successToast: false,
       });
       if (fromDialog) setDialogAction(null);
-      const successMessage =
-        action === "cancel"
-          ? "Registration cancelled."
-          : action === "miss"
-            ? "Patient marked as missed."
-            : action === "return"
-              ? "Patient returned to the queue."
-              : "Queue entry updated.";
+      const successMessage = {
+        "check-in": "Patient checked in.",
+        start: "Consultation started.",
+        cancel: "Registration cancelled.",
+        miss: "Patient marked as missed.",
+        return: "Patient returned to the queue.",
+      }[action] || "Queue entry updated.";
       setToast(successMessage);
       await load();
       return true;
@@ -202,6 +205,7 @@ export default function ClinicDashboard() {
         "Could not update this queue entry.";
       if (fromDialog) setDialogError(message);
       else setError(message);
+      if (fromDialog && action === "start") await load();
       return false;
     } finally {
       actionPendingRef.current = false;
@@ -304,6 +308,13 @@ export default function ClinicDashboard() {
     );
   if (!setup.setupComplete) return <Navigate to="/clinic/setup" replace />;
   const isViewingToday = dashboard.isToday !== false;
+  const doctorOptions = (dashboard.availableDoctors || []).map((doctor) => ({
+    value: doctor.id,
+    label: doctor.name,
+  }));
+  const selectedConsultationDoctor = doctorOptions.some(({ value }) => value === consultationDoctor)
+    ? consultationDoctor
+    : doctorOptions.length === 1 ? doctorOptions[0].value : "";
   const cards = [
     [
       isViewingToday ? "Registered today" : "Scheduled",
@@ -314,12 +325,17 @@ export default function ClinicDashboard() {
     ["In consultation", dashboard.summary.consulting, "with a doctor"],
     ["Completed", dashboard.summary.completed, "visits today"],
   ];
+  const matchingQueue = filterQueue(dashboard.queue, queueSearch, queueStatus === "registered");
+  const appointmentTime = new Intl.DateTimeFormat(locale, {
+    timeStyle: "short",
+    timeZone: dashboard.timeZone || "Asia/Kolkata",
+  });
   const queuePageCount = Math.max(
     1,
-    Math.ceil(dashboard.queue.length / TABLE_PAGE_SIZE),
+    Math.ceil(matchingQueue.length / TABLE_PAGE_SIZE),
   );
   const activeQueuePage = Math.min(queuePage, queuePageCount);
-  const visibleQueue = dashboard.queue.slice(
+  const visibleQueue = matchingQueue.slice(
     (activeQueuePage - 1) * TABLE_PAGE_SIZE,
     activeQueuePage * TABLE_PAGE_SIZE,
   );
@@ -442,12 +458,41 @@ export default function ClinicDashboard() {
           </section>
           <section className="dashboard-columns">
             <div className="queue-panel">
-              <div className="panel-title">
-                <div>
+              <header className="panel-title live-queue-header">
+                <div className="live-queue-heading">
                   <h2>Live queue</h2>
                   <p>
                     <span className="live-dot" /> Updates every 20 seconds
                   </p>
+                </div>
+                <div className="patient-list-filters live-queue-filters">
+                  <label>
+                    Search live queue
+                    <input
+                      type="search"
+                      placeholder="Name, mobile, token or reference"
+                      value={queueSearch}
+                      onChange={(event) => {
+                        setQueueSearch(event.target.value);
+                        setQueuePage(1);
+                      }}
+                    />
+                  </label>
+                  <label>
+                    Status
+                    <DropdownSelect
+                      label="Status"
+                      value={queueStatus}
+                      options={[
+                        { value: "all", label: "All statuses" },
+                        { value: "registered", label: "Awaiting check-in" },
+                      ]}
+                      onChange={(value) => {
+                        setQueueStatus(value);
+                        setQueuePage(1);
+                      }}
+                    />
+                  </label>
                 </div>
                 <button
                   className="button button-dark call-next"
@@ -456,7 +501,7 @@ export default function ClinicDashboard() {
                 >
                   Call next patient <span>↗</span>
                 </button>
-              </div>
+              </header>
               {dashboard.queue.length === 0 ? (
                 <div className="queue-empty">
                   <span>☼</span>
@@ -465,6 +510,10 @@ export default function ClinicDashboard() {
                     Registered patients will show here. Add a walk-in to get
                     started.
                   </p>
+                </div>
+              ) : matchingQueue.length === 0 ? (
+                <div className="queue-empty" role="status">
+                  <h3>No patients match these filters.</h3>
                 </div>
               ) : (
                 <>
@@ -497,7 +546,12 @@ export default function ClinicDashboard() {
                                 <small className="queue-contact-off">Messaging off</small>
                               )}
                             </td>
-                            <td>{row.doctor_name || "Any doctor"}</td>
+                            <td>
+                              {row.doctor_name || "Any doctor"}
+                              {row.scheduled_at && (
+                                <small>{appointmentTime.format(new Date(row.scheduled_at))}</small>
+                              )}
+                            </td>
                             <td>
                               <span
                                 className={`status-pill status-${row.queue_status}`}
@@ -536,13 +590,29 @@ export default function ClinicDashboard() {
                                 {row.queue_status === "called" && (
                                   <>
                                     <button
-                                      disabled={!!pendingQueueId}
-                                      onClick={() =>
-                                        performAction(row.queue_id, "start")
+                                      disabled={
+                                        !isViewingToday ||
+                                        !!pendingQueueId ||
+                                        (!row.doctor_id && !doctorOptions.length)
                                       }
+                                      onClick={() => {
+                                        if (row.doctor_id) {
+                                          void performAction(row.queue_id, "start");
+                                          return;
+                                        }
+                                        setConsultationDoctor("");
+                                        setDialogError("");
+                                        setDialogAction({
+                                          queueId: row.queue_id,
+                                          action: "assign-doctor",
+                                        });
+                                      }}
                                     >
                                       Start
                                     </button>
+                                    {isViewingToday && !row.doctor_id && !doctorOptions.length && (
+                                      <small>No doctors available</small>
+                                    )}
                                     <button
                                       className="quiet-action"
                                       disabled={!!pendingQueueId}
@@ -609,7 +679,7 @@ export default function ClinicDashboard() {
                     </table>
                   </div>
                   <TablePagination
-                    total={dashboard.queue.length}
+                    total={matchingQueue.length}
                     page={activeQueuePage}
                     onPageChange={setQueuePage}
                     label="patients"
@@ -717,7 +787,36 @@ export default function ClinicDashboard() {
             <span>Reception actions are recorded in the activity log.</span>
           </div>
         </section>
-        {dialogAction && (
+        {dialogAction?.action === "assign-doctor" && (
+          <ConfirmDialog
+            title="Assign a doctor"
+            confirmLabel="Start consultation"
+            cancelLabel="Cancel"
+            busy={pendingQueueId === dialogAction.queueId}
+            confirmDisabled={!selectedConsultationDoctor}
+            error={dialogError}
+            onClose={() => setDialogAction(null)}
+            onConfirm={() => submitQueueAction(
+              dialogAction.queueId, "start", { doctorId: selectedConsultationDoctor }, true,
+            )}
+          >
+            {doctorOptions.length ? (
+              <DropdownSelect
+                label="Choose an available doctor"
+                placeholder="Choose an available doctor"
+                value={selectedConsultationDoctor}
+                options={doctorOptions}
+                onChange={(doctorId) => {
+                  setConsultationDoctor(doctorId);
+                  setDialogError("");
+                }}
+              />
+            ) : (
+              <p role="status">No doctors available</p>
+            )}
+          </ConfirmDialog>
+        )}
+        {dialogAction && dialogAction.action !== "assign-doctor" && (
           <ConfirmDialog
             title={
               dialogAction.action === "cancel"

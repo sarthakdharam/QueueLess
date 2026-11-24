@@ -1,5 +1,35 @@
 export const appointmentTranslations = {
   hi: {
+    "Consultation started.":
+      "परामर्श शुरू हो गया।",
+    "Choose an available doctor.":
+      "उपलब्ध डॉक्टर चुनें।",
+    "This patient already has an assigned doctor.":
+      "इस मरीज़ के लिए पहले से एक डॉक्टर तय है।",
+    "Only today's consultations can be started.":
+      "केवल आज के परामर्श शुरू किए जा सकते हैं।",
+    "This patient is no longer ready to start a consultation.":
+      "यह मरीज़ अब परामर्श शुरू करने के लिए तैयार नहीं है।",
+    "This appointment is paused because the doctor is unavailable. Resume doctor availability before calling this patient.":
+      "डॉक्टर उपलब्ध नहीं हैं, इसलिए यह अपॉइंटमेंट रुका है। मरीज़ को बुलाने से पहले डॉक्टर की उपलब्धता बहाल करें।",
+    "This doctor is currently unavailable. Resume doctor availability before calling this patient.":
+      "यह डॉक्टर अभी उपलब्ध नहीं हैं। मरीज़ को बुलाने से पहले डॉक्टर की उपलब्धता बहाल करें।",
+    "Queue entry not found.":
+      "कतार में यह मरीज़ नहीं मिला।",
+    "Could not update this queue entry.":
+      "कतार में इस मरीज़ की जानकारी अपडेट नहीं हो सकी।",
+    "Assign a doctor": "डॉक्टर चुनें",
+    "Start consultation": "परामर्श शुरू करें",
+    "Choose an available doctor": "उपलब्ध डॉक्टर चुनें",
+    "No doctors available": "कोई डॉक्टर उपलब्ध नहीं है",
+    "This doctor is no longer available.": "यह डॉक्टर अब उपलब्ध नहीं हैं।",
+    "Search live queue": "लाइव कतार में खोजें",
+    "Name, mobile, token or reference": "नाम, मोबाइल, टोकन या संदर्भ",
+    "Awaiting check-in": "चेक-इन बाकी है",
+    "No patients match these filters.": "इन फ़िल्टर से कोई मरीज़ नहीं मिला।",
+    "Patient checked in.": "मरीज़ का चेक-इन हो गया।",
+    "Enter the six-digit code sent to your registered mobile number.":
+      "अपने पंजीकृत मोबाइल नंबर पर भेजा गया छह अंकों का कोड दर्ज करें।",
     "Verify the mobile number you registered with to leave feedback.":
       "प्रतिक्रिया देने के लिए पंजीकरण वाला मोबाइल नंबर सत्यापित करें।",
     "This feedback link could not be opened. You can still view your appointments here.":
@@ -129,6 +159,36 @@ export const appointmentTranslations = {
       "सत्यापन कोड का अनुरोध किया गया।",
   },
   bn: {
+    "Consultation started.":
+      "পরামর্শ শুরু হয়েছে।",
+    "Choose an available doctor.":
+      "একজন উপলভ্য ডাক্তার বেছে নিন।",
+    "This patient already has an assigned doctor.":
+      "এই রোগীর জন্য ইতিমধ্যে একজন ডাক্তার নির্ধারিত আছেন।",
+    "Only today's consultations can be started.":
+      "শুধু আজকের পরামর্শ শুরু করা যাবে।",
+    "This patient is no longer ready to start a consultation.":
+      "এই রোগী এখন আর পরামর্শ শুরু করার জন্য প্রস্তুত নন।",
+    "This appointment is paused because the doctor is unavailable. Resume doctor availability before calling this patient.":
+      "ডাক্তার উপলভ্য না থাকায় অ্যাপয়েন্টমেন্টটি স্থগিত আছে। রোগীকে ডাকার আগে ডাক্তারের উপলভ্যতা ফিরিয়ে আনুন।",
+    "This doctor is currently unavailable. Resume doctor availability before calling this patient.":
+      "এই ডাক্তার এখন উপলভ্য নন। রোগীকে ডাকার আগে ডাক্তারের উপলভ্যতা ফিরিয়ে আনুন।",
+    "Queue entry not found.":
+      "সারিতে এই রোগীকে পাওয়া যায়নি।",
+    "Could not update this queue entry.":
+      "সারিতে এই রোগীর তথ্য আপডেট করা যায়নি।",
+    "Assign a doctor": "ডাক্তার নির্ধারণ করুন",
+    "Start consultation": "পরামর্শ শুরু করুন",
+    "Choose an available doctor": "একজন উপলভ্য ডাক্তার বেছে নিন",
+    "No doctors available": "কোনো ডাক্তার উপলভ্য নেই",
+    "This doctor is no longer available.": "এই ডাক্তার এখন উপলভ্য নেই।",
+    "Search live queue": "লাইভ সারিতে খুঁজুন",
+    "Name, mobile, token or reference": "নাম, মোবাইল, টোকেন বা রেফারেন্স",
+    "Awaiting check-in": "চেক-ইনের অপেক্ষায়",
+    "No patients match these filters.": "এই ফিল্টারে কোনো রোগী পাওয়া যায়নি।",
+    "Patient checked in.": "রোগীর চেক-ইন হয়েছে।",
+    "Enter the six-digit code sent to your registered mobile number.":
+      "আপনার নিবন্ধিত মোবাইল নম্বরে পাঠানো ছয় সংখ্যার কোডটি লিখুন।",
     "Verify the mobile number you registered with to leave feedback.":
       "মতামত দিতে নিবন্ধনের সময় ব্যবহার করা মোবাইল নম্বরটি যাচাই করুন।",
     "This feedback link could not be opened. You can still view your appointments here.":
@@ -258,6 +318,36 @@ export const appointmentTranslations = {
       "যাচাইকরণ কোডের অনুরোধ করা হয়েছে।",
   },
   ta: {
+    "Consultation started.":
+      "ஆலோசனை தொடங்கியது.",
+    "Choose an available doctor.":
+      "கிடைக்கும் மருத்துவரைத் தேர்ந்தெடுக்கவும்.",
+    "This patient already has an assigned doctor.":
+      "இந்த நோயாளிக்கு ஏற்கெனவே ஒரு மருத்துவர் நியமிக்கப்பட்டுள்ளார்.",
+    "Only today's consultations can be started.":
+      "இன்றைய ஆலோசனைகளை மட்டுமே தொடங்க முடியும்.",
+    "This patient is no longer ready to start a consultation.":
+      "இந்த நோயாளி இப்போது ஆலோசனையைத் தொடங்கத் தயாராக இல்லை.",
+    "This appointment is paused because the doctor is unavailable. Resume doctor availability before calling this patient.":
+      "மருத்துவர் கிடைக்காததால் இந்தச் சந்திப்பு நிறுத்தி வைக்கப்பட்டுள்ளது. நோயாளியை அழைப்பதற்கு முன் மருத்துவரின் கிடைக்கும் நிலையை மீட்டமைக்கவும்.",
+    "This doctor is currently unavailable. Resume doctor availability before calling this patient.":
+      "இந்த மருத்துவர் தற்போது கிடைக்கவில்லை. நோயாளியை அழைப்பதற்கு முன் மருத்துவரின் கிடைக்கும் நிலையை மீட்டமைக்கவும்.",
+    "Queue entry not found.":
+      "வரிசையில் இந்த நோயாளியைக் காணவில்லை.",
+    "Could not update this queue entry.":
+      "வரிசையில் இந்த நோயாளியின் தகவலைப் புதுப்பிக்க முடியவில்லை.",
+    "Assign a doctor": "மருத்துவரை நியமிக்கவும்",
+    "Start consultation": "ஆலோசனையைத் தொடங்கவும்",
+    "Choose an available doctor": "கிடைக்கும் மருத்துவரைத் தேர்ந்தெடுக்கவும்",
+    "No doctors available": "மருத்துவர்கள் யாரும் கிடைக்கவில்லை",
+    "This doctor is no longer available.": "இந்த மருத்துவர் இப்போது கிடைக்கவில்லை.",
+    "Search live queue": "நேரடி வரிசையில் தேடவும்",
+    "Name, mobile, token or reference": "பெயர், மொபைல் எண், டோக்கன் அல்லது குறிப்பு",
+    "Awaiting check-in": "வருகைப் பதிவுக்குக் காத்திருப்போர்",
+    "No patients match these filters.": "இந்த வடிப்பான்களுக்குப் பொருந்தும் நோயாளிகள் இல்லை.",
+    "Patient checked in.": "நோயாளியின் வருகை பதிவு செய்யப்பட்டது.",
+    "Enter the six-digit code sent to your registered mobile number.":
+      "உங்கள் பதிவு செய்யப்பட்ட மொபைல் எண்ணுக்கு அனுப்பப்பட்ட ஆறு இலக்கக் குறியீட்டை உள்ளிடவும்.",
     "Verify the mobile number you registered with to leave feedback.":
       "கருத்து தெரிவிக்க, பதிவுசெய்த மொபைல் எண்ணைச் சரிபார்க்கவும்.",
     "This feedback link could not be opened. You can still view your appointments here.":
@@ -387,6 +477,36 @@ export const appointmentTranslations = {
       "சரிபார்ப்புக் குறியீடு கோரப்பட்டது.",
   },
   te: {
+    "Consultation started.":
+      "సంప్రదింపు ప్రారంభమైంది.",
+    "Choose an available doctor.":
+      "అందుబాటులో ఉన్న డాక్టర్‌ను ఎంచుకోండి.",
+    "This patient already has an assigned doctor.":
+      "ఈ రోగికి ఇప్పటికే ఒక డాక్టర్ కేటాయించబడ్డారు.",
+    "Only today's consultations can be started.":
+      "ఈరోజు సంప్రదింపులను మాత్రమే ప్రారంభించగలరు.",
+    "This patient is no longer ready to start a consultation.":
+      "ఈ రోగి ఇప్పుడు సంప్రదింపును ప్రారంభించడానికి సిద్ధంగా లేరు.",
+    "This appointment is paused because the doctor is unavailable. Resume doctor availability before calling this patient.":
+      "డాక్టర్ అందుబాటులో లేనందున ఈ అపాయింట్‌మెంట్ నిలిపివేయబడింది. రోగిని పిలిచే ముందు డాక్టర్ అందుబాటును పునరుద్ధరించండి.",
+    "This doctor is currently unavailable. Resume doctor availability before calling this patient.":
+      "ఈ డాక్టర్ ప్రస్తుతం అందుబాటులో లేరు. రోగిని పిలిచే ముందు డాక్టర్ అందుబాటును పునరుద్ధరించండి.",
+    "Queue entry not found.":
+      "క్యూలో ఈ రోగి కనిపించలేదు.",
+    "Could not update this queue entry.":
+      "క్యూలో ఈ రోగి వివరాలను నవీకరించలేకపోయాము.",
+    "Assign a doctor": "డాక్టర్‌ను కేటాయించండి",
+    "Start consultation": "సంప్రదింపును ప్రారంభించండి",
+    "Choose an available doctor": "అందుబాటులో ఉన్న డాక్టర్‌ను ఎంచుకోండి",
+    "No doctors available": "డాక్టర్లు ఎవరూ అందుబాటులో లేరు",
+    "This doctor is no longer available.": "ఈ డాక్టర్ ఇప్పుడు అందుబాటులో లేరు.",
+    "Search live queue": "లైవ్ క్యూలో వెతకండి",
+    "Name, mobile, token or reference": "పేరు, మొబైల్, టోకెన్ లేదా రిఫరెన్స్",
+    "Awaiting check-in": "చెక్-ఇన్ కోసం వేచి ఉన్నవారు",
+    "No patients match these filters.": "ఈ ఫిల్టర్‌లకు సరిపోలే రోగులు లేరు.",
+    "Patient checked in.": "రోగి చెక్-ఇన్ పూర్తయింది.",
+    "Enter the six-digit code sent to your registered mobile number.":
+      "మీరు నమోదు చేసిన మొబైల్ నంబర్‌కు పంపిన ఆరు అంకెల కోడ్‌ను నమోదు చేయండి.",
     "Verify the mobile number you registered with to leave feedback.":
       "అభిప్రాయం ఇవ్వడానికి మీరు నమోదు చేసుకున్న మొబైల్ నంబర్‌ను ధృవీకరించండి.",
     "This feedback link could not be opened. You can still view your appointments here.":
@@ -516,6 +636,36 @@ export const appointmentTranslations = {
       "ధృవీకరణ కోడ్ అభ్యర్థించబడింది.",
   },
   mr: {
+    "Consultation started.":
+      "तपासणी सुरू झाली.",
+    "Choose an available doctor.":
+      "उपलब्ध डॉक्टर निवडा.",
+    "This patient already has an assigned doctor.":
+      "या रुग्णाला आधीच एक डॉक्टर नेमले आहेत.",
+    "Only today's consultations can be started.":
+      "फक्त आजच्या तपासण्या सुरू करता येतात.",
+    "This patient is no longer ready to start a consultation.":
+      "हा रुग्ण आता तपासणी सुरू करण्यासाठी तयार नाही.",
+    "This appointment is paused because the doctor is unavailable. Resume doctor availability before calling this patient.":
+      "डॉक्टर उपलब्ध नसल्याने ही भेट थांबवली आहे. रुग्णाला बोलावण्यापूर्वी डॉक्टरांची उपलब्धता पुन्हा सुरू करा.",
+    "This doctor is currently unavailable. Resume doctor availability before calling this patient.":
+      "हे डॉक्टर सध्या उपलब्ध नाहीत. रुग्णाला बोलावण्यापूर्वी डॉक्टरांची उपलब्धता पुन्हा सुरू करा.",
+    "Queue entry not found.":
+      "हा रुग्ण रांगेत सापडला नाही.",
+    "Could not update this queue entry.":
+      "रांगेतील या रुग्णाची माहिती अपडेट करता आली नाही.",
+    "Assign a doctor": "डॉक्टर नेमा",
+    "Start consultation": "तपासणी सुरू करा",
+    "Choose an available doctor": "उपलब्ध डॉक्टर निवडा",
+    "No doctors available": "कोणतेही डॉक्टर उपलब्ध नाहीत",
+    "This doctor is no longer available.": "हे डॉक्टर आता उपलब्ध नाहीत.",
+    "Search live queue": "थेट रांगेत शोधा",
+    "Name, mobile, token or reference": "नाव, मोबाईल, टोकन किंवा संदर्भ",
+    "Awaiting check-in": "हजेरी नोंदवणे बाकी",
+    "No patients match these filters.": "या फिल्टरशी जुळणारे रुग्ण सापडले नाहीत.",
+    "Patient checked in.": "रुग्णाची हजेरी नोंदवली.",
+    "Enter the six-digit code sent to your registered mobile number.":
+      "तुमच्या नोंदणीकृत मोबाईल क्रमांकावर पाठवलेला सहा अंकी कोड टाका.",
     "Verify the mobile number you registered with to leave feedback.":
       "अभिप्राय देण्यासाठी नोंदणीचा मोबाइल क्रमांक पडताळा.",
     "This feedback link could not be opened. You can still view your appointments here.":

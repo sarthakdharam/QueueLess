@@ -4,6 +4,7 @@ import { sendSimulatedMessage } from "./providers/simulator.js";
 import { sendWhatsAppTemplate } from "./providers/whatsapp-cloud.js";
 import { approachingPatients } from "./notification-policy.js";
 import { mobileLookupCandidates } from "../patient/mobile-lookup.js";
+import { createFeedbackKey } from "../patient/feedback-links.js";
 import { renderMockMessage } from "./mock-templates.js";
 import { availableDoctor, callableAppointment, queuePriority } from "../queue/queue-order.js";
 import { estimateQueueWait } from "../queue/wait-estimate.js";
@@ -208,6 +209,7 @@ export async function notifyVisitCompleted(clinicId, registrationId) {
     process.env.APP_BASE_URL || "http://localhost:5173",
   );
   feedbackUrl.searchParams.set("feedback", visit.reference);
+  feedbackUrl.hash = new URLSearchParams({ key: createFeedbackKey(visit.reference) }).toString();
   return dispatchNotification({
     clinicId,
     registrationId,

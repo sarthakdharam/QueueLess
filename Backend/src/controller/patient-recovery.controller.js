@@ -15,10 +15,27 @@ import { otpHash } from "../services/patient/otp.js";
 import { sendRecoveryOtp } from "../services/notifications/dispatch.js";
 import { mobileLookupCandidates } from "../services/patient/mobile-lookup.js";
 import { isOtpChallengeUsable } from "../services/patient/credential-policy.js";
+import { isFeedbackKeyValid } from "../services/patient/feedback-links.js";
+
+async function recoveryMobile({ mobile, feedbackKey, feedbackReference }) {
+  if (feedbackKey === undefined) return normalizeMobile(mobile);
+  if (!isFeedbackKeyValid(feedbackReference, feedbackKey)) return null;
+  const [visit] = await AppDataSource.query(
+    `SELECT p.mobile FROM registrations r JOIN patients p ON p.id = r.patient_id
+      WHERE r.reference = $1 AND r.status = 'completed' AND r.consent_to_contact`,
+    [feedbackReference],
+  );
+  return visit ? normalizeMobile(visit.mobile) : null;
+}
+
+function invalidFeedbackLink(res) {
+  return res.status(404).json({ code: "FEEDBACK_LINK_UNAVAILABLE" });
+}
 
 export async function requestRecoveryCode(req, res, next) {
-  const mobile = normalizeMobile(req.body.mobile);
   try {
+    const mobile = await recoveryMobile(req.body);
+    if (!mobile) return invalidFeedbackLink(res);
     const candidates = mobileLookupCandidates(mobile);
     const patient = await AppDataSource.getRepository(Patient)
       .createQueryBuilder("p")
@@ -42,7 +59,7 @@ export async function requestRecoveryCode(req, res, next) {
         .getRepository(OtpChallenge)
         .createQueryBuilder("o")
         .where(
-          "o.mobile = :mobile AND o.created_at > now() - interval '60 seconds'",
+          "o.mobile = :mobile AND o.consumed_at IS NULL AND o.created_at > now() - interval '60 seconds'",
           { mobile },
         )
         .getOne();
@@ -86,8 +103,9 @@ export async function requestRecoveryCode(req, res, next) {
 }
 
 export async function verifyRecoveryCode(req, res, next) {
-  const mobile = normalizeMobile(req.body.mobile);
   try {
+    const mobile = await recoveryMobile(req.body);
+    if (!mobile) return invalidFeedbackLink(res);
     const valid = await AppDataSource.transaction(async (manager) => {
       const challenge = await manager
         .getRepository(OtpChallenge)

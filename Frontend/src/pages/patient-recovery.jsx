@@ -1,5 +1,5 @@
-import { useCallback, useEffect, useMemo, useState } from "react";
-import { Link, useSearchParams } from "react-router-dom";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { Link, useLocation, useSearchParams } from "react-router-dom";
 import PatientShell from "../components/PatientShell.jsx";
 import { useAppLanguage, useTranslate } from "../i18n.jsx";
 import { api } from "../api/client.js";
@@ -36,6 +36,10 @@ export default function PatientRecovery() {
   const feedbackReference = /^QL[A-F0-9]{14}$/i.test(requestedReference)
     ? requestedReference
     : null;
+  const { hash } = useLocation();
+  const feedbackKey = feedbackReference && new URLSearchParams(hash.slice(1)).get("key");
+  const openingRequest = useRef();
+  const [useFeedbackTarget, setUseFeedbackTarget] = useState(false);
   const [mobile, setMobile] = useState("+91 ");
   const [code, setCode] = useState("");
   const [developmentCode, setDevelopmentCode] = useState("");
@@ -43,13 +47,41 @@ export default function PatientRecovery() {
   const [appointments, setAppointments] = useState([]);
   const [privateLinks, setPrivateLinks] = useState({});
   const [selectedReference, setSelectedReference] = useState("");
-  const [step, setStep] = useState("request");
+  const [step, setStep] = useState(feedbackKey ? "opening" : "request");
   const [error, setError] = useState("");
   const [feedbackLinkError, setFeedbackLinkError] = useState(false);
   const [fieldErrors, setFieldErrors] = useState({});
   const [busy, setBusy] = useState(false);
   const [loadingAppointments, setLoadingAppointments] = useState(false);
   const [cooldown, setCooldown] = useState(0);
+
+  useEffect(() => {
+    if (!feedbackKey) return undefined;
+    if (openingRequest.current?.key !== feedbackKey ||
+        openingRequest.current?.reference !== feedbackReference) {
+      openingRequest.current = {
+        key: feedbackKey,
+        reference: feedbackReference,
+        promise: api.post("/patient/recovery/request", {
+          feedbackReference, feedbackKey,
+        }, { successToast: false }),
+      };
+    }
+    let active = true;
+    openingRequest.current.promise.then(({ data }) => {
+      if (!active) return;
+      setUseFeedbackTarget(true);
+      setDevelopmentCode(data.developmentCode || "");
+      setStep("verify");
+      setCooldown(60);
+    }).catch((requestError) => {
+      if (!active) return;
+      setUseFeedbackTarget(false);
+      setStep("request");
+      setError(requestError.response?.data?.error || "Could not request a verification code.");
+    });
+    return () => { active = false; };
+  }, [feedbackKey, feedbackReference]);
 
   useEffect(() => {
     if (!cooldown) return undefined;
@@ -132,13 +164,20 @@ export default function PatientRecovery() {
 
   const showCodeRequestError = (requestError, fallback) => {
     const response = requestError.response?.data;
-    if (response?.code === "MOBILE_NOT_REGISTERED") {
+    if (response?.code === "FEEDBACK_LINK_UNAVAILABLE") {
+      setUseFeedbackTarget(false);
+      setDevelopmentCode("");
+      setStep("request");
+      setError(fallback);
+    } else if (response?.code === "MOBILE_NOT_REGISTERED") {
       setStep("request");
       setFieldErrors({ mobile: response.error });
     } else {
       setError(response?.error || fallback);
     }
   };
+
+  const recoveryTarget = useFeedbackTarget ? { feedbackReference, feedbackKey } : { mobile };
 
   const requestCode = async (event) => {
     event.preventDefault();
@@ -182,10 +221,7 @@ export default function PatientRecovery() {
     if (Object.keys(invalid).length || busy) return;
     setBusy(true);
     try {
-      const { data } = await api.post("/patient/recovery/verify", {
-        mobile,
-        code,
-      });
+      const { data } = await api.post("/patient/recovery/verify", { ...recoveryTarget, code });
       if (feedbackReference) {
         try {
           const { data: link } = await api.post(
@@ -203,10 +239,11 @@ export default function PatientRecovery() {
       setLoadingAppointments(true);
       setStep("appointments");
     } catch (requestError) {
-      setError(
+      showCodeRequestError(
+        requestError,
         requestError.response?.status === 400
           ? "The code is invalid or expired. Please enter the mobile number you registered with and request a new code."
-          : requestError.response?.data?.error || "The code could not be verified.",
+          : "The code could not be verified.",
       );
     } finally {
       setBusy(false);
@@ -218,7 +255,7 @@ export default function PatientRecovery() {
     setBusy(true);
     setError("");
     try {
-      const { data } = await api.post("/patient/recovery/request", { mobile });
+      const { data } = await api.post("/patient/recovery/request", recoveryTarget);
       setDevelopmentCode(data.developmentCode || "");
       setCooldown(60);
       setCode("");
@@ -384,6 +421,9 @@ export default function PatientRecovery() {
         <h1>
           {step === "appointments" ? "My appointments" : "My Appointment"}
         </h1>
+        {step === "opening" && (
+          <p className="patient-intro" role="status">Sending code…</p>
+        )}
         {step === "request" && (
           <>
             <p className="patient-intro">
@@ -425,8 +465,9 @@ export default function PatientRecovery() {
         {step === "verify" && (
           <>
             <p className="patient-intro">
-              Enter the six-digit code. If you didn’t receive it, check that you
-              entered the mobile number you registered with.
+              {useFeedbackTarget
+                ? "Enter the six-digit code sent to your registered mobile number."
+                : "Enter the six-digit code. If you didn’t receive it, check that you entered the mobile number you registered with."}
             </p>
             <form
               noValidate
@@ -485,6 +526,8 @@ export default function PatientRecovery() {
                   className="text-button"
                   disabled={busy}
                   onClick={() => {
+                    setUseFeedbackTarget(false);
+                    setDevelopmentCode("");
                     setStep("request");
                     setError("");
                     setCode("");

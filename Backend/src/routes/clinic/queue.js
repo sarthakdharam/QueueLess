@@ -28,6 +28,7 @@ router.post(
       "cancel",
     ]),
     body("overrideReturnRule").optional().isBoolean(),
+    body("doctorId").optional().isUUID(),
     body("patientsAhead").optional().isInt({ min: 0, max: 30 }),
     body("overrideReason").optional().trim().isLength({ min: 5, max: 500 }),
     validateRequest,

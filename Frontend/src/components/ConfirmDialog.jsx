@@ -10,6 +10,7 @@ export default function ConfirmDialog({
   confirmLabel,
   cancelLabel = "Keep me here",
   busy = false,
+  confirmDisabled = false,
   error = "",
   destructive = false,
   onConfirm,
@@ -107,7 +108,7 @@ export default function ConfirmDialog({
           <button
             type="button"
             className={`button button-dark app-dialog-confirm ${destructive ? "is-destructive" : ""}`}
-            disabled={busy}
+            disabled={busy || confirmDisabled}
             onClick={onConfirm}
           >
             {busy ? t("Please wait…") : confirmLabel}

@@ -18,6 +18,7 @@ import {
 } from "../services/notifications/dispatch.js";
 import { recordClinicNotification } from "../services/notifications/clinic-notifications.js";
 import { transitionFor } from "../services/queue/transitions.js";
+import { availableConsultationDoctors } from "../services/queue/consultation-doctors.js";
 import { availableDoctor, callableAppointment, queuePriority } from "../services/queue/queue-order.js";
 
 export async function callNextPatient(req, res, next) {
@@ -200,12 +201,13 @@ export async function transitionQueueEntry(req, res, next) {
       const transition = transitionFor(req.params.action, entry.status);
       if (!transition)
         throw Object.assign(
-          new Error(
-            `Cannot ${req.params.action} a patient whose status is ${entry.status}.`,
-          ),
+          new Error(req.params.action === "start"
+            ? "This patient is no longer ready to start a consultation."
+            : `Cannot ${req.params.action} a patient whose status is ${entry.status}.`),
           { status: 409 },
         );
-      if (req.params.action === "check-in") {
+      let day;
+      if (["check-in", "start"].includes(req.params.action)) {
         const clinic = await manager
           .getRepository(Clinic)
           .findOneBy({ id: req.auth.clinicId });
@@ -216,30 +218,34 @@ export async function transitionQueueEntry(req, res, next) {
           session?.sessionDate instanceof Date
             ? session.sessionDate.toISOString().slice(0, 10)
             : String(session?.sessionDate || "").slice(0, 10);
-        if (!session || sessionDate !== clinicToday(clinic.timeZone))
+        day = clinicToday(clinic.timeZone);
+        if (!session || sessionDate !== day)
           throw Object.assign(
-            new Error("Only today's registrations can be checked in."),
+            new Error(req.params.action === "check-in"
+              ? "Only today's registrations can be checked in."
+              : "Only today's consultations can be started."),
             { status: 409 },
           );
       }
+      let assignedDoctorId;
       if (req.params.action === "start") {
-        await manager.query(
-          `SELECT "id" FROM "queue_sessions" WHERE "id" = $1 FOR UPDATE`,
-          [entry.session_id],
+        const requestedDoctor = req.body?.doctorId?.toLowerCase();
+        const doctorId = entry.doctor_id || requestedDoctor;
+        if (!doctorId)
+          throw Object.assign(new Error("Choose an available doctor."), { status: 400 });
+        if (entry.doctor_id && requestedDoctor && entry.doctor_id !== requestedDoctor)
+          throw Object.assign(new Error("This patient already has an assigned doctor."), { status: 409 });
+        // Starts for booked and unassigned patients share this doctor lock.
+        const [doctor] = await manager.query(
+          "SELECT id FROM doctors WHERE id = $1 AND clinic_id = $2 FOR NO KEY UPDATE",
+          [doctorId, req.auth.clinicId],
         );
-        const anotherConsultation = await manager
-          .getRepository(QueueEntry)
-          .findOneBy({
-            sessionId: entry.session_id,
-            status: "in_consultation",
-          });
-        if (anotherConsultation)
-          throw Object.assign(
-            new Error(
-              "Complete the current consultation before starting another patient.",
-            ),
-            { status: 409 },
-          );
+        const available = doctor && await availableConsultationDoctors(
+          manager, req.auth.clinicId, day, doctorId,
+        );
+        if (!available?.length)
+          throw Object.assign(new Error("This doctor is no longer available."), { status: 409 });
+        if (!entry.doctor_id) assignedDoctorId = doctorId;
       }
       if (req.params.action === "return") {
         await manager.query(
@@ -350,6 +356,7 @@ export async function transitionQueueEntry(req, res, next) {
           { id: entry.registration_id, clinicId: req.auth.clinicId },
           {
             status: transition.to,
+            ...(assignedDoctorId ? { doctorId: assignedDoctorId } : {}),
             ...(req.params.action === "complete"
               ? { completedAt: new Date() }
               : {}),
@@ -407,7 +414,10 @@ export async function transitionQueueEntry(req, res, next) {
               action: transition.action,
               entityType: "queue_entry",
               entityId: entry.id,
-              metadata: { tokenNumber: entry.token_number },
+              metadata: {
+                tokenNumber: entry.token_number,
+                ...(assignedDoctorId ? { doctorId: assignedDoctorId } : {}),
+              },
             }),
         );
       return {

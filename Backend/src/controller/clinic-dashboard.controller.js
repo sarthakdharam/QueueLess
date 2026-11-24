@@ -4,6 +4,7 @@ import { ClinicSettings } from "../entities/ClinicSettings.js";
 import { QueueEntry } from "../entities/QueueEntry.js";
 import { clinicToday } from "../services/clinic/time.js";
 import { validDate } from "../services/patient/clinic-availability.js";
+import { availableConsultationDoctors } from "../services/queue/consultation-doctors.js";
 
 const ACTIVE_QUEUE_STATUSES = [
   "registered",
@@ -48,6 +49,7 @@ export async function getDashboard(req, res, next) {
         "r.reference AS reference",
         "r.status AS status",
         "r.visit_type AS visit_type",
+        "r.doctor_id AS doctor_id",
         "r.consent_to_contact AS consent_to_contact",
         "p.name AS patient_name",
         "p.mobile AS patient_mobile",
@@ -103,6 +105,10 @@ export async function getDashboard(req, res, next) {
       queue.filter((entry) => entry.queue_status === status).length;
     return res.json({
       date: day,
+      timeZone: clinic.timeZone || "Asia/Kolkata",
+      availableDoctors: day === today
+        ? await availableConsultationDoctors(AppDataSource, clinic.id, day)
+        : [],
       todayDate: today,
       isToday: day === today,
       summary: {
